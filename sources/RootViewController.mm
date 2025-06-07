@@ -624,7 +624,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
 - (void)verticalSizeClassUpdated
 {
     UIUserInterfaceSizeClass verticalClass = self.traitCollection.verticalSizeClass;
-    BOOL isPad = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
     // 如果垂直尺寸类别为紧凑型
     if (verticalClass == UIUserInterfaceSizeClassCompact) {
         // 移除未使用的变量
