@@ -47,7 +47,7 @@
 
     _textColorWell = [[UIColorWell alloc] init];
     _textColorWell.translatesAutoresizingMaskIntoConstraints = NO;
-    _textColorWell.selectedColor = [[NSUserDefaults standardUserDefaults] colorForKey:HUDUserDefaultsKeyTextColor] ?: [UIColor redColor]; // 默认红色
+    _textColorWell.selectedColor = [UIColor redColor]; // 直接设置为默认红色，实际值由loadCurrentSettings设置
     [_textColorWell addTarget:self action:@selector(colorWellDidChange:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:_textColorWell];
 
@@ -100,7 +100,7 @@
 
     _backgroundColorWell = [[UIColorWell alloc] init];
     _backgroundColorWell.translatesAutoresizingMaskIntoConstraints = NO;
-    _backgroundColorWell.selectedColor = [[NSUserDefaults standardUserDefaults] colorForKey:HUDUserDefaultsKeyBackgroundColor] ?: [UIColor blackColor]; // 默认黑色
+    _backgroundColorWell.selectedColor = [UIColor blackColor]; // 直接设置为默认黑色，实际值由loadCurrentSettings设置
     [_backgroundColorWell addTarget:self action:@selector(colorWellDidChange:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:_backgroundColorWell];
 
