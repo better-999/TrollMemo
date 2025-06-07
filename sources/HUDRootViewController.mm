@@ -109,7 +109,6 @@ static const double HUD_MAX_CORNER_RADIUS = 5.0;
 static double HUD_FONT_SIZE = 8.0;
 static UIFontWeight HUD_FONT_WEIGHT = UIFontWeightRegular;
 static CGFloat HUD_INACTIVE_OPACITY = 0.667;
-static uint8_t HUD_DATA_UNIT = 0;
 static uint8_t HUD_SHOW_UPLOAD_SPEED = 1;
 static uint8_t HUD_SHOW_DOWNLOAD_SPEED = 1;
 static uint8_t HUD_SHOW_DOWNLOAD_SPEED_FIRST = 1;
@@ -124,6 +123,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
 {
     if (isFocused)
     {
+        /*
         if (0 == HUD_DATA_UNIT)
         {
             if (bytes < KILOBYTES) {
@@ -194,8 +194,10 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
             }
         }
+        */
     }
     else {
+        /*
         if (0 == HUD_DATA_UNIT)
         {
             if (bytes < KILOBYTES) {
@@ -266,6 +268,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
             }
         }
+        */
     }
 }
 
@@ -356,12 +359,6 @@ static NSAttributedString *formattedAttributedString(BOOL isFocused)
             return nil;
         }
         else shouldUpdateSpeedLabel = YES;
-
-        if (HUD_DATA_UNIT == 1)
-        {
-            upDiff *= BYTE_SIZE;
-            downDiff *= BYTE_SIZE;
-        }
 
         if (HUD_SHOW_DOWNLOAD_SPEED_FIRST)
         {
@@ -507,9 +504,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 {
     [self loadUserDefaults:YES];
 
-    BOOL usesBitrate = [self usesBitrate];
-    HUD_DATA_UNIT = usesBitrate;
-
     BOOL usesCustomFontSize = [self usesCustomFontSize];
     if (!usesCustomFontSize) {
         BOOL usesLargeFont = [self usesLargeFont];
@@ -579,13 +573,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [self loadUserDefaults:NO];
     NSNumber *mode = [_userDefaults objectForKey:[self selectedModeKeyForCurrentOrientation]];
     return mode != nil ? (HUDPresetPosition)[mode integerValue] : HUDPresetPositionTopCenter;
-}
-
-- (BOOL)usesBitrate
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeyUsesBitrate];
-    return mode != nil ? [mode boolValue] : NO;
 }
 
 - (BOOL)usesLargeFont

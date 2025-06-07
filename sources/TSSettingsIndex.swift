@@ -14,7 +14,6 @@ enum TSSettingsIndex: Int, CaseIterable {
     case usesInvertedColor
     case usesRotation
     case usesLargeFont
-    case usesBitrate
 
     var key: String {
         switch self {
@@ -30,8 +29,6 @@ enum TSSettingsIndex: Int, CaseIterable {
             return HUDUserDefaultsKeyUsesRotation
         case .usesLargeFont:
             return HUDUserDefaultsKeyUsesLargeFont
-        case .usesBitrate:
-            return HUDUserDefaultsKeyUsesBitrate
         }
     }
 
@@ -49,8 +46,6 @@ enum TSSettingsIndex: Int, CaseIterable {
             return NSLocalizedString("Landscape", comment: "TSSettingsIndex")
         case .usesLargeFont:
             return NSLocalizedString("Size", comment: "TSSettingsIndex")
-        case .usesBitrate:
-            return NSLocalizedString("Unit", comment: "TSSettingsIndex")
         }
     }
 
@@ -70,8 +65,6 @@ enum TSSettingsIndex: Int, CaseIterable {
             return highlighted ? NSLocalizedString("Follow", comment: "TSSettingsIndex") : NSLocalizedString("Hide", comment: "TSSettingsIndex")
         case .usesLargeFont:
             return highlighted ? NSLocalizedString("Large", comment: "TSSettingsIndex") : NSLocalizedString("Standard", comment: "TSSettingsIndex")
-        case .usesBitrate:
-            return highlighted ? NSLocalizedString("b/s", comment: "TSSettingsIndex") : NSLocalizedString("B/s", comment: "TSSettingsIndex")
         }
     }
 }
