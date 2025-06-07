@@ -13,7 +13,7 @@
 #import <Foundation/Foundation.h>
 
 #import "HUDRootViewController.h"
-#import "HUDBackdropLabel.h"
+#import "RootViewController.h"
 #import "TrollMemo-Swift.h"
 
 #pragma mark -
@@ -129,7 +129,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 KB", @"formattedSpeed");
+                    _string = NSLocalizedString(@"0 KB", @"formattedSpeed");
                 });
                 return _string;
             }
@@ -137,7 +137,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f KB", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.0f KB", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / KILOBYTES];
             }
@@ -145,7 +145,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f MB", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f MB", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / MEGABYTES];
             }
@@ -153,7 +153,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f GB", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f GB", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABYTES];
             }
@@ -164,7 +164,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 Kb", @"formattedSpeed");
+                    _string = NSLocalizedString(@"0 Kb", @"formattedSpeed");
                 });
                 return _string;
             }
@@ -172,7 +172,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f Kb", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.0f Kb", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / KILOBITS];
             }
@@ -180,7 +180,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Mb", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f Mb", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / MEGABITS];
             }
@@ -188,7 +188,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Gb", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f Gb", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
             }
@@ -203,7 +203,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 KB/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"0 KB/s", @"formattedSpeed");
                 });
                 return _string;
             }
@@ -211,7 +211,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f KB/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.0f KB/s", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / KILOBYTES];
             }
@@ -219,7 +219,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f MB/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f MB/s", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / MEGABYTES];
             }
@@ -227,7 +227,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f GB/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f GB/s", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABYTES];
             }
@@ -238,7 +238,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 Kb/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"0 Kb/s", @"formattedSpeed");
                 });
                 return _string;
             }
@@ -246,7 +246,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f Kb/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.0f Kb/s", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / KILOBITS];
             }
@@ -254,7 +254,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Mb/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f Mb/s", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / MEGABITS];
             }
@@ -262,7 +262,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 static NSString *_string = nil;
                 static dispatch_once_t onceToken;
                 dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Gb/s", @"formattedSpeed");
+                    _string = NSLocalizedString(@"%.2f Gb/s", @"formattedSpeed");
                 });
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
             }
@@ -433,6 +433,30 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     NSLayoutConstraint *_trailingConstraint;
     UIInterfaceOrientation _orientation;
     FBSOrientationObserver *_orientationObserver;
+    BOOL _shouldKeepIdle;
+    BOOL _canAdjustOrientation;
+    BOOL _isPassthroughMode;
+    BOOL _usesBitrate;
+    BOOL _usesArrowPrefixes;
+    BOOL _singleLineMode;
+    BOOL _usesLargeFont;
+    BOOL _usesRotation;
+    BOOL _usesInvertedColor;
+    BOOL _keepInPlace;
+    BOOL _hideAtSnapshot;
+    UITextView *_hudTextView;
+    NSTimer *_loopTimer;
+    struct {
+        uint64_t inputBytes;
+        uint64_t outputBytes;
+    } _lastBytes;
+    CGPoint _centerOffset;
+    UIInterfaceOrientation _interfaceOrientation;
+    BOOL _isLandscape;
+    CGFloat _preferredPositionX;
+    CGFloat _preferredPositionY;
+    CGFloat _safeAreaTopInset;
+    CGFloat _safeAreaBottomInset;
 }
 
 - (void)registerNotifications
@@ -737,14 +761,17 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     _containerView.hiddenContainer.translatesAutoresizingMaskIntoConstraints = NO;
     [_contentView addSubview:_containerView.hiddenContainer];
 
-    _speedLabel = [[HUDBackdropLabel alloc] initWithFrame:CGRectZero];
-    _speedLabel.numberOfLines = 0;
-    _speedLabel.textAlignment = NSTextAlignmentCenter;
-    _speedLabel.textColor = [UIColor whiteColor];
-    _speedLabel.font = [UIFont systemFontOfSize:HUD_FONT_SIZE];
-    _speedLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [_speedLabel setContentHuggingPriority:UILayoutPriorityDefaultHigh forAxis:UILayoutConstraintAxisVertical];
-    [_blurView.contentView addSubview:_speedLabel];
+    // 初始化 hudTextView
+    self.hudTextView = [[UITextView alloc] initWithFrame:CGRectZero];
+    self.hudTextView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.hudTextView.editable = NO; // 禁止编辑
+    self.hudTextView.scrollEnabled = NO; // 禁止滚动
+    self.hudTextView.backgroundColor = [UIColor clearColor]; // 背景透明
+    self.hudTextView.textContainerInset = UIEdgeInsetsZero; // 移除默认内边距
+    self.hudTextView.textContainer.lineFragmentPadding = 0; // 移除行片段填充
+    self.hudTextView.layer.cornerRadius = HUD_MAX_CORNER_RADIUS; // 设置圆角
+    self.hudTextView.layer.masksToBounds = YES; // 裁剪子视图到圆角
+    [_blurView.contentView addSubview:self.hudTextView];
 
     _lockedView = [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"lock.fill"]];
     _lockedView.tintColor = [UIColor whiteColor];
@@ -768,6 +795,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [_contentView setUserInteractionEnabled:YES];
 
     [self reloadUserDefaults];
+    [self applyTextSettings]; // 在视图加载后应用文本设置
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -1145,6 +1173,84 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         [_impactFeedbackGenerator prepare];
         [_impactFeedbackGenerator impactOccurred];
     }
+}
+
+#pragma mark - Text Settings
+
+- (void)applyTextSettings {
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+
+    // 文字内容
+    NSString *textContent = [userDefaults stringForKey:HUDUserDefaultsKeyTextContent] ?: NSLocalizedString(@"Hello World!", nil);
+    self.hudTextView.text = textContent;
+
+    // 文字颜色
+    NSData *textColorData = [userDefaults dataForKey:HUDUserDefaultsKeyTextColor];
+    if (textColorData) {
+        UIColor *textColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:textColorData error:nil];
+        if (textColor) {
+            self.hudTextView.textColor = textColor;
+        }
+    } else {
+        self.hudTextView.textColor = [UIColor whiteColor]; // HUD默认白色
+    }
+
+    // 文字大小
+    CGFloat textSize = [userDefaults floatForKey:HUDUserDefaultsKeyTextSize];
+    if (textSize < 5.0 || textSize > 50.0) { // 检查有效范围
+        textSize = 10.0; // 默认值
+    }
+    self.hudTextView.font = [UIFont systemFontOfSize:textSize];
+
+    // 文字对齐
+    NSTextAlignment textAlignment = [userDefaults integerForKey:HUDUserDefaultsKeyTextAlignment];
+    self.hudTextView.textAlignment = textAlignment;
+
+    // 文字透明度
+    CGFloat textAlpha = [userDefaults floatForKey:HUDUserDefaultsKeyTextAlpha];
+    if (textAlpha < 0.0 || textAlpha > 1.0) { // 检查有效范围
+        textAlpha = 1.0; // 默认完全不透明
+    }
+    self.hudTextView.alpha = textAlpha;
+
+    // 背景颜色
+    NSData *bgColorData = [userDefaults dataForKey:HUDUserDefaultsKeyBackgroundColor];
+    if (bgColorData) {
+        UIColor *bgColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:bgColorData error:nil];
+        if (bgColor) {
+            // 将背景颜色应用到 _blurView 的 content view (实际背景) 上
+            self.blurView.backgroundColor = bgColor; // 设置背景颜色
+        }
+    } else {
+        self.blurView.backgroundColor = [UIColor blackColor]; // 默认黑色背景
+    }
+
+    // 背景透明度
+    CGFloat backgroundAlpha = [userDefaults floatForKey:HUDUserDefaultsKeyBackgroundAlpha];
+    if (backgroundAlpha < 0.0 || backgroundAlpha > 1.0) { // 检查有效范围
+        backgroundAlpha = 1.0; // 默认完全透明
+    }
+    self.blurView.alpha = backgroundAlpha; // 设置背景透明度
+
+    // 重新计算文本视图的尺寸以适应内容
+    CGSize newSize = [self.hudTextView sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+    
+    // 更新HUD容器视图的尺寸
+    [_hudTextView.widthAnchor constraintEqualToConstant:newSize.width + 20].active = YES; // 添加一些内边距
+    [_hudTextView.heightAnchor constraintEqualToConstant:newSize.height + 20].active = YES;
+
+    // 调整 _blurView 的尺寸以包裹 _hudTextView，并添加圆角
+    [_blurView.widthAnchor constraintEqualToAnchor:self.hudTextView.widthAnchor].active = YES;
+    [_blurView.heightAnchor constraintEqualToAnchor:self.hudTextView.heightAnchor].active = YES;
+    _blurView.layer.cornerRadius = HUD_MAX_CORNER_RADIUS; // 5像素圆角
+    _blurView.layer.masksToBounds = YES;
+
+    // 更新 _contentView 的尺寸以包裹 _blurView
+    [_contentView.widthAnchor constraintEqualToAnchor:self.blurView.widthAnchor].active = YES;
+    [_contentView.heightAnchor constraintEqualToAnchor:self.blurView.heightAnchor].active = YES;
+
+    // 确保布局更新
+    [self.view layoutIfNeeded];
 }
 
 @end
