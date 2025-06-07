@@ -122,8 +122,7 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
 {
     if (isFocused)
     {
-        /*
-        if (0 == HUD_DATA_UNIT)
+        if (0 == 0 /*HUD_DATA_UNIT*/)
         {
             if (bytes < KILOBYTES) {
                 static NSString *_string = nil;
@@ -193,11 +192,9 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
             }
         }
-        */
     }
     else {
-        /*
-        if (0 == HUD_DATA_UNIT)
+        if (0 == 0 /*HUD_DATA_UNIT*/)
         {
             if (bytes < KILOBYTES) {
                 static NSString *_string = nil;
@@ -267,7 +264,6 @@ static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
                 return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
             }
         }
-        */
     }
 }
 
@@ -419,7 +415,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     UIVisualEffectView *_blurView;
     ScreenshotInvisibleContainer *_containerView;
     UIView *_contentView;
-    HUDBackdropLabel *_speedLabel;
     UIImageView *_lockedView;
     NSTimer *_timer;
     UITapGestureRecognizer *_tapGestureRecognizer;
@@ -492,6 +487,13 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyUsesCustomOffset options:NSKeyValueObservingOptionNew context:nil];
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetX options:NSKeyValueObservingOptionNew context:nil];
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetY options:NSKeyValueObservingOptionNew context:nil];
+    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextContent options:NSKeyValueObservingOptionNew context:nil];
+    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextColor options:NSKeyValueObservingOptionNew context:nil];
+    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextSize options:NSKeyValueObservingOptionNew context:nil];
+    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextAlignment options:NSKeyValueObservingOptionNew context:nil];
+    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextAlpha options:NSKeyValueObservingOptionNew context:nil];
+    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyBackgroundColor options:NSKeyValueObservingOptionNew context:nil];
+    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyBackgroundAlpha options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
@@ -499,7 +501,14 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomFontSize] ||
         [keyPath isEqualToString:HUDUserDefaultsKeyUsesCustomOffset] ||
         [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomOffsetX] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomOffsetY])
+        [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomOffsetY] ||
+        [keyPath isEqualToString:HUDUserDefaultsKeyTextContent] ||
+        [keyPath isEqualToString:HUDUserDefaultsKeyTextColor] ||
+        [keyPath isEqualToString:HUDUserDefaultsKeyTextSize] ||
+        [keyPath isEqualToString:HUDUserDefaultsKeyTextAlignment] ||
+        [keyPath isEqualToString:HUDUserDefaultsKeyTextAlpha] ||
+        [keyPath isEqualToString:HUDUserDefaultsKeyBackgroundColor] ||
+        [keyPath isEqualToString:HUDUserDefaultsKeyBackgroundAlpha])
     {
         [self reloadUserDefaults];
     }
@@ -542,7 +551,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     HUD_FONT_WEIGHT = (usesInvertedColor ? UIFontWeightMedium : UIFontWeightRegular);
     HUD_INACTIVE_OPACITY = (usesInvertedColor ? 1.0 : 0.667);
     [_blurView setEffect:(usesInvertedColor ? nil : _blurEffect)];
-    [_speedLabel setColorInvertEnabled:usesInvertedColor];
+    [self.hudTextView setColorInvertEnabled:usesInvertedColor];
     [_lockedView setHidden:usesInvertedColor];
 
     BOOL hideAtSnapshot = [self hideAtSnapshot];
@@ -737,9 +746,9 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     log_debug(OS_LOG_DEFAULT, "updateSpeedLabel");
     NSAttributedString *attributedText = formattedAttributedString(_isFocused);
     if (attributedText) {
-        [_speedLabel setAttributedText:attributedText];
+        [self.hudTextView setAttributedText:attributedText];
     }
-    [_speedLabel sizeToFit];
+    [self.hudTextView sizeToFit];
 }
 
 - (void)viewDidLoad
@@ -842,7 +851,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 
     HUD_SHOW_DOWNLOAD_SPEED_FIRST = isCentered;
     HUD_SHOW_SECOND_SPEED_IN_NEW_LINE = !isCentered;
-    [_speedLabel setTextAlignment:(isCentered ? NSTextAlignmentCenter : NSTextAlignmentLeft)];
     [_lockedView setImage:[UIImage systemImageNamed:(isCentered ? @"hand.raised.slash.fill" : @"lock.fill")]];
     [_blurView.layer setMaskedCorners:((isCenteredMost && !isLandscape) ? kCornerMaskBottom : kCornerMaskAll)];
 
@@ -953,27 +961,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     }
 
     [_constraints addObjectsFromArray:@[
-        [_speedLabel.topAnchor constraintEqualToAnchor:_contentView.topAnchor],
-        [_speedLabel.bottomAnchor constraintEqualToAnchor:_contentView.bottomAnchor],
-    ]];
-
-    _centerXConstraint = [_speedLabel.centerXAnchor constraintEqualToAnchor:layoutGuide.centerXAnchor];
-    if (isCentered) {
-        [_constraints addObject:_centerXConstraint];
-    }
-
-    _leadingConstraint = [_speedLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:10];
-
-    _trailingConstraint = [_speedLabel.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-10];
-
-    [_constraints addObjectsFromArray:@[
-        [_blurView.topAnchor constraintEqualToAnchor:_speedLabel.topAnchor constant:-2],
-        [_blurView.leadingAnchor constraintEqualToAnchor:_speedLabel.leadingAnchor constant:-4],
-        [_blurView.trailingAnchor constraintEqualToAnchor:_speedLabel.trailingAnchor constant:4],
-        [_blurView.bottomAnchor constraintEqualToAnchor:_speedLabel.bottomAnchor constant:2],
-    ]];
-
-    [_constraints addObjectsFromArray:@[
         [_lockedView.topAnchor constraintGreaterThanOrEqualToAnchor:_blurView.topAnchor constant:2],
         [_lockedView.centerXAnchor constraintEqualToAnchor:_blurView.centerXAnchor],
         [_lockedView.centerYAnchor constraintEqualToAnchor:_blurView.centerYAnchor],
@@ -1010,7 +997,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     BOOL isCentered = false;
 
     CGFloat topTrans = CGRectGetHeight(view.bounds) * (scaleFactor / 2);
-    CGFloat leadingTrans = (isCentered ? 0 : -CGRectGetWidth(view.bounds) * (scaleFactor / 2)));
+    CGFloat leadingTrans = (isCentered ? 0 : -CGRectGetWidth(view.bounds) * (scaleFactor / 2));
 
     if (beginFromInitialState)
         [view setTransform:CGAffineTransformIdentity];
@@ -1094,7 +1081,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     [_lockedView.layer addAnimation:animation forKey:@"opacity"];
 
-    [_speedLabel.layer removeAllAnimations];
+    [_hudTextView.layer removeAllAnimations];
     CABasicAnimation *animationReverse = [CABasicAnimation animationWithKeyPath:@"opacity"];
     animationReverse.fromValue = [NSNumber numberWithFloat:1.0];
     animationReverse.toValue = [NSNumber numberWithFloat:0.0];
@@ -1104,7 +1091,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     animationReverse.removedOnCompletion = YES;
     animationReverse.fillMode = kCAFillModeForwards;
     animationReverse.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    [_speedLabel.layer addAnimation:animationReverse forKey:@"opacity"];
+    [_hudTextView.layer addAnimation:animationReverse forKey:@"opacity"];
 }
 
 - (void)panGestureRecognized:(UIPanGestureRecognizer *)sender
@@ -1218,11 +1205,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (bgColorData) {
         UIColor *bgColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:bgColorData error:nil];
         if (bgColor) {
-            // 将背景颜色应用到 _blurView 的 content view (实际背景) 上
-            self.blurView.backgroundColor = bgColor; // 设置背景颜色
+            self.hudTextView.backgroundColor = bgColor; // 设置背景颜色
         }
     } else {
-        self.blurView.backgroundColor = [UIColor blackColor]; // 默认黑色背景
+        self.hudTextView.backgroundColor = [UIColor blackColor]; // 默认黑色背景
     }
 
     // 背景透明度
@@ -1230,7 +1216,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (backgroundAlpha < 0.0 || backgroundAlpha > 1.0) { // 检查有效范围
         backgroundAlpha = 1.0; // 默认完全透明
     }
-    self.blurView.alpha = backgroundAlpha; // 设置背景透明度
+    self.hudTextView.alpha = backgroundAlpha; // 设置背景透明度
 
     // 重新计算文本视图的尺寸以适应内容
     CGSize newSize = [self.hudTextView sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
@@ -1240,14 +1226,14 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [_hudTextView.heightAnchor constraintEqualToConstant:newSize.height + 20].active = YES;
 
     // 调整 _blurView 的尺寸以包裹 _hudTextView，并添加圆角
-    [_blurView.widthAnchor constraintEqualToAnchor:self.hudTextView.widthAnchor].active = YES;
-    [_blurView.heightAnchor constraintEqualToAnchor:self.hudTextView.heightAnchor].active = YES;
+    [_blurView.widthAnchor constraintEqualToAnchor:_hudTextView.widthAnchor].active = YES;
+    [_blurView.heightAnchor constraintEqualToAnchor:_hudTextView.heightAnchor].active = YES;
     _blurView.layer.cornerRadius = HUD_MAX_CORNER_RADIUS; // 5像素圆角
     _blurView.layer.masksToBounds = YES;
 
     // 更新 _contentView 的尺寸以包裹 _blurView
-    [_contentView.widthAnchor constraintEqualToAnchor:self.blurView.widthAnchor].active = YES;
-    [_contentView.heightAnchor constraintEqualToAnchor:self.blurView.heightAnchor].active = YES;
+    [_contentView.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor].active = YES;
+    [_contentView.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor].active = YES;
 
     // 确保布局更新
     [self.view layoutIfNeeded];
