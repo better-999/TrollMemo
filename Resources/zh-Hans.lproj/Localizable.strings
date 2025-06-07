@@ -86,9 +86,6 @@
 "Hide @snapshot" = "截图时隐藏";
 
 /* No comment provided by engineer. */
-"Incoming Only" = "仅显示下载";
-
-/* No comment provided by engineer. */
 "Inverted" = "实时反色";
 
 /* No comment provided by engineer. */
@@ -117,9 +114,6 @@
 
 /* No comment provided by engineer. */
 "Pass-through" = "触摸穿透";
-
-/* No comment provided by engineer. */
-"Prefixes" = "前缀";
 
 /* No comment provided by engineer. */
 "Re-open to apply" = "重启以应用更改";

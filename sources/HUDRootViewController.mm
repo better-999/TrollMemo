@@ -114,8 +114,6 @@ static uint8_t HUD_SHOW_UPLOAD_SPEED = 1;
 static uint8_t HUD_SHOW_DOWNLOAD_SPEED = 1;
 static uint8_t HUD_SHOW_DOWNLOAD_SPEED_FIRST = 1;
 static uint8_t HUD_SHOW_SECOND_SPEED_IN_NEW_LINE = 0;
-static const char *HUD_UPLOAD_PREFIX = "▲";
-static const char *HUD_DOWNLOAD_PREFIX = "▼";
 
 typedef struct {
     uint64_t inputBytes;
@@ -319,10 +317,6 @@ static NSAttributedString *formattedAttributedString(BOOL isFocused)
 {
     @autoreleasepool
     {
-        if (!attributedUploadPrefix)
-            attributedUploadPrefix = [[NSAttributedString alloc] initWithString:[[NSString stringWithUTF8String:HUD_UPLOAD_PREFIX] stringByAppendingString:@" "] attributes:@{ NSFontAttributeName: [UIFont boldSystemFontOfSize:HUD_FONT_SIZE] }];
-        if (!attributedDownloadPrefix)
-            attributedDownloadPrefix = [[NSAttributedString alloc] initWithString:[[NSString stringWithUTF8String:HUD_DOWNLOAD_PREFIX] stringByAppendingString:@" "] attributes:@{ NSFontAttributeName: [UIFont boldSystemFontOfSize:HUD_FONT_SIZE] }];
         if (!attributedInlineSeparator)
             attributedInlineSeparator = [[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:INLINE_SEPARATOR] attributes:@{ NSFontAttributeName: [UIFont boldSystemFontOfSize:HUD_FONT_SIZE] }];
         if (!attributedLineSeparator)
@@ -513,15 +507,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 {
     [self loadUserDefaults:YES];
 
-    BOOL singleLineMode = [self singleLineMode];
-    HUD_SHOW_UPLOAD_SPEED = !singleLineMode;
-
     BOOL usesBitrate = [self usesBitrate];
     HUD_DATA_UNIT = usesBitrate;
-
-    BOOL usesArrowPrefixes = [self usesArrowPrefixes];
-    HUD_UPLOAD_PREFIX = (usesArrowPrefixes ? "↑" : "▲");
-    HUD_DOWNLOAD_PREFIX = (usesArrowPrefixes ? "↓" : "▼");
 
     BOOL usesCustomFontSize = [self usesCustomFontSize];
     if (!usesCustomFontSize) {
@@ -594,24 +581,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     return mode != nil ? (HUDPresetPosition)[mode integerValue] : HUDPresetPositionTopCenter;
 }
 
-- (BOOL)singleLineMode
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeySingleLineMode];
-    return mode != nil ? [mode boolValue] : NO;
-}
-
 - (BOOL)usesBitrate
 {
     [self loadUserDefaults:NO];
     NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeyUsesBitrate];
-    return mode != nil ? [mode boolValue] : NO;
-}
-
-- (BOOL)usesArrowPrefixes
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeyUsesArrowPrefixes];
     return mode != nil ? [mode boolValue] : NO;
 }
 
