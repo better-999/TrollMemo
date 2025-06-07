@@ -12,7 +12,6 @@
 #import <mach/vm_param.h>
 #import <Foundation/Foundation.h>
 
-#import "HUDPresetPosition.h"
 #import "HUDRootViewController.h"
 #import "HUDBackdropLabel.h"
 #import "TrollMemo-Swift.h"
@@ -568,13 +567,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     return [self isLandscapeOrientation] ? HUDUserDefaultsKeySelectedModeLandscape : HUDUserDefaultsKeySelectedMode;
 }
 
-- (HUDPresetPosition)selectedModeForCurrentOrientation
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:[self selectedModeKeyForCurrentOrientation]];
-    return mode != nil ? (HUDPresetPosition)[mode integerValue] : HUDPresetPositionTopCenter;
-}
-
 - (BOOL)usesLargeFont
 {
     [self loadUserDefaults:NO];
@@ -816,9 +808,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         isLandscape = UIInterfaceOrientationIsLandscape(_orientation);
     }
 
-    HUDPresetPosition selectedMode = [self selectedModeForCurrentOrientation];
-    BOOL isCentered = (selectedMode == HUDPresetPositionTopCenter || selectedMode == HUDPresetPositionTopCenterMost);
-    BOOL isCenteredMost = (selectedMode == HUDPresetPositionTopCenterMost);
+    BOOL isCentered = false;
+    BOOL isCenteredMost = false;
     BOOL isPad = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
 
     HUD_SHOW_DOWNLOAD_SPEED_FIRST = isCentered;
@@ -944,14 +935,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     }
 
     _leadingConstraint = [_speedLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:10];
-    if (selectedMode == HUDPresetPositionTopLeft) {
-        [_constraints addObject:_leadingConstraint];
-    }
 
     _trailingConstraint = [_speedLabel.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-10];
-    if (selectedMode == HUDPresetPositionTopRight) {
-        [_constraints addObject:_trailingConstraint];
-    }
 
     [_constraints addObjectsFromArray:@[
         [_blurView.topAnchor constraintEqualToAnchor:_speedLabel.topAnchor constant:-2],
@@ -994,11 +979,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [self updateSpeedLabel];
     [self resetLoopTimer];
 
-    HUDPresetPosition selectedMode = [self selectedModeForCurrentOrientation];
-    BOOL isCentered = (selectedMode == HUDPresetPositionTopCenter || selectedMode == HUDPresetPositionTopCenterMost);
+    BOOL isCentered = false;
 
     CGFloat topTrans = CGRectGetHeight(view.bounds) * (scaleFactor / 2);
-    CGFloat leadingTrans = (isCentered ? 0 : (selectedMode == HUDPresetPositionTopLeft ? CGRectGetWidth(view.bounds) * (scaleFactor / 2) : -CGRectGetWidth(view.bounds) * (scaleFactor / 2)));
+    CGFloat leadingTrans = (isCentered ? 0 : -CGRectGetWidth(view.bounds) * (scaleFactor / 2)));
 
     if (beginFromInitialState)
         [view setTransform:CGAffineTransformIdentity];
@@ -1100,9 +1084,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (!_isFocused)
         return;
 
-    HUDPresetPosition selectedMode = [self selectedModeForCurrentOrientation];
-    BOOL isCentered = (selectedMode == HUDPresetPositionTopCenter || selectedMode == HUDPresetPositionTopCenterMost);
-
+    BOOL isCentered = false;
     if (isCentered || [self keepInPlace])
     {
         if (sender.state == UIGestureRecognizerStateBegan)

@@ -115,7 +115,6 @@
 		CC711D1E2B5BF5C6007235A6 /* HUDHelper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HUDHelper.mm; sourceTree = "<group>"; };
 		CC711D1F2B5BF5C6007235A6 /* RootViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RootViewController.mm; sourceTree = "<group>"; };
 		CC711D202B5BF5C6007235A6 /* HUDMainWindow.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HUDMainWindow.mm; sourceTree = "<group>"; };
-		CC711D212B5BF5C6007235A6 /* HUDPresetPosition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDPresetPosition.h; sourceTree = "<group>"; };
 		CC711D222B5BF5C6007235A6 /* MainApplicationDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MainApplicationDelegate.mm; sourceTree = "<group>"; };
 		CC711D232B5BF5C6007235A6 /* TSEventFetcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSEventFetcher.h; sourceTree = "<group>"; };
 		CC711D242B5BF5C6007235A6 /* MainApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainApplication.h; sourceTree = "<group>"; };
@@ -289,7 +288,6 @@
 				CC711D2F2B5BF5C6007235A6 /* SPLarkController */,
 				CC8DDA8D2B654D7D001C7C9E /* Intents */,
 				CC711D3F2B5BF5C6007235A6 /* JetsamHelper.h */,
-				CC711D212B5BF5C6007235A6 /* HUDPresetPosition.h */,
 				CC711D482B5BF5C6007235A6 /* HUDApp.mm */,
 				CC711D432B5BF5C6007235A6 /* HUDHelper.h */,
 				CC711D1E2B5BF5C6007235A6 /* HUDHelper.mm */,

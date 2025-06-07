@@ -11,7 +11,6 @@
 #import "HUDHelper.h"
 #import "MainButton.h"
 #import "MainApplication.h"
-#import "HUDPresetPosition.h"
 #import "RootViewController.h"
 #import "UIApplication+Private.h"
 #import "HUDRootViewController.h"
@@ -29,15 +28,9 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     NSMutableDictionary *_userDefaults;
     MainButton *_mainButton;
     UIButton *_settingsButton;
-    UIButton *_topLeftButton;
-    UIButton *_topRightButton;
-    UIButton *_topCenterButton;
     UIButton *_topCenterMostButton;
     UILabel *_authorLabel;
     BOOL _supportsCenterMost;
-    NSLayoutConstraint *_topLeftConstraint;
-    NSLayoutConstraint *_topRightConstraint;
-    NSLayoutConstraint *_topCenterConstraint;
     NSLayoutConstraint *_authorLabelBottomConstraint;
     BOOL _isRemoteHUDActive;
     HUDRootViewController *_localHUDRootViewController;  // Only for debugging
@@ -92,85 +85,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     }];
     [self.view addSubview:self.backgroundView];
 
-
-    /*
-    _topLeftButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [_topLeftButton setTintColor:[UIColor whiteColor]];
-    [_topLeftButton addTarget:self action:@selector(tapTopLeftButton:) forControlEvents:UIControlEventTouchUpInside];
-    [_topLeftButton setImage:[UIImage systemImageNamed:@"arrow.up.left"] forState:UIControlStateNormal];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [_topLeftButton setAdjustsImageWhenHighlighted:NO];
-#pragma clang diagnostic pop
-    [self.backgroundView addSubview:_topLeftButton];
-    if (@available(iOS 15.0, *))
-    {
-        UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
-        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
-        [_topLeftButton setConfiguration:config];
-    }
-    UILayoutGuide *safeArea = self.backgroundView.safeAreaLayoutGuide;
-    [_topLeftButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    _topLeftConstraint = [_topLeftButton.topAnchor constraintEqualToAnchor:safeArea.topAnchor constant:_gTopButtonConstraintsConstantRegular];
-    [NSLayoutConstraint activateConstraints:@[
-        _topLeftConstraint,
-        [_topLeftButton.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20.0f],
-        [_topLeftButton.widthAnchor constraintEqualToConstant:40.0f],
-        [_topLeftButton.heightAnchor constraintEqualToConstant:40.0f],
-    ]];
-    */
-    /*
-    _topRightButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [_topRightButton setTintColor:[UIColor whiteColor]];
-    [_topRightButton addTarget:self action:@selector(tapTopRightButton:) forControlEvents:UIControlEventTouchUpInside];
-    [_topRightButton setImage:[UIImage systemImageNamed:@"arrow.up.right"] forState:UIControlStateNormal];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [_topRightButton setAdjustsImageWhenHighlighted:NO];
-#pragma clang diagnostic pop
-    [self.backgroundView addSubview:_topRightButton];
-    if (@available(iOS 15.0, *))
-    {
-        UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
-        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
-        [_topRightButton setConfiguration:config];
-    }
-    [_topRightButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    _topRightConstraint = [_topRightButton.topAnchor constraintEqualToAnchor:safeArea.topAnchor constant:_gTopButtonConstraintsConstantRegular];
-    [NSLayoutConstraint activateConstraints:@[
-        _topRightConstraint,
-        [_topRightButton.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20.0f],
-        [_topRightButton.widthAnchor constraintEqualToConstant:40.0f],
-        [_topRightButton.heightAnchor constraintEqualToConstant:40.0f],
-    ]];
-    */
-
-
-    /*
-    _topCenterButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [_topCenterButton setTintColor:[UIColor whiteColor]];
-    [_topCenterButton addTarget:self action:@selector(tapTopCenterButton:) forControlEvents:UIControlEventTouchUpInside];
-    [_topCenterButton setImage:[UIImage systemImageNamed:@"arrow.up"] forState:UIControlStateNormal];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [_topCenterButton setAdjustsImageWhenHighlighted:NO];
-#pragma clang diagnostic pop
-    [self.backgroundView addSubview:_topCenterButton];
-    if (@available(iOS 15.0, *))
-    {
-        UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
-        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
-        [_topCenterButton setConfiguration:config];
-    }
-    [_topCenterButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    _topCenterConstraint = [_topCenterButton.topAnchor constraintEqualToAnchor:safeArea.topAnchor constant:_gTopButtonConstraintsConstantRegular];
-    [NSLayoutConstraint activateConstraints:@[
-        _topCenterConstraint,
-        [_topCenterButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
-        [_topCenterButton.widthAnchor constraintEqualToConstant:40.0f],
-        [_topCenterButton.heightAnchor constraintEqualToConstant:40.0f],
-    ]];
-    */
     [self reloadModeButtonState];
 
     _mainButton = [MainButton buttonWithType:UIButtonTypeSystem];
@@ -366,26 +280,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     return [self isLandscapeOrientation] ? HUDUserDefaultsKeySelectedModeLandscape : HUDUserDefaultsKeySelectedMode;
 }
 
-- (HUDPresetPosition)selectedModeForCurrentOrientation
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:[self selectedModeKeyForCurrentOrientation]];
-    return mode != nil ? (HUDPresetPosition)[mode integerValue] : HUDPresetPositionTopCenter;
-}
-
-- (void)setSelectedModeForCurrentOrientation:(HUDPresetPosition)selectedMode
-{
-    [self loadUserDefaults:NO];
-    // Remove some keys that are not persistent
-    if ([self isLandscapeOrientation]) {
-        [_userDefaults removeObjectForKey:HUDUserDefaultsKeyCurrentLandscapePositionY];
-    } else {
-        [_userDefaults removeObjectForKey:HUDUserDefaultsKeyCurrentPositionY];
-    }
-    [_userDefaults setObject:@(selectedMode) forKey:[self selectedModeKeyForCurrentOrientation]];
-    [self saveUserDefaults];
-}
-
 - (BOOL)passthroughMode
 {
     [self loadUserDefaults:NO];
@@ -562,18 +456,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [self saveUserDefaults];
 }
 
-- (void)reloadModeButtonState
-{
-    HUDPresetPosition selectedMode = [self selectedModeForCurrentOrientation];
-    BOOL isCentered = (selectedMode == HUDPresetPositionTopCenter || selectedMode == HUDPresetPositionTopCenterMost);
-    BOOL isCenteredMost = (selectedMode == HUDPresetPositionTopCenterMost);
-    [_topLeftButton setSelected:(selectedMode == HUDPresetPositionTopLeft)];
-    [_topCenterButton setSelected:isCentered];
-    [_topRightButton setSelected:(selectedMode == HUDPresetPositionTopRight)];
-    UIImage *topCenterImage = (isCenteredMost ? [UIImage systemImageNamed:@"arrow.up.to.line"] : [UIImage systemImageNamed:@"arrow.up"]);
-    [_topCenterButton setImage:topCenterImage forState:UIControlStateNormal];
-}
-
 - (void)tapAuthorLabel:(UITapGestureRecognizer *)sender
 {
     if (_isRemoteHUDActive) {
@@ -582,40 +464,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     NSString *repoURLString = @"https://TrollMemo.app";
     NSURL *repoURL = [NSURL URLWithString:repoURLString];
     [[UIApplication sharedApplication] openURL:repoURL options:@{} completionHandler:nil];
-}
-
-- (void)tapTopLeftButton:(UIButton *)sender
-{
-    log_debug(OS_LOG_DEFAULT, "- [RootViewController tapTopLeftButton:%{public}@]", sender);
-    [self setSelectedModeForCurrentOrientation:HUDPresetPositionTopLeft];
-    [self reloadModeButtonState];
-}
-
-- (void)tapTopRightButton:(UIButton *)sender
-{
-    log_debug(OS_LOG_DEFAULT, "- [RootViewController tapTopRightButton:%{public}@]", sender);
-    [self setSelectedModeForCurrentOrientation:HUDPresetPositionTopRight];
-    [self reloadModeButtonState];
-}
-
-- (void)tapTopCenterButton:(UIButton *)sender
-{
-    log_debug(OS_LOG_DEFAULT, "- [RootViewController tapTopCenterButton:%{public}@]", sender);
-    HUDPresetPosition selectedMode = [self selectedModeForCurrentOrientation];
-    BOOL isCenteredMost = (selectedMode == HUDPresetPositionTopCenterMost);
-    if (!sender.isSelected || !_supportsCenterMost) {
-        [self setSelectedModeForCurrentOrientation:HUDPresetPositionTopCenter];
-        if (_supportsCenterMost) {
-            [self presentTopCenterMostHints];
-        }
-    } else {
-        if (isCenteredMost) {
-            [self setSelectedModeForCurrentOrientation:HUDPresetPositionTopCenter];
-        } else {
-            [self setSelectedModeForCurrentOrientation:HUDPresetPositionTopCenterMost];
-        }
-    }
-    [self reloadModeButtonState];
 }
 
 - (void)tapMainButton:(UIButton *)sender
@@ -686,16 +534,10 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
         CGFloat topConstant = _gTopButtonConstraintsConstantCompact;
         [_settingsButton setHidden:YES];
         [_authorLabelBottomConstraint setConstant:_gAuthorLabelBottomConstraintConstantCompact];
-        [_topLeftConstraint setConstant:topConstant];
-        [_topRightConstraint setConstant:topConstant];
-        [_topCenterConstraint setConstant:topConstant];
     } else {
         CGFloat topConstant = isPad ? _gTopButtonConstraintsConstantRegularPad : _gTopButtonConstraintsConstantRegular;
         [_settingsButton setHidden:NO];
         [_authorLabelBottomConstraint setConstant:_gAuthorLabelBottomConstraintConstantRegular];
-        [_topLeftConstraint setConstant:topConstant];
-        [_topRightConstraint setConstant:topConstant];
-        [_topCenterConstraint setConstant:topConstant];
     }
 }
 
