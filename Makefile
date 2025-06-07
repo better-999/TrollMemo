@@ -34,6 +34,7 @@ TrollMemo_CFLAGS += -fobjc-arc
 TrollMemo_CFLAGS += -Iheaders
 TrollMemo_CFLAGS += -Isources
 TrollMemo_CFLAGS += -Isources/KIF
+TrollMemo_CFLAGS += -Isupports
 TrollMemo_CFLAGS += -include supports/hudapp-prefix.pch
 MainApplication.mm_CCFLAGS += -std=c++14
 
