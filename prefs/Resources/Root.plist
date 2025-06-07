@@ -16,13 +16,13 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>ch.xxtou.hudapp.prefs</string>
+			<string>ch.better.hudapp.prefs</string>
 			<key>key</key>
 			<string>usesCustomFontSize</string>
 			<key>label</key>
 			<string>Uses Custom Font Size</string>
 			<key>PostNotification</key>
-			<string>ch.xxtou.notification.hud.reload</string>
+			<string>ch.better.notification.hud.reload</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -30,7 +30,7 @@
 			<key>default</key>
 			<real>9</real>
 			<key>defaults</key>
-			<string>ch.xxtou.hudapp.prefs</string>
+			<string>ch.better.hudapp.prefs</string>
 			<key>key</key>
 			<string>realCustomFontSize</string>
 			<key>label</key>
@@ -42,7 +42,7 @@
 			<key>showValue</key>
 			<true/>
 			<key>PostNotification</key>
-			<string>ch.xxtou.notification.hud.reload</string>
+			<string>ch.better.notification.hud.reload</string>
 			<key>isContinuous</key>
 			<true/>
 		</dict>
@@ -58,13 +58,13 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>ch.xxtou.hudapp.prefs</string>
+			<string>ch.better.hudapp.prefs</string>
 			<key>key</key>
 			<string>usesCustomOffset</string>
 			<key>label</key>
 			<string>Uses Custom Offset</string>
 			<key>PostNotification</key>
-			<string>ch.xxtou.notification.hud.reload</string>
+			<string>ch.better.notification.hud.reload</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -72,7 +72,7 @@
 			<key>default</key>
 			<real>0</real>
 			<key>defaults</key>
-			<string>ch.xxtou.hudapp.prefs</string>
+			<string>ch.better.hudapp.prefs</string>
 			<key>key</key>
 			<string>realCustomOffsetX</string>
 			<key>label</key>
@@ -84,7 +84,7 @@
 			<key>showValue</key>
 			<true/>
 			<key>PostNotification</key>
-			<string>ch.xxtou.notification.hud.reload</string>
+			<string>ch.better.notification.hud.reload</string>
 			<key>isContinuous</key>
 			<true/>
 		</dict>
@@ -94,7 +94,7 @@
 			<key>default</key>
 			<real>0</real>
 			<key>defaults</key>
-			<string>ch.xxtou.hudapp.prefs</string>
+			<string>ch.better.hudapp.prefs</string>
 			<key>key</key>
 			<string>realCustomOffsetY</string>
 			<key>label</key>
@@ -106,7 +106,7 @@
 			<key>showValue</key>
 			<true/>
 			<key>PostNotification</key>
-			<string>ch.xxtou.notification.hud.reload</string>
+			<string>ch.better.notification.hud.reload</string>
 			<key>isContinuous</key>
 			<true/>
 		</dict>
@@ -126,9 +126,9 @@
 			<key>action</key>
 			<string>resetToDefaults:</string>
 			<key>defaults</key>
-			<string>ch.xxtou.hudapp.prefs</string>
+			<string>ch.better.hudapp.prefs</string>
 			<key>PostNotification</key>
-			<string>ch.xxtou.notification.hud.reload</string>
+			<string>ch.better.notification.hud.reload</string>
 			<key>isDestructive</key>
 			<true/>
 		</dict>

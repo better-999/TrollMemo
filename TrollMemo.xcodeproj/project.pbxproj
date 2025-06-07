@@ -662,7 +662,7 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
 				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphonesimulator;
@@ -706,7 +706,7 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
 				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphonesimulator;
@@ -882,7 +882,7 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
 				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphoneos;
@@ -927,7 +927,7 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
 				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphoneos;

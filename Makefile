@@ -2,7 +2,7 @@ ARCHS := arm64  # arm64e
 TARGET := iphone:clang:16.5:14.0
 INSTALL_TARGET_PROCESSES := TrollMemo
 ENT_PLIST := $(PWD)/supports/entitlements.plist
-LAUNCHD_PLIST := $(PWD)/layout/Library/LaunchDaemons/ch.xxtou.hudservices.plist
+LAUNCHD_PLIST := $(PWD)/layout/Library/LaunchDaemons/ch.better.hudservices.plist
 
 include $(THEOS)/makefiles/common.mk
 

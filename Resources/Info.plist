@@ -13,7 +13,7 @@
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
-	<string>ch.xxtou.hudapp</string>
+	<string>ch.better.hudapp</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -28,7 +28,7 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>ch.xxtou.hudapp</string>
+			<string>ch.better.hudapp</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>TrollMemo</string>
@@ -51,7 +51,7 @@
 			<key>UIApplicationShortcutItemTitle</key>
 			<string>Toggle HUD</string>
 			<key>UIApplicationShortcutItemType</key>
-			<string>ch.xxtou.shortcut.toggle-hud</string>
+			<string>ch.better.shortcut.toggle-hud</string>
 		</dict>
 	</array>
 	<key>UIApplicationShowsViewsWhileLocked</key>

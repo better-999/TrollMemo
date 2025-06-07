@@ -41,7 +41,7 @@ static void LaunchServicesApplicationStateChanged
 
     for (LSApplicationProxy *app in [[objc_getClass("LSApplicationWorkspace") defaultWorkspace] allApplications])
     {
-        if ([app.applicationIdentifier isEqualToString:@"ch.xxtou.hudapp"])
+        if ([app.applicationIdentifier isEqualToString:@"ch.better.hudapp"])
         {
             isAppInstalled = YES;
             break;
@@ -630,7 +630,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [self saveUserDefaults];
 }
 
-#define PREFS_PATH "/var/mobile/Library/Preferences/ch.xxtou.hudapp.prefs.plist"
+#define PREFS_PATH "/var/mobile/Library/Preferences/ch.better.hudapp.prefs.plist"
 
 - (NSDictionary *)extraUserDefaultsDictionary {
     static BOOL isJailbroken = NO;

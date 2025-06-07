@@ -18,7 +18,7 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>Label</key>
-	<string>ch.xxtou.hudservices</string>
+	<string>ch.better.hudservices</string>
 	<key>POSIXSpawnType</key>
 	<string>App</string>
 	<key>ProcessType</key>
