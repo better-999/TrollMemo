@@ -19,9 +19,6 @@
 #define HUD_TRANSITION_DURATION 0.25
 
 static BOOL _gShouldToggleHUDAfterLaunch = NO;
-static const CGFloat _gTopButtonConstraintsConstantCompact = 46.f;
-static const CGFloat _gTopButtonConstraintsConstantRegular = 28.f;
-static const CGFloat _gTopButtonConstraintsConstantRegularPad = 46.f;
 static const CGFloat _gAuthorLabelBottomConstraintConstantCompact = -20.f;
 static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
 
