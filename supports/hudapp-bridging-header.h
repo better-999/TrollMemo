@@ -31,4 +31,12 @@ static HUDUserDefaultsKey const HUDUserDefaultsKeyUsesCustomOffset = @"usesCusto
 static HUDUserDefaultsKey const HUDUserDefaultsKeyRealCustomOffsetX = @"realCustomOffsetX";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyRealCustomOffsetY = @"realCustomOffsetY";
 
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextContent = @"HUDUserDefaultsKeyTextContent";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextColor = @"HUDUserDefaultsKeyTextColor";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextSize = @"HUDUserDefaultsKeyTextSize";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextAlignment = @"HUDUserDefaultsKeyTextAlignment";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextAlpha = @"HUDUserDefaultsKeyTextAlpha";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyBackgroundColor = @"HUDUserDefaultsKeyBackgroundColor";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyBackgroundAlpha = @"HUDUserDefaultsKeyBackgroundAlpha";
+
 #endif /* hudapp_bridging_header_h */

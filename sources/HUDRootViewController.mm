@@ -15,6 +15,7 @@
 #import "HUDRootViewController.h"
 #import "RootViewController.h"
 #import "TrollMemo-Swift.h"
+#import "hudapp-bridging-header.h"
 
 #pragma mark -
 
@@ -551,7 +552,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     HUD_FONT_WEIGHT = (usesInvertedColor ? UIFontWeightMedium : UIFontWeightRegular);
     HUD_INACTIVE_OPACITY = (usesInvertedColor ? 1.0 : 0.667);
     [_blurView setEffect:(usesInvertedColor ? nil : _blurEffect)];
-    [self.hudTextView setColorInvertEnabled:usesInvertedColor];
     [_lockedView setHidden:usesInvertedColor];
 
     BOOL hideAtSnapshot = [self hideAtSnapshot];

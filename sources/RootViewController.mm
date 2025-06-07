@@ -25,15 +25,6 @@ static const CGFloat _gTopButtonConstraintsConstantRegularPad = 46.f;
 static const CGFloat _gAuthorLabelBottomConstraintConstantCompact = -20.f;
 static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
 
-// 新增的用户默认设置键
-static NSString *const HUDUserDefaultsKeyTextContent = @"HUDUserDefaultsKeyTextContent";
-static NSString *const HUDUserDefaultsKeyTextColor = @"HUDUserDefaultsKeyTextColor";
-static NSString *const HUDUserDefaultsKeyTextSize = @"HUDUserDefaultsKeyTextSize";
-static NSString *const HUDUserDefaultsKeyTextAlignment = @"HUDUserDefaultsKeyTextAlignment";
-static NSString *const HUDUserDefaultsKeyTextAlpha = @"HUDUserDefaultsKeyTextAlpha";
-static NSString *const HUDUserDefaultsKeyBackgroundColor = @"HUDUserDefaultsKeyBackgroundColor";
-static NSString *const HUDUserDefaultsKeyBackgroundAlpha = @"HUDUserDefaultsKeyBackgroundAlpha";
-
 @interface RootViewController () <EditTextSettingsViewControllerDelegate>
 
 @end
