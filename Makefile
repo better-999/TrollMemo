@@ -40,7 +40,7 @@ MainApplication.mm_CCFLAGS += -std=c++14
 
 TrollMemo_SWIFT_BRIDGING_HEADER += supports/hudapp-bridging-header.h
 
-TrollMemo_LDFLAGS += -Flibraries
+TrollMemo_LDFLAGS += -F$(PWD)/libraries
 
 TrollMemo_FRAMEWORKS += CoreGraphics CoreServices QuartzCore IOKit UIKit
 TrollMemo_PRIVATE_FRAMEWORKS += BackBoardServices GraphicsServices SpringBoardServices

@@ -40,6 +40,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>NSHumanReadableCopyright</key>
+	<string></string>
 	<key>NSPrincipalClass</key>
 	<string>HUDMainApplication</string>
 	<key>UIApplicationShortcutItems</key>
