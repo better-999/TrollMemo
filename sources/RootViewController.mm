@@ -3,6 +3,7 @@
 //  TrollMemo
 //
 //  Created by Lessica on 2024/1/24.
+//  Modify by Better on 2025/6/07.
 //
 
 #import <notify.h>
@@ -396,20 +397,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
 {
     [self loadUserDefaults:NO];
     [_userDefaults setObject:@(passthroughMode) forKey:HUDUserDefaultsKeyPassthroughMode];
-    [self saveUserDefaults];
-}
-
-- (BOOL)usesBitrate
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeyUsesBitrate];
-    return mode != nil ? [mode boolValue] : NO;
-}
-
-- (void)setUsesBitrate:(BOOL)usesBitrate
-{
-    [self loadUserDefaults:NO];
-    [_userDefaults setObject:@(usesBitrate) forKey:HUDUserDefaultsKeyUsesBitrate];
     [self saveUserDefaults];
 }
 
