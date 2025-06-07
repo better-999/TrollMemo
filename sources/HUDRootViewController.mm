@@ -15,7 +15,7 @@
 #import "HUDRootViewController.h"
 #import "RootViewController.h"
 #import "TrollMemo-Swift.h"
-#import "hudapp-bridging-header.h"
+#import "../supports/hudapp-bridging-header.h"
 
 #pragma mark -
 
