@@ -75,9 +75,8 @@ before-package::
 after-package::
 	$(ECHO_NOTHING)mkdir -p packages $(THEOS_STAGING_DIR)/Payload$(ECHO_END)
 	$(ECHO_NOTHING)cp -rp $(THEOS_STAGING_DIR)$(THEOS_PACKAGE_INSTALL_PREFIX)/Applications/TrollMemo.app $(THEOS_STAGING_DIR)/Payload$(ECHO_END)
-	$(ECHO_NOTHING)defaults delete $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist CFBundleIconName || true$(ECHO_END)
-	$(ECHO_NOTHING)defaults write $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist CFBundleVersion -string $(shell openssl rand -hex 4)$(ECHO_END)
-	$(ECHO_NOTHING)plutil -convert xml1 $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist$(ECHO_END)
+	# $(ECHO_NOTHING)defaults delete $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist CFBundleIconName || true$(ECHO_END)
+	# $(ECHO_NOTHING)defaults write $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist CFBundleVersion -string $(shell openssl rand -hex 4)$(ECHO_END)
 	$(ECHO_NOTHING)chmod 0644 $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist$(ECHO_END)
 	$(ECHO_NOTHING)cd $(THEOS_STAGING_DIR); zip -qr TrollMemo_${GIT_TAG_SHORT}.tipa Payload; cd -;$(ECHO_END)
 	$(ECHO_NOTHING)mv $(THEOS_STAGING_DIR)/TrollMemo_${GIT_TAG_SHORT}.tipa packages/TrollMemo_${GIT_TAG_SHORT}.tipa$(ECHO_END)
