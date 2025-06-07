@@ -45,7 +45,7 @@ Tested and expected to work on all iOS versions supported by opa334’s TrollSto
 ![preview](screenshots/preview.jpeg)
 
 ## Special Thanks
-
+- [TrollSpeed](https://github.com/Lessica/TrollSpeed) by [@Lessica](https://github.com/Lessica)
 - [KIF](https://github.com/kif-framework/KIF)
 - [SPLarkController](https://github.com/ivanvorobei/SPLarkController) by [@ivanvorobei_](https://twitter.com/ivanvorobei_)
 - [TrollStore](https://github.com/opa334/TrollStore) by [@opa334dev](https://twitter.com/opa334dev)
