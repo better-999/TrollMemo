@@ -1,9 +1,9 @@
-Package: ch.xxtou.hudapp.jb
-Name: TrollMemo JB
+Package: ch.better.trollmemo
+Name: TrollMemo
 Version: 1.12.1
 Section: Tweaks
 Depends: firmware (>= 14.0)
 Architecture: iphoneos-arm
-Author: Lessica <82flex@gmail.com>
+Author: better-999
 Maintainer: Lessica <82flex@gmail.com>
-Description: Troll your speed, but jailbroken.
+Description: Troll your Memo, but jailbroken.

@@ -1,10 +1,10 @@
 # TrollMemo
 
-[![Xcode - Build and Analyze](https://github.com/Lessica/TrollMemo/actions/workflows/build-analyse.yml/badge.svg)](https://github.com/Lessica/TrollMemo/actions/workflows/build-analyse.yml)
-[![Analyse Commands](https://github.com/Lessica/TrollMemo/actions/workflows/analyse-commands.yml/badge.svg)](https://github.com/Lessica/TrollMemo/actions/workflows/analyse-commands.yml)
-[![Build Release](https://github.com/Lessica/TrollMemo/actions/workflows/build-release.yml/badge.svg)](https://github.com/Lessica/TrollMemo/actions/workflows/build-release.yml)
-![Latest Release](https://img.shields.io/github/v/release/Lessica/TrollMemo)
-![MIT License](https://img.shields.io/github/license/Lessica/TrollMemo)
+[![Xcode - Build and Analyze](https://github.com/better-999/TrollMemo/actions/workflows/build-analyse.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-analyse.yml)
+[![Analyse Commands](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml)
+[![Build Release](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml)
+![Latest Release](https://img.shields.io/github/v/release/better-999/TrollMemo)
+![MIT License](https://img.shields.io/github/license/better-999/TrollMemo)
 
 [now-on-havoc]: https://havoc.app/package/TrollMemo 
 
@@ -61,5 +61,5 @@ TrollMemo is [Free Software](https://www.gnu.org/philosophy/free-sw.html) licens
 
 To add a language, create a new `.lproj` folder in `Resources`.
 
-- en/zh-Hans [@Lessica](https://github.com/Lessica)
+- en/zh-Hans [@better-999](https://github.com/better-999)
 - es [@Deci8BelioS](https://github.com/Deci8BelioS)

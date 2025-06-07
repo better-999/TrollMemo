@@ -49,7 +49,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: Lessica/TrollMemo
+          repository: better-999/TrollMemo
           ref: main
           path: TrollMemo
           submodules: recursive

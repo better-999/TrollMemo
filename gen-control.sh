@@ -16,15 +16,15 @@ mkdir -p layout/DEBIAN
 
 # Write the control file
 cat > layout/DEBIAN/control << __EOF__
-Package: ch.xxtou.hudapp.jb
-Name: TrollMemo JB
+Package: ch.better.trollmemo
+Name: TrollMemo
 Version: $VERSION
 Section: Tweaks
 Depends: firmware (>= 14.0)
 Architecture: iphoneos-arm
-Author: Lessica <82flex@gmail.com>
+Author: better-999
 Maintainer: Lessica <82flex@gmail.com>
-Description: Troll your speed, but jailbroken.
+Description: Troll your memo, but jailbroken.
 __EOF__
 
 # Set permissions
