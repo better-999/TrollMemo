@@ -91,6 +91,8 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     }];
     [self.view addSubview:self.backgroundView];
 
+
+    /*
     _topLeftButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [_topLeftButton setTintColor:[UIColor whiteColor]];
     [_topLeftButton addTarget:self action:@selector(tapTopLeftButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -115,7 +117,8 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
         [_topLeftButton.widthAnchor constraintEqualToConstant:40.0f],
         [_topLeftButton.heightAnchor constraintEqualToConstant:40.0f],
     ]];
-
+    */
+    /*
     _topRightButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [_topRightButton setTintColor:[UIColor whiteColor]];
     [_topRightButton addTarget:self action:@selector(tapTopRightButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -139,7 +142,10 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
         [_topRightButton.widthAnchor constraintEqualToConstant:40.0f],
         [_topRightButton.heightAnchor constraintEqualToConstant:40.0f],
     ]];
+    */
 
+
+    /*
     _topCenterButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [_topCenterButton setTintColor:[UIColor whiteColor]];
     [_topCenterButton addTarget:self action:@selector(tapTopCenterButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -163,7 +169,7 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
         [_topCenterButton.widthAnchor constraintEqualToConstant:40.0f],
         [_topCenterButton.heightAnchor constraintEqualToConstant:40.0f],
     ]];
-
+    */
     [self reloadModeButtonState];
 
     _mainButton = [MainButton buttonWithType:UIButtonTypeSystem];
@@ -393,20 +399,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [self saveUserDefaults];
 }
 
-- (BOOL)singleLineMode
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeySingleLineMode];
-    return mode != nil ? [mode boolValue] : NO;
-}
-
-- (void)setSingleLineMode:(BOOL)singleLineMode
-{
-    [self loadUserDefaults:NO];
-    [_userDefaults setObject:@(singleLineMode) forKey:HUDUserDefaultsKeySingleLineMode];
-    [self saveUserDefaults];
-}
-
 - (BOOL)usesBitrate
 {
     [self loadUserDefaults:NO];
@@ -418,20 +410,6 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
 {
     [self loadUserDefaults:NO];
     [_userDefaults setObject:@(usesBitrate) forKey:HUDUserDefaultsKeyUsesBitrate];
-    [self saveUserDefaults];
-}
-
-- (BOOL)usesArrowPrefixes
-{
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeyUsesArrowPrefixes];
-    return mode != nil ? [mode boolValue] : NO;
-}
-
-- (void)setUsesArrowPrefixes:(BOOL)usesArrowPrefixes
-{
-    [self loadUserDefaults:NO];
-    [_userDefaults setObject:@(usesArrowPrefixes) forKey:HUDUserDefaultsKeyUsesArrowPrefixes];
     [self saveUserDefaults];
 }
 
