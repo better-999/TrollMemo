@@ -4,20 +4,20 @@ INSTALL_TARGET_PROCESSES := Preferences
 
 include $(THEOS)/makefiles/common.mk
 
-BUNDLE_NAME += TrollSpeedPrefs
+BUNDLE_NAME += TrollMemoPrefs
 
-TrollSpeedPrefs_FILES += TSPrefsRootListController.m
+TrollMemoPrefs_FILES += TSPrefsRootListController.m
 
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
-TrollSpeedPrefs_FILES += ../libroot/dyn.c
-TrollSpeedPrefs_LIBRARIES += roothide
+TrollMemoPrefs_FILES += ../libroot/dyn.c
+TrollMemoPrefs_LIBRARIES += roothide
 endif
 
-TrollSpeedPrefs_CFLAGS += -fobjc-arc
-TrollSpeedPrefs_CFLAGS += -I../supports/
+TrollMemoPrefs_CFLAGS += -fobjc-arc
+TrollMemoPrefs_CFLAGS += -I../supports/
 
-TrollSpeedPrefs_FRAMEWORKS += UIKit
-TrollSpeedPrefs_PRIVATE_FRAMEWORKS += Preferences
-TrollSpeedPrefs_INSTALL_PATH += /Library/PreferenceBundles
+TrollMemoPrefs_FRAMEWORKS += UIKit
+TrollMemoPrefs_PRIVATE_FRAMEWORKS += Preferences
+TrollMemoPrefs_INSTALL_PATH += /Library/PreferenceBundles
 
 include $(THEOS_MAKE_PATH)/bundle.mk

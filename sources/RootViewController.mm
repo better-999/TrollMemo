@@ -1,6 +1,6 @@
 //
 //  RootViewController.mm
-//  TrollSpeed
+//  TrollMemo
 //
 //  Created by Lessica on 2024/1/24.
 //
@@ -614,7 +614,7 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     if (_isRemoteHUDActive) {
         return;
     }
-    NSString *repoURLString = @"https://trollspeed.app";
+    NSString *repoURLString = @"https://TrollMemo.app";
     NSURL *repoURL = [NSURL URLWithString:repoURLString];
     [[UIApplication sharedApplication] openURL:repoURL options:@{} completionHandler:nil];
 }

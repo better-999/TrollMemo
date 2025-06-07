@@ -50,22 +50,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: Lessica/TrollSpeed
+          repository: Lessica/TrollMemo
           ref: main
-          path: TrollSpeed
+          path: TrollMemo
           submodules: recursive
 
       - name: Setup build environment
         run: |
           echo "Available SDKs: $(find $THEOS/sdks -name "*.sdk" -maxdepth 1 -print)"
           echo "FINALPACKAGE=1" >> $GITHUB_ENV
-          cd $GITHUB_WORKSPACE/TrollSpeed
+          cd $GITHUB_WORKSPACE/TrollMemo
           git fetch --tags
           echo "GIT_TAG=$(git describe --tags --always --abbrev=0)" >> $GITHUB_ENV
 
       - name: Build compilation database
         run: |
-          cd $GITHUB_WORKSPACE/TrollSpeed
+          cd $GITHUB_WORKSPACE/TrollMemo
           ./gen-control.sh ${{ env.GIT_TAG }}
           THEOS_PACKAGE_SCHEME=rootless make commands
           make clean

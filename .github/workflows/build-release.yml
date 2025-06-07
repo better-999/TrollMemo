@@ -49,22 +49,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: Lessica/TrollSpeed
+          repository: Lessica/TrollMemo
           ref: main
-          path: TrollSpeed
+          path: TrollMemo
           submodules: recursive
 
       - name: Setup build environment
         run: |
           echo "Available SDKs: $(find $THEOS/sdks -name "*.sdk" -maxdepth 1 -print)"
           echo "FINALPACKAGE=1" >> $GITHUB_ENV
-          cd $GITHUB_WORKSPACE/TrollSpeed
+          cd $GITHUB_WORKSPACE/TrollMemo
           git fetch --tags
           echo "GIT_TAG=$(git describe --tags --always --abbrev=0)" >> $GITHUB_ENV
 
       - name: Build package
         run: |
-          cd $GITHUB_WORKSPACE/TrollSpeed
+          cd $GITHUB_WORKSPACE/TrollMemo
           ./gen-control.sh ${{ env.GIT_TAG }}
           ./build.sh ${{ env.GIT_TAG }}
           THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package
@@ -73,31 +73,31 @@ jobs:
 
       - name: Collect symbols
         run: |
-          cd $GITHUB_WORKSPACE/TrollSpeed
-          find .theos/obj -name "*.dSYM" -print | zip -r packages/TrollSpeed_${{ env.GIT_TAG }}_symbols.zip -@
+          cd $GITHUB_WORKSPACE/TrollMemo
+          find .theos/obj -name "*.dSYM" -print | zip -r packages/TrollMemo_${{ env.GIT_TAG }}_symbols.zip -@
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: TrollSpeed_${{ env.GIT_TAG }}
+          name: TrollMemo_${{ env.GIT_TAG }}
           path: |
-            TrollSpeed/packages/TrollSpeed_*.tipa
-            TrollSpeed/packages/TrollSpeed+AppIntents16_*.tipa
-            TrollSpeed/packages/ch.xxtou.hudapp.jb_*.deb
+            TrollMemo/packages/TrollMemo_*.tipa
+            TrollMemo/packages/TrollMemo+AppIntents16_*.tipa
+            TrollMemo/packages/ch.xxtou.hudapp.jb_*.deb
 
       - name: Upload symbols
         uses: actions/upload-artifact@v4
         with:
-          name: TrollSpeed_${{ env.GIT_TAG }}_symbols
+          name: TrollMemo_${{ env.GIT_TAG }}_symbols
           path: |
-            TrollSpeed/packages/TrollSpeed_${{ env.GIT_TAG }}_symbols.zip
+            TrollMemo/packages/TrollMemo_${{ env.GIT_TAG }}_symbols.zip
 
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
           token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-          body_path: TrollSpeed/CHANGELOG.md
+          body_path: TrollMemo/CHANGELOG.md
           files: |
-            TrollSpeed/packages/TrollSpeed_*.tipa
-            TrollSpeed/packages/TrollSpeed+AppIntents16_*.tipa
-            TrollSpeed/packages/ch.xxtou.hudapp.jb_*.deb
+            TrollMemo/packages/TrollMemo_*.tipa
+            TrollMemo/packages/TrollMemo+AppIntents16_*.tipa
+            TrollMemo/packages/ch.xxtou.hudapp.jb_*.deb

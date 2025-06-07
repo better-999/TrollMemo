@@ -1,6 +1,6 @@
 //
 //  HUDRootViewController.mm
-//  TrollSpeed
+//  TrollMemo
 //
 //  Created by Lessica on 2024/1/24.
 //
@@ -15,7 +15,7 @@
 #import "HUDPresetPosition.h"
 #import "HUDRootViewController.h"
 #import "HUDBackdropLabel.h"
-#import "TrollSpeed-Swift.h"
+#import "TrollMemo-Swift.h"
 
 #pragma mark -
 
@@ -685,7 +685,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
       isJailbroken = [[NSFileManager defaultManager]
-          fileExistsAtPath:JBROOT_PATH_NSSTRING(@"/Library/PreferenceBundles/TrollSpeedPrefs.bundle")];
+          fileExistsAtPath:JBROOT_PATH_NSSTRING(@"/Library/PreferenceBundles/TrollMemoPrefs.bundle")];
     });
     if (!isJailbroken) {
         return nil;

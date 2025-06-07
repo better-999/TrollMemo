@@ -5,7 +5,7 @@
 	<key>entry</key>
 	<dict>
 		<key>bundle</key>
-		<string>TrollSpeedPrefs</string>
+		<string>TrollMemoPrefs</string>
 		<key>cell</key>
 		<string>PSLinkCell</string>
 		<key>detail</key>
@@ -15,7 +15,7 @@
 		<key>isController</key>
 		<true/>
 		<key>label</key>
-		<string>TrollSpeed</string>
+		<string>TrollMemo</string>
 	</dict>
 </dict>
 </plist>

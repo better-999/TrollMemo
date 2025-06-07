@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>TrollSpeedPrefs</string>
+	<string>TrollMemoPrefs</string>
 	<key>CFBundleIdentifier</key>
 	<string>ch.xxtou.hudapp.prefs</string>
 	<key>CFBundleInfoDictionaryVersion</key>

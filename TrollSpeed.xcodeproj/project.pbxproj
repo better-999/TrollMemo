@@ -108,9 +108,9 @@
 		CC654E072DABD95200D54F83 /* BackBoardServices.Sim.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; path = BackBoardServices.Sim.tbd; sourceTree = "<group>"; };
 		CC654E092DABD95800D54F83 /* GraphicsServices.Sim.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; path = GraphicsServices.Sim.tbd; sourceTree = "<group>"; };
 		CC654E0B2DABD95E00D54F83 /* SpringBoardServices.Sim.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; path = SpringBoardServices.Sim.tbd; sourceTree = "<group>"; };
-		CC654E452DABD9C200D54F83 /* TrollSpeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollSpeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC654E452DABD9C200D54F83 /* TrollMemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollMemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC654E5F2DABE3EB00D54F83 /* libroot_dyn_iphoneos-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libroot_dyn_iphoneos-arm64.a"; sourceTree = "<group>"; };
-		CC711D012B5BF550007235A6 /* TrollSpeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollSpeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC711D012B5BF550007235A6 /* TrollMemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollMemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC711D102B5BF551007235A6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CC711D1E2B5BF5C6007235A6 /* HUDHelper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HUDHelper.mm; sourceTree = "<group>"; };
 		CC711D1F2B5BF5C6007235A6 /* RootViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RootViewController.mm; sourceTree = "<group>"; };
@@ -259,8 +259,8 @@
 		CC711D022B5BF550007235A6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CC711D012B5BF550007235A6 /* TrollSpeed.app */,
-				CC654E452DABD9C200D54F83 /* TrollSpeed.app */,
+				CC711D012B5BF550007235A6 /* TrollMemo.app */,
+				CC654E452DABD9C200D54F83 /* TrollMemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -431,9 +431,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		CC654E0D2DABD9C200D54F83 /* TrollSpeed.Sim */ = {
+		CC654E0D2DABD9C200D54F83 /* TrollMemo.Sim */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollSpeed.Sim" */;
+			buildConfigurationList = CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollMemo.Sim" */;
 			buildPhases = (
 				CC654E0E2DABD9C200D54F83 /* Sources */,
 				CC654E302DABD9C200D54F83 /* Frameworks */,
@@ -443,14 +443,14 @@
 			);
 			dependencies = (
 			);
-			name = TrollSpeed.Sim;
-			productName = TrollSpeed;
-			productReference = CC654E452DABD9C200D54F83 /* TrollSpeed.app */;
+			name = TrollMemo.Sim;
+			productName = TrollMemo;
+			productReference = CC654E452DABD9C200D54F83 /* TrollMemo.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CC711D002B5BF550007235A6 /* TrollSpeed */ = {
+		CC711D002B5BF550007235A6 /* TrollMemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollSpeed" */;
+			buildConfigurationList = CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollMemo" */;
 			buildPhases = (
 				CC711CFD2B5BF550007235A6 /* Sources */,
 				CC711CFE2B5BF550007235A6 /* Frameworks */,
@@ -460,9 +460,9 @@
 			);
 			dependencies = (
 			);
-			name = TrollSpeed;
-			productName = TrollSpeed;
-			productReference = CC711D012B5BF550007235A6 /* TrollSpeed.app */;
+			name = TrollMemo;
+			productName = TrollMemo;
+			productReference = CC711D012B5BF550007235A6 /* TrollMemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -479,7 +479,7 @@
 					};
 				};
 			};
-			buildConfigurationList = CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollSpeed" */;
+			buildConfigurationList = CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollMemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -494,8 +494,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CC711D002B5BF550007235A6 /* TrollSpeed */,
-				CC654E0D2DABD9C200D54F83 /* TrollSpeed.Sim */,
+				CC711D002B5BF550007235A6 /* TrollMemo */,
+				CC654E0D2DABD9C200D54F83 /* TrollMemo.Sim */,
 			);
 		};
 /* End PBXProject section */
@@ -650,7 +650,7 @@
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -665,7 +665,7 @@
 				);
 				MARKETING_VERSION = 1.12.1;
 				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphonesimulator;
 				SUPPORTS_MACCATALYST = NO;
@@ -694,7 +694,7 @@
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -709,7 +709,7 @@
 				);
 				MARKETING_VERSION = 1.12.1;
 				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphonesimulator;
 				SUPPORTS_MACCATALYST = NO;
@@ -783,7 +783,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_MODULE_NAME = TrollSpeed;
+				PRODUCT_MODULE_NAME = TrollMemo;
 				SDKROOT = iphoneos;
 				THEOS = $HOME/theos;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -844,7 +844,7 @@
 				MARKETING_VERSION = 1.12.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_MODULE_NAME = TrollSpeed;
+				PRODUCT_MODULE_NAME = TrollMemo;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				THEOS = $HOME/theos;
@@ -870,7 +870,7 @@
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -885,7 +885,7 @@
 				);
 				MARKETING_VERSION = 1.12.1;
 				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -915,7 +915,7 @@
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -930,7 +930,7 @@
 				);
 				MARKETING_VERSION = 1.12.1;
 				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -946,7 +946,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollSpeed.Sim" */ = {
+		CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollMemo.Sim" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC654E432DABD9C200D54F83 /* Debug */,
@@ -955,7 +955,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollSpeed" */ = {
+		CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollMemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC711D182B5BF551007235A6 /* Debug */,
@@ -964,7 +964,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollSpeed" */ = {
+		CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollMemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC711D1B2B5BF551007235A6 /* Debug */,

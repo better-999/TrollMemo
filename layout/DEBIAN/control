@@ -1,5 +1,5 @@
 Package: ch.xxtou.hudapp.jb
-Name: TrollSpeed JB
+Name: TrollMemo JB
 Version: 1.12.1
 Section: Tweaks
 Depends: firmware (>= 14.0)

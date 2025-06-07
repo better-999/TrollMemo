@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>TrollSpeed</string>
+	<string>TrollMemo</string>
 	<key>CFBundleExecutable</key>
-	<string>TrollSpeed</string>
+	<string>TrollMemo</string>
 	<key>CFBundleIconFile</key>
 	<string>icon.png</string>
 	<key>CFBundleIconName</key>
@@ -17,7 +17,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>TrollSpeed</string>
+	<string>TrollMemo</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -31,7 +31,7 @@
 			<string>ch.xxtou.hudapp</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>trollspeed</string>
+				<string>TrollMemo</string>
 			</array>
 		</dict>
 	</array>
