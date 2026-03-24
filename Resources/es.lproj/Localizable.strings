@@ -86,9 +86,6 @@
 "Hide @snapshot" = "Ocultar en capturas";
 
 /* No comment provided by engineer. */
-"Incoming Only" = "Sólo descarga";
-
-/* No comment provided by engineer. */
 "Inverted" = "Invertido";
 
 /* No comment provided by engineer. */
@@ -119,9 +116,6 @@
 "Pass-through" = "Pass-through";
 
 /* No comment provided by engineer. */
-"Prefixes" = "Prefijos";
-
-/* No comment provided by engineer. */
 "Re-open to apply" = "Reabrir para aplicar";
 
 /* No comment provided by engineer. */
@@ -146,16 +140,7 @@
 "Toggle the network speed HUD." = "Cambia la velocidad de la red HUD.";
 
 /* No comment provided by engineer. */
-"Unit" = "Unid";
-
-/* No comment provided by engineer. */
 "Utility" = "Utilidad";
 
 /* No comment provided by engineer. */
 "You can quit this app now.\nThe HUD will persist on your screen." = "Puedes salir de esta aplicación ahora.\nEl HUD persistirá en tu pantalla.";
-
-/* No comment provided by engineer. */
-"↑↓" = "↑↓";
-
-/* No comment provided by engineer. */
-"▲▼" = "▲▼";

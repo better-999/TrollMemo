@@ -108,14 +108,13 @@
 		CC654E072DABD95200D54F83 /* BackBoardServices.Sim.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; path = BackBoardServices.Sim.tbd; sourceTree = "<group>"; };
 		CC654E092DABD95800D54F83 /* GraphicsServices.Sim.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; path = GraphicsServices.Sim.tbd; sourceTree = "<group>"; };
 		CC654E0B2DABD95E00D54F83 /* SpringBoardServices.Sim.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; path = SpringBoardServices.Sim.tbd; sourceTree = "<group>"; };
-		CC654E452DABD9C200D54F83 /* TrollSpeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollSpeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC654E452DABD9C200D54F83 /* TrollMemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollMemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC654E5F2DABE3EB00D54F83 /* libroot_dyn_iphoneos-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libroot_dyn_iphoneos-arm64.a"; sourceTree = "<group>"; };
-		CC711D012B5BF550007235A6 /* TrollSpeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollSpeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC711D012B5BF550007235A6 /* TrollMemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrollMemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC711D102B5BF551007235A6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CC711D1E2B5BF5C6007235A6 /* HUDHelper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HUDHelper.mm; sourceTree = "<group>"; };
 		CC711D1F2B5BF5C6007235A6 /* RootViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RootViewController.mm; sourceTree = "<group>"; };
 		CC711D202B5BF5C6007235A6 /* HUDMainWindow.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HUDMainWindow.mm; sourceTree = "<group>"; };
-		CC711D212B5BF5C6007235A6 /* HUDPresetPosition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDPresetPosition.h; sourceTree = "<group>"; };
 		CC711D222B5BF5C6007235A6 /* MainApplicationDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MainApplicationDelegate.mm; sourceTree = "<group>"; };
 		CC711D232B5BF5C6007235A6 /* TSEventFetcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TSEventFetcher.h; sourceTree = "<group>"; };
 		CC711D242B5BF5C6007235A6 /* MainApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainApplication.h; sourceTree = "<group>"; };
@@ -259,8 +258,8 @@
 		CC711D022B5BF550007235A6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CC711D012B5BF550007235A6 /* TrollSpeed.app */,
-				CC654E452DABD9C200D54F83 /* TrollSpeed.app */,
+				CC711D012B5BF550007235A6 /* TrollMemo.app */,
+				CC654E452DABD9C200D54F83 /* TrollMemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -289,7 +288,6 @@
 				CC711D2F2B5BF5C6007235A6 /* SPLarkController */,
 				CC8DDA8D2B654D7D001C7C9E /* Intents */,
 				CC711D3F2B5BF5C6007235A6 /* JetsamHelper.h */,
-				CC711D212B5BF5C6007235A6 /* HUDPresetPosition.h */,
 				CC711D482B5BF5C6007235A6 /* HUDApp.mm */,
 				CC711D432B5BF5C6007235A6 /* HUDHelper.h */,
 				CC711D1E2B5BF5C6007235A6 /* HUDHelper.mm */,
@@ -431,9 +429,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		CC654E0D2DABD9C200D54F83 /* TrollSpeed.Sim */ = {
+		CC654E0D2DABD9C200D54F83 /* TrollMemo.Sim */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollSpeed.Sim" */;
+			buildConfigurationList = CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollMemo.Sim" */;
 			buildPhases = (
 				CC654E0E2DABD9C200D54F83 /* Sources */,
 				CC654E302DABD9C200D54F83 /* Frameworks */,
@@ -443,14 +441,14 @@
 			);
 			dependencies = (
 			);
-			name = TrollSpeed.Sim;
-			productName = TrollSpeed;
-			productReference = CC654E452DABD9C200D54F83 /* TrollSpeed.app */;
+			name = TrollMemo.Sim;
+			productName = TrollMemo;
+			productReference = CC654E452DABD9C200D54F83 /* TrollMemo.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CC711D002B5BF550007235A6 /* TrollSpeed */ = {
+		CC711D002B5BF550007235A6 /* TrollMemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollSpeed" */;
+			buildConfigurationList = CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollMemo" */;
 			buildPhases = (
 				CC711CFD2B5BF550007235A6 /* Sources */,
 				CC711CFE2B5BF550007235A6 /* Frameworks */,
@@ -460,9 +458,9 @@
 			);
 			dependencies = (
 			);
-			name = TrollSpeed;
-			productName = TrollSpeed;
-			productReference = CC711D012B5BF550007235A6 /* TrollSpeed.app */;
+			name = TrollMemo;
+			productName = TrollMemo;
+			productReference = CC711D012B5BF550007235A6 /* TrollMemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -479,7 +477,7 @@
 					};
 				};
 			};
-			buildConfigurationList = CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollSpeed" */;
+			buildConfigurationList = CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollMemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -494,8 +492,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CC711D002B5BF550007235A6 /* TrollSpeed */,
-				CC654E0D2DABD9C200D54F83 /* TrollSpeed.Sim */,
+				CC711D002B5BF550007235A6 /* TrollMemo */,
+				CC654E0D2DABD9C200D54F83 /* TrollMemo.Sim */,
 			);
 		};
 /* End PBXProject section */
@@ -649,12 +647,18 @@
 					"$(inherited)",
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/l/Projects/theos/include,
+					/Users/l/Projects/theos/vendor/include,
+					/Users/l/Projects/theos/vendor/include/libroot,
+				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -664,9 +668,10 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = "iphoneos16.5";
 				SUPPORTED_PLATFORMS = iphonesimulator;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -693,12 +698,18 @@
 					"$(inherited)",
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/l/Projects/theos/include,
+					/Users/l/Projects/theos/vendor/include,
+					/Users/l/Projects/theos/vendor/include/libroot,
+				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -708,9 +719,10 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = "iphoneos16.5";
 				SUPPORTED_PLATFORMS = iphonesimulator;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -777,13 +789,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = $THEOS/vendor/include;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.12.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_MODULE_NAME = TrollSpeed;
+				PRODUCT_MODULE_NAME = TrollMemo;
 				SDKROOT = iphoneos;
 				THEOS = $HOME/theos;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -839,12 +851,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = $THEOS/vendor/include;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.12.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_MODULE_NAME = TrollSpeed;
+				PRODUCT_MODULE_NAME = TrollMemo;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				THEOS = $HOME/theos;
@@ -870,11 +882,11 @@
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -884,8 +896,8 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -915,11 +927,11 @@
 					"THEOS_PACKAGE_INSTALL_PREFIX=\\\"\\\"",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TrollSpeed;
+				INFOPLIST_KEY_CFBundleDisplayName = TrollMemo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -929,8 +941,8 @@
 					"$(PROJECT_DIR)/libraries",
 				);
 				MARKETING_VERSION = 1.12.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ch.xxtou.hudapp;
-				PRODUCT_NAME = TrollSpeed;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.better.hudapp;
+				PRODUCT_NAME = TrollMemo;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -946,7 +958,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollSpeed.Sim" */ = {
+		CC654E422DABD9C200D54F83 /* Build configuration list for PBXNativeTarget "TrollMemo.Sim" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC654E432DABD9C200D54F83 /* Debug */,
@@ -955,7 +967,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollSpeed" */ = {
+		CC711CFC2B5BF550007235A6 /* Build configuration list for PBXProject "TrollMemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC711D182B5BF551007235A6 /* Debug */,
@@ -964,7 +976,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollSpeed" */ = {
+		CC711D1A2B5BF551007235A6 /* Build configuration list for PBXNativeTarget "TrollMemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CC711D1B2B5BF551007235A6 /* Debug */,

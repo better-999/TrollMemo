@@ -16,15 +16,15 @@ mkdir -p layout/DEBIAN
 
 # Write the control file
 cat > layout/DEBIAN/control << __EOF__
-Package: ch.xxtou.hudapp.jb
-Name: TrollSpeed JB
+Package: ch.better.trollmemo
+Name: TrollMemo
 Version: $VERSION
 Section: Tweaks
 Depends: firmware (>= 14.0)
 Architecture: iphoneos-arm
-Author: Lessica <82flex@gmail.com>
+Author: better-999
 Maintainer: Lessica <82flex@gmail.com>
-Description: Troll your speed, but jailbroken.
+Description: Troll your memo, but jailbroken.
 __EOF__
 
 # Set permissions
@@ -38,5 +38,5 @@ defaults write $PWD/Resources/Info.plist CFBundleVersion $RAND_BUILD_STR
 plutil -convert xml1 $PWD/Resources/Info.plist
 chmod 0644 $PWD/Resources/Info.plist
 
-XCODE_PROJ_PBXPROJ=$PWD/TrollSpeed.xcodeproj/project.pbxproj
+XCODE_PROJ_PBXPROJ=$PWD/TrollMemo.xcodeproj/project.pbxproj
 sed -i '' "s/MARKETING_VERSION = .*;/MARKETING_VERSION = $VERSION;/g" $XCODE_PROJ_PBXPROJ

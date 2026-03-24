@@ -86,9 +86,6 @@
 "Hide @snapshot" = "Hide @snapshot";
 
 /* No comment provided by engineer. */
-"Incoming Only" = "Incoming Only";
-
-/* No comment provided by engineer. */
 "Inverted" = "Inverted";
 
 /* No comment provided by engineer. */
@@ -101,7 +98,7 @@
 "Large" = "Large";
 
 /* No comment provided by engineer. */
-"Made with ♥ by @GITHUB@Lessica and @GITHUB@jmpews\nTranslation @TRANSLATION@" = "Made with ♥ by @GITHUB@Lessica and @GITHUB@jmpews";
+"Made by @better, Base on @GITHUB@Lessica and @GITHUB@jmpews\nTranslation @TRANSLATION@" = "Made with ♥ by @GITHUB@Lessica and @GITHUB@jmpews";
 
 /* No comment provided by engineer. */
 "Memory Pressure" = "Memory Pressure";
@@ -117,9 +114,6 @@
 
 /* No comment provided by engineer. */
 "Pass-through" = "Pass-through";
-
-/* No comment provided by engineer. */
-"Prefixes" = "Prefixes";
 
 /* No comment provided by engineer. */
 "Re-open to apply" = "Re-open to apply";
@@ -146,16 +140,7 @@
 "Toggle the network speed HUD." = "Toggle the network speed HUD.";
 
 /* No comment provided by engineer. */
-"Unit" = "Unit";
-
-/* No comment provided by engineer. */
 "Utility" = "Utility";
 
 /* No comment provided by engineer. */
 "You can quit this app now.\nThe HUD will persist on your screen." = "You can quit this app now.\nThe HUD will persist on your screen.";
-
-/* No comment provided by engineer. */
-"↑↓" = "↑↓";
-
-/* No comment provided by engineer. */
-"▲▼" = "▲▼";

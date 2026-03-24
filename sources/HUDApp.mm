@@ -1,6 +1,6 @@
 //
 //  HUDApp.mm
-//  TrollSpeed
+//  TrollMemo
 //
 //  Created by Lessica on 2024/1/24.
 //
@@ -17,7 +17,7 @@
 #import "AXEventRepresentation.h"
 #import "UIApplication+Private.h"
 
-#define PID_PATH "/var/mobile/Library/Caches/ch.xxtou.hudapp.pid"
+#define PID_PATH "/var/mobile/Library/Caches/ch.better.hudapp.pid"
 
 static __used
 NSString *mDeviceModel(void) {
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 #if !TARGET_OS_SIMULATOR
         pidPath = JBROOT_PATH_NSSTRING(@"" PID_PATH);
 #else
-        pidPath = [[[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask].firstObject path] stringByAppendingPathComponent:@"ch.xxtou.hudapp.pid"];
+        pidPath = [[[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask].firstObject path] stringByAppendingPathComponent:@"ch.better.hudapp.pid"];
 #endif
 
         if (strcmp(argv[1], "-hud") == 0)

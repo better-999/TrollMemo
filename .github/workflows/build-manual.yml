@@ -1,0 +1,85 @@
+name: Build IPA (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      scheme:
+        description: 'Build scheme (rootless / roothide / default)'
+        required: true
+        default: 'default'
+        type: choice
+        options:
+          - default
+          - rootless
+          - roothide
+
+env:
+  THEOS: ''
+  XCODE_VERSION: '15.4'
+
+jobs:
+  build:
+    name: Build TrollMemo .tipa
+    runs-on: macos-14
+
+    steps:
+      - name: Setup Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Install Homebrew dependencies
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 \
+            brew install dpkg make libplist openssl@3 ldid-procursus
+          echo "/usr/local/opt/make/libexec/gnubin" >> $GITHUB_PATH
+
+      - name: Checkout XXTouchNG/theos
+        uses: actions/checkout@v4
+        with:
+          repository: XXTouchNG/theos
+          ref: 954dfd17fd05544a3bb26b2a25e1930cd228f4ef
+          path: theos
+          submodules: recursive
+
+      - name: Set THEOS env & replace SDKs
+        run: |
+          rm -rf $GITHUB_WORKSPACE/theos/sdks
+          echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
+
+      - name: Checkout theos/sdks
+        uses: actions/checkout@v4
+        with:
+          repository: theos/sdks
+          ref: master
+          path: ${{ env.THEOS }}/sdks
+
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+        with:
+          path: TrollSpeed
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build package
+        run: |
+          cd $GITHUB_WORKSPACE/TrollMemo
+          # Get version tag (fallback to commit sha if no tag)
+          GIT_TAG=$(git describe --tags --always --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
+          echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
+
+          SCHEME="${{ github.event.inputs.scheme }}"
+          if [ "$SCHEME" = "roothide" ]; then
+            THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package
+          elif [ "$SCHEME" = "rootless" ]; then
+            THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 make clean package
+          else
+            FINALPACKAGE=1 make clean package
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrollMemo${{ env.GIT_TAG }}_${{ github.event.inputs.scheme }}
+          path: TrollMemo/packages/*.tipa
+          if-no-files-found: error

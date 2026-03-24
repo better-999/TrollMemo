@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>TrollSpeedPrefs</string>
+	<string>TrollMemoPrefs</string>
 	<key>CFBundleIdentifier</key>
-	<string>ch.xxtou.hudapp.prefs</string>
+	<string>ch.better.hudapp.prefs</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>

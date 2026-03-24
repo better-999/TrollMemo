@@ -1,6 +1,6 @@
 //
 //  MainApplicationDelegate.mm
-//  TrollSpeed
+//  TrollMemo
 //
 //  Created by Lessica on 2024/1/24.
 //
@@ -24,7 +24,7 @@
 
 - (BOOL)application:(UIApplication *)application openURL:(nonnull NSURL *)url options:(nonnull NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-    if ([url.scheme isEqualToString:@"trollspeed"]) {
+    if ([url.scheme isEqualToString:@"TrollMemo"]) {
         if ([url.host isEqualToString:@"toggle"]) {
             [self setupAndNotifyToggleHUDAfterLaunchWithAction:nil];
             return YES;
@@ -41,7 +41,7 @@
 
 - (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL succeeded))completionHandler
 {
-    if ([shortcutItem.type isEqualToString:@"ch.xxtou.shortcut.toggle-hud"])
+    if ([shortcutItem.type isEqualToString:@"ch.better.shortcut.toggle-hud"])
     {
         [self setupAndNotifyToggleHUDAfterLaunchWithAction:nil];
     }

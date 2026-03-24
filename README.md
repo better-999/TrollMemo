@@ -1,12 +1,12 @@
-# TrollSpeed
+# TrollMemo
 
-[![Xcode - Build and Analyze](https://github.com/Lessica/TrollSpeed/actions/workflows/build-analyse.yml/badge.svg)](https://github.com/Lessica/TrollSpeed/actions/workflows/build-analyse.yml)
-[![Analyse Commands](https://github.com/Lessica/TrollSpeed/actions/workflows/analyse-commands.yml/badge.svg)](https://github.com/Lessica/TrollSpeed/actions/workflows/analyse-commands.yml)
-[![Build Release](https://github.com/Lessica/TrollSpeed/actions/workflows/build-release.yml/badge.svg)](https://github.com/Lessica/TrollSpeed/actions/workflows/build-release.yml)
-![Latest Release](https://img.shields.io/github/v/release/Lessica/TrollSpeed)
-![MIT License](https://img.shields.io/github/license/Lessica/TrollSpeed)
+[![Xcode - Build and Analyze](https://github.com/better-999/TrollMemo/actions/workflows/build-analyse.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-analyse.yml)
+[![Analyse Commands](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml)
+[![Build Release](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml)
+![Latest Release](https://img.shields.io/github/v/release/better-999/TrollMemo)
+![MIT License](https://img.shields.io/github/license/better-999/TrollMemo)
 
-[now-on-havoc]: https://havoc.app/package/trollspeed 
+[now-on-havoc]: https://havoc.app/package/TrollMemo 
 
 [<img width="150" src="https://docs.havoc.app/img/badges/get_square.svg" />][now-on-havoc]
 
@@ -33,7 +33,7 @@ Tested and expected to work on all iOS versions supported by opa334’s TrollSto
 ## Caveats
 
 - Spawn with root privileges is **required**. Otherwise, the HUD process will be killed by SpringBoard when unlocking device.
-- TrollSpeed will observe its app removal and terminate its HUD.
+- TrollMemo will observe its app removal and terminate its HUD.
 
 ## Notes
 
@@ -45,7 +45,7 @@ Tested and expected to work on all iOS versions supported by opa334’s TrollSto
 ![preview](screenshots/preview.jpeg)
 
 ## Special Thanks
-
+- [TrollSpeed](https://github.com/Lessica/TrollSpeed) by [@Lessica](https://github.com/Lessica)
 - [KIF](https://github.com/kif-framework/KIF)
 - [SPLarkController](https://github.com/ivanvorobei/SPLarkController) by [@ivanvorobei_](https://twitter.com/ivanvorobei_)
 - [TrollStore](https://github.com/opa334/TrollStore) by [@opa334dev](https://twitter.com/opa334dev)
@@ -55,11 +55,11 @@ Tested and expected to work on all iOS versions supported by opa334’s TrollSto
 
 ## License
 
-TrollSpeed is [Free Software](https://www.gnu.org/philosophy/free-sw.html) licensed under the [GNU Affero General Public License](LICENSE).
+TrollMemo is [Free Software](https://www.gnu.org/philosophy/free-sw.html) licensed under the [GNU Affero General Public License](LICENSE).
 
 ### Localization
 
 To add a language, create a new `.lproj` folder in `Resources`.
 
-- en/zh-Hans [@Lessica](https://github.com/Lessica)
+- en/zh-Hans [@better-999](https://github.com/better-999)
 - es [@Deci8BelioS](https://github.com/Deci8BelioS)

@@ -86,9 +86,6 @@
 "Hide @snapshot" = "截图时隐藏";
 
 /* No comment provided by engineer. */
-"Incoming Only" = "仅显示下载";
-
-/* No comment provided by engineer. */
 "Inverted" = "实时反色";
 
 /* No comment provided by engineer. */
@@ -101,7 +98,7 @@
 "Large" = "较大";
 
 /* No comment provided by engineer. */
-"Made with ♥ by @GITHUB@Lessica and @GITHUB@jmpews\nTranslation @TRANSLATION@" = "由 @GITHUB@Lessica 和 @GITHUB@jmpews 倾情制作";
+"Made by @better, Base on @GITHUB@Lessica and @GITHUB@jmpews\nTranslation @TRANSLATION@" = "由 @GITHUB@Lessica 和 @GITHUB@jmpews 倾情制作";
 
 /* No comment provided by engineer. */
 "Memory Pressure" = "内存压力测试";
@@ -117,9 +114,6 @@
 
 /* No comment provided by engineer. */
 "Pass-through" = "触摸穿透";
-
-/* No comment provided by engineer. */
-"Prefixes" = "前缀";
 
 /* No comment provided by engineer. */
 "Re-open to apply" = "重启以应用更改";
@@ -146,16 +140,7 @@
 "Toggle the network speed HUD." = "打开/关闭网速悬浮窗。";
 
 /* No comment provided by engineer. */
-"Unit" = "单位";
-
-/* No comment provided by engineer. */
 "Utility" = "实用工具";
 
 /* No comment provided by engineer. */
 "You can quit this app now.\nThe HUD will persist on your screen." = "你现在可以退出这个应用了，\n悬浮窗将会一直显示在你的屏幕上。";
-
-/* No comment provided by engineer. */
-"↑↓" = "↑↓";
-
-/* No comment provided by engineer. */
-"▲▼" = "▲▼";

@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CC654E0D2DABD9C200D54F83"
-               BuildableName = "TrollSpeed.app"
-               BlueprintName = "TrollSpeed.Sim"
-               ReferencedContainer = "container:TrollSpeed.xcodeproj">
+               BuildableName = "TrollMemo.app"
+               BlueprintName = "TrollMemo.Sim"
+               ReferencedContainer = "container:TrollMemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CC654E0D2DABD9C200D54F83"
-            BuildableName = "TrollSpeed.app"
-            BlueprintName = "TrollSpeed.Sim"
-            ReferencedContainer = "container:TrollSpeed.xcodeproj">
+            BuildableName = "TrollMemo.app"
+            BlueprintName = "TrollMemo.Sim"
+            ReferencedContainer = "container:TrollMemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CC654E0D2DABD9C200D54F83"
-            BuildableName = "TrollSpeed.app"
-            BlueprintName = "TrollSpeed.Sim"
-            ReferencedContainer = "container:TrollSpeed.xcodeproj">
+            BuildableName = "TrollMemo.app"
+            BlueprintName = "TrollMemo.Sim"
+            ReferencedContainer = "container:TrollMemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

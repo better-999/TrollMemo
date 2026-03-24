@@ -1,6 +1,6 @@
 //
 //  hudapp-bridging-header.h
-//  TrollSpeed
+//  TrollMemo
 //
 //  Created by Lessica on 2024/1/25.
 //
@@ -19,9 +19,6 @@ static HUDUserDefaultsKey const HUDUserDefaultsKeySelectedModeLandscape = @"sele
 static HUDUserDefaultsKey const HUDUserDefaultsKeyCurrentPositionY = @"currentPositionY";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyCurrentLandscapePositionY = @"currentLandscapePositionY";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyPassthroughMode = @"passthroughMode";
-static HUDUserDefaultsKey const HUDUserDefaultsKeySingleLineMode = @"singleLineMode";
-static HUDUserDefaultsKey const HUDUserDefaultsKeyUsesBitrate = @"usesBitrate";
-static HUDUserDefaultsKey const HUDUserDefaultsKeyUsesArrowPrefixes = @"usesArrowPrefixes";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyUsesLargeFont = @"usesLargeFont";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyUsesRotation = @"usesRotation";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyUsesInvertedColor = @"usesInvertedColor";
@@ -33,5 +30,13 @@ static HUDUserDefaultsKey const HUDUserDefaultsKeyRealCustomFontSize = @"realCus
 static HUDUserDefaultsKey const HUDUserDefaultsKeyUsesCustomOffset = @"usesCustomOffset";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyRealCustomOffsetX = @"realCustomOffsetX";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyRealCustomOffsetY = @"realCustomOffsetY";
+
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextContent = @"HUDUserDefaultsKeyTextContent";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextColor = @"HUDUserDefaultsKeyTextColor";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextSize = @"HUDUserDefaultsKeyTextSize";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextAlignment = @"HUDUserDefaultsKeyTextAlignment";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextAlpha = @"HUDUserDefaultsKeyTextAlpha";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyBackgroundColor = @"HUDUserDefaultsKeyBackgroundColor";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyBackgroundAlpha = @"HUDUserDefaultsKeyBackgroundAlpha";
 
 #endif /* hudapp_bridging_header_h */

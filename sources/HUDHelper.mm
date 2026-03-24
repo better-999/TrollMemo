@@ -1,6 +1,6 @@
 //
 //  HUDHelper.mm
-//  TrollSpeed
+//  TrollMemo
 //
 //  Created by Lessica on 2024/1/24.
 //
@@ -63,7 +63,7 @@ BOOL IsHUDEnabled(void)
     return WEXITSTATUS(status) != 0;
 }
 
-#define LAUNCH_DAEMON_PATH JBROOT_PATH_CSTRING("/Library/LaunchDaemons/ch.xxtou.hudservices.plist")
+#define LAUNCH_DAEMON_PATH JBROOT_PATH_CSTRING("/Library/LaunchDaemons/ch.better.hudservices.plist")
 
 void SetHUDEnabled(BOOL isEnabled)
 {
