@@ -48,17 +48,35 @@ jobs:
           rm -rf $GITHUB_WORKSPACE/theos/sdks
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
 
-      - name: List available SDKs
-        run: |
-          ls -la ~/Library/Developer/Xcode/Sdks/ 2>/dev/null || echo "No SDKs in ~/Library/Developer/Xcode/Sdks/"
-          xcrun --show-sdk-version --sdk iphoneos 2>/dev/null || echo "Cannot get SDK version"
-
       - name: Checkout theos/sdks
         uses: actions/checkout@v4
         with:
           repository: theos/sdks
           ref: master
           path: ${{ env.THEOS }}/sdks
+
+      - name: List available SDKs
+        run: |
+          echo "Available Xcode SDKs:"
+          ls -la ~/Library/Developer/Xcode/Sdks/ 2>/dev/null || echo "No SDKs in ~/Library/Developer/Xcode/Sdks/"
+          echo ""
+          echo "Default iOS SDK:"
+          xcrun --show-sdk-version --sdk iphoneos 2>/dev/null || echo "Cannot get SDK version"
+          echo ""
+          echo "Available iOS SDKs in theos:"
+          ls $THEOS/sdks/ 2>/dev/null || echo "No SDKs in theos/sdks/"
+
+      - name: Detect and set SDK version
+        run: |
+          # Try to detect available SDK from theos/sdks
+          DETECTED_SDK=$(ls $THEOS/sdks/*.sdk 2>/dev/null | head -1 | xargs basename 2>/dev/null | sed 's/iPhoneOS//' | sed 's/.sdk//')
+          if [ -n "$DETECTED_SDK" ]; then
+            echo "Detected SDK: iPhoneOS${DETECTED_SDK}.sdk"
+            echo "SDK_VERSION=${DETECTED_SDK}" >> $GITHUB_ENV
+          else
+            echo "Using default SDK: 17.4"
+            echo "SDK_VERSION=17.4" >> $GITHUB_ENV
+          fi
 
       - name: Checkout this repo
         uses: actions/checkout@v4
@@ -68,12 +86,15 @@ jobs:
           fetch-depth: 0
 
       - name: Build package
+        env:
+          SDK_VERSION: ${{ env.SDK_VERSION }}
         run: |
           cd $GITHUB_WORKSPACE/project
           
           echo "=== Build Environment ==="
           echo "Current directory: $(pwd)"
           echo "THEOS path: $THEOS"
+          echo "SDK_VERSION: $SDK_VERSION"
           echo "Files in directory:"
           ls -la
           echo "======================="
@@ -86,11 +107,11 @@ jobs:
           echo "Building with scheme: $SCHEME"
           
           if [ "$SCHEME" = "roothide" ]; then
-            THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            THEOS_PACKAGE_SCHEME=roothide SDKVERSION=$SDK_VERSION TARGET="iphone:clang:$SDK_VERSION:14.0" FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           elif [ "$SCHEME" = "rootless" ]; then
-            THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            THEOS_PACKAGE_SCHEME=rootless SDKVERSION=$SDK_VERSION TARGET="iphone:clang:$SDK_VERSION:14.0" FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           else
-            FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            SDKVERSION=$SDK_VERSION TARGET="iphone:clang:$SDK_VERSION:14.0" FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           fi
           
           echo "=== Build Log (last 100 lines) ==="
