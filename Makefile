@@ -11,7 +11,7 @@ INSTALL_PATH = /Applications/TrollMemo.app
 
 include $(THEOS)/makefiles/common.mk
 
-GIT_TAG_SHORT := $(shell git describe --tags --always --abbrev=0)
+GIT_TAG_SHORT := $(shell git describe --tags --always --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
 APPLICATION_NAME := TrollMemo
 
 TrollMemo_USE_MODULES := 0
@@ -78,7 +78,7 @@ after-package::
 	# $(ECHO_NOTHING)defaults delete $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist CFBundleIconName || true$(ECHO_END)
 	# $(ECHO_NOTHING)defaults write $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist CFBundleVersion -string $(shell openssl rand -hex 4)$(ECHO_END)
 	$(ECHO_NOTHING)chmod 0644 $(THEOS_STAGING_DIR)/Payload/TrollMemo.app/Info.plist$(ECHO_END)
-	$(ECHO_NOTHING)cd $(THEOS_STAGING_DIR); zip -qr TrollMemo_${GIT_TAG_SHORT}.tipa Payload; cd -;$(ECHO_END)
-	$(ECHO_NOTHING)mv $(THEOS_STAGING_DIR)/TrollMemo_${GIT_TAG_SHORT}.tipa packages/TrollMemo_${GIT_TAG_SHORT}.tipa$(ECHO_END)
+	$(ECHO_NOTHING)cd $(THEOS_STAGING_DIR); zip -qr TrollMemo_$(GIT_TAG_SHORT).tipa Payload; cd -;$(ECHO_END)
+	$(ECHO_NOTHING)mv $(THEOS_STAGING_DIR)/TrollMemo_$(GIT_TAG_SHORT).tipa packages/TrollMemo_$(GIT_TAG_SHORT).tipa$(ECHO_END)
 
 THEOS_PLATFORM_DPKG_DEB_COMPRESSION = gzip

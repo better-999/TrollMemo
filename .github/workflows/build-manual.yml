@@ -16,6 +16,7 @@ on:
 env:
   THEOS: ''
   XCODE_VERSION: '15.4'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build:
@@ -80,11 +81,22 @@ jobs:
           echo "Building with scheme: $SCHEME"
           
           if [ "$SCHEME" = "roothide" ]; then
-            THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package
+            THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           elif [ "$SCHEME" = "rootless" ]; then
-            THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 make clean package
+            THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           else
-            FINALPACKAGE=1 make clean package
+            FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+          fi
+          
+          echo "=== Build Log (last 100 lines) ==="
+          tail -100 build.log
+          echo "==================================="
+          
+          # Check for errors
+          if grep -q "error:" build.log; then
+            echo "=== Compilation Errors Found ==="
+            grep -A2 "error:" build.log
+            exit 1
           fi
           
           echo "=== Build Complete ==="
@@ -96,5 +108,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: TrollMemo${{ env.GIT_TAG }}_${{ github.event.inputs.scheme }}
-          path: project/packages/*.tipa
+          path: |
+            project/packages/*.tipa
+            project/build.log
           if-no-files-found: error
