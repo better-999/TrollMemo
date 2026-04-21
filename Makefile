@@ -1,6 +1,6 @@
 ARCHS := arm64  # arm64e
-SDKVERSION = 15.5
-TARGET := iphone:clang:15.5:14.0
+SDKVERSION = 17.0
+TARGET := iphone:clang:17.0:14.0
 # TARGET := iphone:15.5:latest
 INSTALL_TARGET_PROCESSES := TrollMemo
 ENT_PLIST := $(PWD)/supports/entitlements.plist
