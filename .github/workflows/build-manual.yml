@@ -48,6 +48,11 @@ jobs:
           rm -rf $GITHUB_WORKSPACE/theos/sdks
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
 
+      - name: List available SDKs
+        run: |
+          ls -la ~/Library/Developer/Xcode/Sdks/ 2>/dev/null || echo "No SDKs in ~/Library/Developer/Xcode/Sdks/"
+          xcrun --show-sdk-version --sdk iphoneos 2>/dev/null || echo "Cannot get SDK version"
+
       - name: Checkout theos/sdks
         uses: actions/checkout@v4
         with:
@@ -102,6 +107,22 @@ jobs:
           echo "=== Build Complete ==="
           echo "Packages directory:"
           ls -la packages/ || echo "WARNING: packages directory not found!"
+          echo ""
+          echo "=== Checking .tipa file ==="
+          if [ -f "packages/"*.tipa ]; then
+            TIPAFILE=$(ls packages/*.tipa 2>/dev/null | head -1)
+            if [ -n "$TIPAFILE" ]; then
+              SIZE=$(stat -f%z "$TIPAFILE" 2>/dev/null || stat -c%s "$TIPAFILE" 2>/dev/null)
+              echo "Tipa file: $TIPAFILE"
+              echo "File size: $SIZE bytes"
+              if [ "$SIZE" -lt 10000 ]; then
+                echo "WARNING: File size seems too small! Checking contents:"
+                unzip -l "$TIPAFILE" || echo "Cannot list zip contents"
+              fi
+            fi
+          else
+            echo "ERROR: No .tipa file found!"
+          fi
           echo "===================="
 
       - name: Upload artifacts
