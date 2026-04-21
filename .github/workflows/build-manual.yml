@@ -43,40 +43,58 @@ jobs:
           path: theos
           submodules: recursive
 
-      - name: Set THEOS env & replace SDKs
+      - name: Set THEOS env
         run: |
-          rm -rf $GITHUB_WORKSPACE/theos/sdks
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
 
-      - name: Checkout theos/sdks
-        uses: actions/checkout@v4
-        with:
-          repository: theos/sdks
-          ref: master
-          path: ${{ env.THEOS }}/sdks
-
-      - name: List available SDKs
+      - name: Setup iOS SDK for theos
         run: |
-          echo "Available Xcode SDKs:"
-          ls -la ~/Library/Developer/Xcode/Sdks/ 2>/dev/null || echo "No SDKs in ~/Library/Developer/Xcode/Sdks/"
-          echo ""
-          echo "Default iOS SDK:"
-          xcrun --show-sdk-version --sdk iphoneos 2>/dev/null || echo "Cannot get SDK version"
-          echo ""
-          echo "Available iOS SDKs in theos:"
-          ls $THEOS/sdks/ 2>/dev/null || echo "No SDKs in theos/sdks/"
-
-      - name: Detect and set SDK version
-        run: |
-          # Try to detect available SDK from theos/sdks
-          DETECTED_SDK=$(ls $THEOS/sdks/*.sdk 2>/dev/null | head -1 | xargs basename 2>/dev/null | sed 's/iPhoneOS//' | sed 's/.sdk//')
-          if [ -n "$DETECTED_SDK" ]; then
-            echo "Detected SDK: iPhoneOS${DETECTED_SDK}.sdk"
-            echo "SDK_VERSION=${DETECTED_SDK}" >> $GITHUB_ENV
-          else
-            echo "Using default SDK: 17.4"
-            echo "SDK_VERSION=17.4" >> $GITHUB_ENV
+          echo "=== Detecting Xcode iOS SDK ==="
+          
+          # Get Xcode SDK path
+          XCODE_SDK_PATH=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs
+          
+          echo "Xcode SDK Path: $XCODE_SDK_PATH"
+          
+          # List all available SDKs in Xcode
+          echo "Available SDKs in Xcode:"
+          ls -la "$XCODE_SDK_PATH/" || echo "No SDKs found"
+          
+          # Find the actual SDK directory name
+          SDK_DIR=$(ls "$XCODE_SDK_PATH/" | grep -i "iphoneos" | head -1)
+          if [ -z "$SDK_DIR" ]; then
+            echo "ERROR: No iPhoneOS SDK found in Xcode!"
+            exit 1
           fi
+          
+          echo "Found SDK directory: $SDK_DIR"
+          
+          # Extract version from directory name (e.g., iPhoneOS17.4.sdk -> 17.4)
+          SDK_VERSION=$(echo "$SDK_DIR" | sed 's/iPhoneOS//' | sed 's/.sdk//')
+          echo "Detected SDK Version: $SDK_VERSION"
+          
+          # Create symlink in theos/sdks with correct name
+          mkdir -p $THEOS/sdks
+          rm -f "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
+          ln -sf "$XCODE_SDK_PATH/$SDK_DIR" "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
+          
+          echo "Created symlink: $THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
+          ls -la $THEOS/sdks/
+          
+          # Verify symlink target exists
+          if [ -L "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk" ]; then
+            TARGET=$(readlink "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk")
+            echo "Symlink target: $TARGET"
+            if [ -e "$TARGET" ]; then
+              echo "Symlink target exists!"
+            else
+              echo "ERROR: Symlink target does not exist!"
+              exit 1
+            fi
+          fi
+          
+          # Set SDK_VERSION for build step
+          echo "SDK_VERSION=${SDK_VERSION}" >> $GITHUB_ENV
 
       - name: Checkout this repo
         uses: actions/checkout@v4
@@ -86,8 +104,6 @@ jobs:
           fetch-depth: 0
 
       - name: Build package
-        env:
-          SDK_VERSION: ${{ env.SDK_VERSION }}
         run: |
           cd $GITHUB_WORKSPACE/project
           
@@ -107,11 +123,11 @@ jobs:
           echo "Building with scheme: $SCHEME"
           
           if [ "$SCHEME" = "roothide" ]; then
-            THEOS_PACKAGE_SCHEME=roothide SDKVERSION=$SDK_VERSION TARGET="iphone:clang:$SDK_VERSION:14.0" FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           elif [ "$SCHEME" = "rootless" ]; then
-            THEOS_PACKAGE_SCHEME=rootless SDKVERSION=$SDK_VERSION TARGET="iphone:clang:$SDK_VERSION:14.0" FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           else
-            SDKVERSION=$SDK_VERSION TARGET="iphone:clang:$SDK_VERSION:14.0" FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            FINALPACKAGE=1 make clean package 2>&1 | tee build.log
           fi
           
           echo "=== Build Log (last 100 lines) ==="
