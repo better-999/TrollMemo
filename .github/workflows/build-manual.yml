@@ -31,7 +31,7 @@ jobs:
       - name: Install Homebrew dependencies
         run: |
           HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 \
-            brew install dpkg make libplist openssl@3 ldid-procursus
+            brew install dpkg make libplist openssl@3 ldid-procursus zip
           echo "/usr/local/opt/make/libexec/gnubin" >> $GITHUB_PATH
 
       - name: Checkout XXTouchNG/theos
@@ -57,18 +57,28 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
         with:
-          path: TrollSpeed
+          path: project
           submodules: recursive
           fetch-depth: 0
 
       - name: Build package
         run: |
-          cd $GITHUB_WORKSPACE/TrollMemo
+          cd $GITHUB_WORKSPACE/project
+          
+          echo "=== Build Environment ==="
+          echo "Current directory: $(pwd)"
+          echo "THEOS path: $THEOS"
+          echo "Files in directory:"
+          ls -la
+          echo "======================="
+          
           # Get version tag (fallback to commit sha if no tag)
           GIT_TAG=$(git describe --tags --always --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
           echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
 
           SCHEME="${{ github.event.inputs.scheme }}"
+          echo "Building with scheme: $SCHEME"
+          
           if [ "$SCHEME" = "roothide" ]; then
             THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package
           elif [ "$SCHEME" = "rootless" ]; then
@@ -76,10 +86,15 @@ jobs:
           else
             FINALPACKAGE=1 make clean package
           fi
+          
+          echo "=== Build Complete ==="
+          echo "Packages directory:"
+          ls -la packages/ || echo "WARNING: packages directory not found!"
+          echo "===================="
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: TrollMemo${{ env.GIT_TAG }}_${{ github.event.inputs.scheme }}
-          path: TrollMemo/packages/*.tipa
+          path: project/packages/*.tipa
           if-no-files-found: error
