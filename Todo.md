@@ -4,8 +4,9 @@
 TrollSpeed可以正常打包ipa并使用巨魔商店安装
 TrollMemo打包ipa后，却没法通过巨魔商店安装。
 目前这个项目版本回退到了最初始的状态。
-而@examples\TrollMemo 里面是之前失败的改造代码
+而@examples\TrollMemo 里面是之前失败的改造代码。
 @examples\TrollMemo里面的改造，参考的一个非开源的ipa包：XLsnowState.ipa，但是它的进程控制与桌面文字显示，总是被后台杀掉了。没有TrollSpeed.ipa显示的那么稳定。
+打包方式是使用的：@examples\TrollMemo\.github\workflows\build-manual.yml 在github里打包的。
 这几个是XLsnowState.ipa的界面参考：@examples\20260616104839_1_84.jpg，@examples\20260616104840_2_84.jpg，@examples\20260616104841_3_84.jpg，红色的字就是固定在界面保持不动的，类似TrollSpeed的流量显示。但是我只需要文字。
 现在的问题是：
 1. TrollSpeed只能在桌面显示流量，但是我需要的是文字，而且这个的进程非常稳定，不会被杀进程。
