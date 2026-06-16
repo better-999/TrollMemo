@@ -38,5 +38,10 @@ static HUDUserDefaultsKey const HUDUserDefaultsKeyTextAlignment = @"HUDUserDefau
 static HUDUserDefaultsKey const HUDUserDefaultsKeyTextAlpha = @"HUDUserDefaultsKeyTextAlpha";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyBackgroundColor = @"HUDUserDefaultsKeyBackgroundColor";
 static HUDUserDefaultsKey const HUDUserDefaultsKeyBackgroundAlpha = @"HUDUserDefaultsKeyBackgroundAlpha";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyTextVerticalPosition = @"HUDUserDefaultsKeyTextVerticalPosition";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyPortraitOffsetX = @"HUDUserDefaultsKeyPortraitOffsetX";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyPortraitOffsetY = @"HUDUserDefaultsKeyPortraitOffsetY";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyLandscapeOffsetX = @"HUDUserDefaultsKeyLandscapeOffsetX";
+static HUDUserDefaultsKey const HUDUserDefaultsKeyLandscapeOffsetY = @"HUDUserDefaultsKeyLandscapeOffsetY";
 
 #endif /* hudapp_bridging_header_h */

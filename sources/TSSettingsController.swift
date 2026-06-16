@@ -38,20 +38,24 @@ import UIKit
         super.viewDidLayoutSubviews()
     }
 
+    private var visibleSettings: [TSSettingsIndex] {
+        embeddedInEditSheet ? TSSettingsIndex.embeddedEditCases : TSSettingsIndex.allCases
+    }
+
     open override func settingsCount() -> Int {
-        return TSSettingsIndex.allCases.count
+        return visibleSettings.count
     }
 
     open override func settingTitle(index: Int, highlighted: Bool) -> String {
-        return TSSettingsIndex.allCases[index].title
+        return visibleSettings[index].title
     }
 
     open override func settingSubtitle(index: Int, highlighted: Bool) -> String? {
-        return TSSettingsIndex.allCases[index].subtitle(highlighted: highlighted, restartRequired: restartRequired)
+        return visibleSettings[index].subtitle(highlighted: highlighted, restartRequired: restartRequired)
     }
 
     private func settingKey(index: Int) -> String {
-        return TSSettingsIndex.allCases[index].key
+        return visibleSettings[index].key
     }
 
     open override func settingHighlighted(index: Int) -> Bool {

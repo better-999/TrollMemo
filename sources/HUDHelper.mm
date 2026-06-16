@@ -10,6 +10,7 @@
 #import <mach-o/dyld.h>
 #import <unistd.h>
 #import <signal.h>
+#import <errno.h>
 
 #import "HUDHelper.h"
 #import "NSUserDefaults+Private.h"
@@ -104,7 +105,12 @@ static BOOL IsHUDRunningFromPIDFile(void)
         return NO;
     }
 
-    return kill(pid, 0) == 0;
+    int rc = kill(pid, 0);
+    if (rc == 0) {
+        return YES;
+    }
+    // HUD 以 root 运行时，mobile 主 App 可能收到 EPERM，但进程仍在
+    return errno == EPERM;
 }
 
 BOOL IsHUDEnabled(void)

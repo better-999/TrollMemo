@@ -21,9 +21,14 @@
 @property (nonatomic, strong) UIColorWell *textColorWell;
 @property (nonatomic, strong) UIStepper *textSizeStepper;
 @property (nonatomic, strong) UISegmentedControl *textAlignmentSegmentedControl;
+@property (nonatomic, strong) UISegmentedControl *textVerticalSegmentedControl;
 @property (nonatomic, strong) UISlider *textAlphaSlider;
 @property (nonatomic, strong) UIColorWell *backgroundColorWell;
 @property (nonatomic, strong) UISlider *backgroundAlphaSlider;
+@property (nonatomic, strong) UISlider *portraitOffsetXSlider;
+@property (nonatomic, strong) UISlider *portraitOffsetYSlider;
+@property (nonatomic, strong) UISlider *landscapeOffsetXSlider;
+@property (nonatomic, strong) UISlider *landscapeOffsetYSlider;
 @property (nonatomic, strong) UILabel *behaviorSectionLabel;
 @property (nonatomic, strong) UIView *behaviorSettingsContainer;
 @property (nonatomic, strong) TSSettingsController *behaviorSettingsController;
@@ -109,6 +114,20 @@
     [_textAlignmentSegmentedControl addTarget:self action:@selector(segmentedControlDidChange:) forControlEvents:UIControlEventValueChanged];
     [_contentView addSubview:_textAlignmentSegmentedControl];
 
+    UILabel *textVerticalLabel = [[UILabel alloc] init];
+    textVerticalLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    textVerticalLabel.text = NSLocalizedString(@"Text Vertical", nil);
+    [_contentView addSubview:textVerticalLabel];
+
+    _textVerticalSegmentedControl = [[UISegmentedControl alloc] initWithItems:@[NSLocalizedString(@"Top", nil), NSLocalizedString(@"Middle", nil), NSLocalizedString(@"Bottom", nil)]];
+    _textVerticalSegmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
+    _textVerticalSegmentedControl.selectedSegmentIndex = [[savedSettings objectForKey:HUDUserDefaultsKeyTextVerticalPosition] integerValue];
+    if (_textVerticalSegmentedControl.selectedSegmentIndex < 0 || _textVerticalSegmentedControl.selectedSegmentIndex > 2) {
+        _textVerticalSegmentedControl.selectedSegmentIndex = 0;
+    }
+    [_textVerticalSegmentedControl addTarget:self action:@selector(segmentedControlDidChange:) forControlEvents:UIControlEventValueChanged];
+    [_contentView addSubview:_textVerticalSegmentedControl];
+
     UILabel *textAlphaLabel = [[UILabel alloc] init];
     textAlphaLabel.translatesAutoresizingMaskIntoConstraints = NO;
     textAlphaLabel.text = NSLocalizedString(@"文字透明度", nil);
@@ -147,6 +166,62 @@
     [_backgroundAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
     [_backgroundAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
     [_contentView addSubview:_backgroundAlphaSlider];
+
+    UILabel *portraitOffsetXLabel = [[UILabel alloc] init];
+    portraitOffsetXLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    portraitOffsetXLabel.text = NSLocalizedString(@"Portrait X Offset", nil);
+    [_contentView addSubview:portraitOffsetXLabel];
+
+    _portraitOffsetXSlider = [[UISlider alloc] init];
+    _portraitOffsetXSlider.translatesAutoresizingMaskIntoConstraints = NO;
+    _portraitOffsetXSlider.minimumValue = -300.0;
+    _portraitOffsetXSlider.maximumValue = 300.0;
+    _portraitOffsetXSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetX] floatValue];
+    [_portraitOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
+    [_portraitOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
+    [_contentView addSubview:_portraitOffsetXSlider];
+
+    UILabel *portraitOffsetYLabel = [[UILabel alloc] init];
+    portraitOffsetYLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    portraitOffsetYLabel.text = NSLocalizedString(@"Portrait Y Offset", nil);
+    [_contentView addSubview:portraitOffsetYLabel];
+
+    _portraitOffsetYSlider = [[UISlider alloc] init];
+    _portraitOffsetYSlider.translatesAutoresizingMaskIntoConstraints = NO;
+    _portraitOffsetYSlider.minimumValue = -300.0;
+    _portraitOffsetYSlider.maximumValue = 300.0;
+    _portraitOffsetYSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetY] floatValue];
+    [_portraitOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
+    [_portraitOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
+    [_contentView addSubview:_portraitOffsetYSlider];
+
+    UILabel *landscapeOffsetXLabel = [[UILabel alloc] init];
+    landscapeOffsetXLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    landscapeOffsetXLabel.text = NSLocalizedString(@"Landscape X Offset", nil);
+    [_contentView addSubview:landscapeOffsetXLabel];
+
+    _landscapeOffsetXSlider = [[UISlider alloc] init];
+    _landscapeOffsetXSlider.translatesAutoresizingMaskIntoConstraints = NO;
+    _landscapeOffsetXSlider.minimumValue = -300.0;
+    _landscapeOffsetXSlider.maximumValue = 300.0;
+    _landscapeOffsetXSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetX] floatValue];
+    [_landscapeOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
+    [_landscapeOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
+    [_contentView addSubview:_landscapeOffsetXSlider];
+
+    UILabel *landscapeOffsetYLabel = [[UILabel alloc] init];
+    landscapeOffsetYLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    landscapeOffsetYLabel.text = NSLocalizedString(@"Landscape Y Offset", nil);
+    [_contentView addSubview:landscapeOffsetYLabel];
+
+    _landscapeOffsetYSlider = [[UISlider alloc] init];
+    _landscapeOffsetYSlider.translatesAutoresizingMaskIntoConstraints = NO;
+    _landscapeOffsetYSlider.minimumValue = -300.0;
+    _landscapeOffsetYSlider.maximumValue = 300.0;
+    _landscapeOffsetYSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetY] floatValue];
+    [_landscapeOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
+    [_landscapeOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
+    [_contentView addSubview:_landscapeOffsetYSlider];
 
     _behaviorSectionLabel = [[UILabel alloc] init];
     _behaviorSectionLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -224,7 +299,13 @@
         [_textAlphaSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_textAlphaSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
 
-        [backgroundColorLabel.topAnchor constraintEqualToAnchor:_textAlphaSlider.bottomAnchor constant:20],
+        [textVerticalLabel.topAnchor constraintEqualToAnchor:_textAlphaSlider.bottomAnchor constant:20],
+        [textVerticalLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_textVerticalSegmentedControl.centerYAnchor constraintEqualToAnchor:textVerticalLabel.centerYAnchor],
+        [_textVerticalSegmentedControl.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
+        [_textVerticalSegmentedControl.leadingAnchor constraintGreaterThanOrEqualToAnchor:textVerticalLabel.trailingAnchor constant:10],
+
+        [backgroundColorLabel.topAnchor constraintEqualToAnchor:textVerticalLabel.bottomAnchor constant:20],
         [backgroundColorLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_backgroundColorWell.centerYAnchor constraintEqualToAnchor:backgroundColorLabel.centerYAnchor],
         [_backgroundColorWell.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
@@ -237,13 +318,37 @@
         [_backgroundAlphaSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_backgroundAlphaSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
 
-        [_behaviorSectionLabel.topAnchor constraintEqualToAnchor:_backgroundAlphaSlider.bottomAnchor constant:28],
+        [portraitOffsetXLabel.topAnchor constraintEqualToAnchor:_backgroundAlphaSlider.bottomAnchor constant:20],
+        [portraitOffsetXLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_portraitOffsetXSlider.topAnchor constraintEqualToAnchor:portraitOffsetXLabel.bottomAnchor constant:8],
+        [_portraitOffsetXSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_portraitOffsetXSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
+
+        [portraitOffsetYLabel.topAnchor constraintEqualToAnchor:_portraitOffsetXSlider.bottomAnchor constant:16],
+        [portraitOffsetYLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_portraitOffsetYSlider.topAnchor constraintEqualToAnchor:portraitOffsetYLabel.bottomAnchor constant:8],
+        [_portraitOffsetYSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_portraitOffsetYSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
+
+        [landscapeOffsetXLabel.topAnchor constraintEqualToAnchor:_portraitOffsetYSlider.bottomAnchor constant:16],
+        [landscapeOffsetXLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_landscapeOffsetXSlider.topAnchor constraintEqualToAnchor:landscapeOffsetXLabel.bottomAnchor constant:8],
+        [_landscapeOffsetXSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_landscapeOffsetXSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
+
+        [landscapeOffsetYLabel.topAnchor constraintEqualToAnchor:_landscapeOffsetXSlider.bottomAnchor constant:16],
+        [landscapeOffsetYLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_landscapeOffsetYSlider.topAnchor constraintEqualToAnchor:landscapeOffsetYLabel.bottomAnchor constant:8],
+        [_landscapeOffsetYSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_landscapeOffsetYSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
+
+        [_behaviorSectionLabel.topAnchor constraintEqualToAnchor:_landscapeOffsetYSlider.bottomAnchor constant:28],
         [_behaviorSectionLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
 
         [_behaviorSettingsContainer.topAnchor constraintEqualToAnchor:_behaviorSectionLabel.bottomAnchor constant:12],
         [_behaviorSettingsContainer.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:12],
         [_behaviorSettingsContainer.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-12],
-        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:150],
+        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:120],
 
         [_behaviorSettingsController.view.topAnchor constraintEqualToAnchor:_behaviorSettingsContainer.topAnchor],
         [_behaviorSettingsController.view.leadingAnchor constraintEqualToAnchor:_behaviorSettingsContainer.leadingAnchor],
@@ -291,14 +396,18 @@
 }
 
 - (void)segmentedControlDidChange:(UISegmentedControl *)sender {
-    NSTextAlignment alignment;
-    switch (sender.selectedSegmentIndex) {
-        case 0: alignment = NSTextAlignmentLeft; break;
-        case 1: alignment = NSTextAlignmentCenter; break;
-        case 2: alignment = NSTextAlignmentRight; break;
-        default: alignment = NSTextAlignmentCenter; break;
+    if (sender == _textAlignmentSegmentedControl) {
+        NSTextAlignment alignment;
+        switch (sender.selectedSegmentIndex) {
+            case 0: alignment = NSTextAlignmentLeft; break;
+            case 1: alignment = NSTextAlignmentCenter; break;
+            case 2: alignment = NSTextAlignmentRight; break;
+            default: alignment = NSTextAlignmentCenter; break;
+        }
+        [_currentSettings setObject:@(alignment) forKey:HUDUserDefaultsKeyTextAlignment];
+    } else if (sender == _textVerticalSegmentedControl) {
+        [_currentSettings setObject:@(sender.selectedSegmentIndex) forKey:HUDUserDefaultsKeyTextVerticalPosition];
     }
-    [_currentSettings setObject:@(alignment) forKey:HUDUserDefaultsKeyTextAlignment];
     [self updatePreview];
 }
 
@@ -307,6 +416,14 @@
         [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyTextAlpha];
     } else if (sender == _backgroundAlphaSlider) {
         [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyBackgroundAlpha];
+    } else if (sender == _portraitOffsetXSlider) {
+        [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyPortraitOffsetX];
+    } else if (sender == _portraitOffsetYSlider) {
+        [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyPortraitOffsetY];
+    } else if (sender == _landscapeOffsetXSlider) {
+        [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyLandscapeOffsetX];
+    } else if (sender == _landscapeOffsetYSlider) {
+        [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyLandscapeOffsetY];
     }
     [self updatePreview];
 }
@@ -350,7 +467,12 @@
 
     UIColor *bgColor = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundColor] ?: [UIColor blackColor];
     NSNumber *bgAlpha = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
-    _textViewPreview.backgroundColor = [bgColor colorWithAlphaComponent:bgAlpha ? [bgAlpha floatValue] : 0.0];
+    CGFloat alpha = bgAlpha ? [bgAlpha floatValue] : 0.0;
+    if (alpha <= 0.001f) {
+        _textViewPreview.backgroundColor = [UIColor clearColor];
+    } else {
+        _textViewPreview.backgroundColor = [bgColor colorWithAlphaComponent:alpha];
+    }
 }
 
 #pragma mark - 读写共享 plist
@@ -366,14 +488,24 @@
     _currentSettings[HUDUserDefaultsKeyTextAlpha] = [savedSettings objectForKey:HUDUserDefaultsKeyTextAlpha] ?: @(1.0f);
     _currentSettings[HUDUserDefaultsKeyBackgroundColor] = [self colorFromSettingsData:[savedSettings objectForKey:HUDUserDefaultsKeyBackgroundColor] fallback:[UIColor blackColor]];
     _currentSettings[HUDUserDefaultsKeyBackgroundAlpha] = [savedSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha] ?: @(0.0f);
+    _currentSettings[HUDUserDefaultsKeyTextVerticalPosition] = [savedSettings objectForKey:HUDUserDefaultsKeyTextVerticalPosition] ?: @(0);
+    _currentSettings[HUDUserDefaultsKeyPortraitOffsetX] = [savedSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetX] ?: @(0.0f);
+    _currentSettings[HUDUserDefaultsKeyPortraitOffsetY] = [savedSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetY] ?: @(0.0f);
+    _currentSettings[HUDUserDefaultsKeyLandscapeOffsetX] = [savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetX] ?: @(0.0f);
+    _currentSettings[HUDUserDefaultsKeyLandscapeOffsetY] = [savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetY] ?: @(0.0f);
 
     _textViewPreview.text = _currentSettings[HUDUserDefaultsKeyTextContent];
     _textColorWell.selectedColor = _currentSettings[HUDUserDefaultsKeyTextColor];
     _textSizeStepper.value = [_currentSettings[HUDUserDefaultsKeyTextSize] doubleValue];
     _textAlignmentSegmentedControl.selectedSegmentIndex = [_currentSettings[HUDUserDefaultsKeyTextAlignment] integerValue];
+    _textVerticalSegmentedControl.selectedSegmentIndex = [_currentSettings[HUDUserDefaultsKeyTextVerticalPosition] integerValue];
     _textAlphaSlider.value = [_currentSettings[HUDUserDefaultsKeyTextAlpha] floatValue];
     _backgroundColorWell.selectedColor = _currentSettings[HUDUserDefaultsKeyBackgroundColor];
     _backgroundAlphaSlider.value = [_currentSettings[HUDUserDefaultsKeyBackgroundAlpha] floatValue];
+    _portraitOffsetXSlider.value = [_currentSettings[HUDUserDefaultsKeyPortraitOffsetX] floatValue];
+    _portraitOffsetYSlider.value = [_currentSettings[HUDUserDefaultsKeyPortraitOffsetY] floatValue];
+    _landscapeOffsetXSlider.value = [_currentSettings[HUDUserDefaultsKeyLandscapeOffsetX] floatValue];
+    _landscapeOffsetYSlider.value = [_currentSettings[HUDUserDefaultsKeyLandscapeOffsetY] floatValue];
 }
 
 // 点保存时：合并进 plist 文件，并发送 NOTIFY_RELOAD_HUD 通知 HUD 进程刷新
@@ -398,6 +530,11 @@
     }
 
     settings[HUDUserDefaultsKeyBackgroundAlpha] = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
+    settings[HUDUserDefaultsKeyTextVerticalPosition] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextVerticalPosition];
+    settings[HUDUserDefaultsKeyPortraitOffsetX] = [_currentSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetX];
+    settings[HUDUserDefaultsKeyPortraitOffsetY] = [_currentSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetY];
+    settings[HUDUserDefaultsKeyLandscapeOffsetX] = [_currentSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetX];
+    settings[HUDUserDefaultsKeyLandscapeOffsetY] = [_currentSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetY];
 
     SaveHUDSettingsPlist(settings);
     notify_post(NOTIFY_RELOAD_HUD); // HUDRootViewController 监听此通知后调用 reloadUserDefaults

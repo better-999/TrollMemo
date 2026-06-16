@@ -112,6 +112,16 @@
 /* No comment provided by engineer. */
 "Open HUD" = "Open HUD";
 
+/* Edit screen */
+"Text Vertical" = "Text Vertical";
+"Top" = "Top";
+"Middle" = "Middle";
+"Bottom" = "Bottom";
+"Portrait X Offset" = "Portrait X Offset";
+"Portrait Y Offset" = "Portrait Y Offset";
+"Landscape X Offset" = "Landscape X Offset";
+"Landscape Y Offset" = "Landscape Y Offset";
+
 /* No comment provided by engineer. */
 "Pass-through" = "Pass-through";
 

@@ -11,9 +11,11 @@ enum TSSettingsIndex: Int, CaseIterable {
     case passthroughMode = 0
     case keepInPlace
     case hideAtSnapshot
-    case usesInvertedColor
     case usesRotation
-    case usesLargeFont
+
+    static var embeddedEditCases: [TSSettingsIndex] {
+        [.passthroughMode, .keepInPlace, .hideAtSnapshot, .usesRotation]
+    }
 
     var key: String {
         switch self {
@@ -23,12 +25,8 @@ enum TSSettingsIndex: Int, CaseIterable {
             return HUDUserDefaultsKeyKeepInPlace
         case .hideAtSnapshot:
             return HUDUserDefaultsKeyHideAtSnapshot
-        case .usesInvertedColor:
-            return HUDUserDefaultsKeyUsesInvertedColor
         case .usesRotation:
             return HUDUserDefaultsKeyUsesRotation
-        case .usesLargeFont:
-            return HUDUserDefaultsKeyUsesLargeFont
         }
     }
 
@@ -40,12 +38,8 @@ enum TSSettingsIndex: Int, CaseIterable {
             return NSLocalizedString("Keep In-place", comment: "TSSettingsIndex")
         case .hideAtSnapshot:
             return NSLocalizedString("Hide @snapshot", comment: "TSSettingsIndex")
-        case .usesInvertedColor:
-            return NSLocalizedString("Appearance", comment: "TSSettingsIndex")
         case .usesRotation:
             return NSLocalizedString("Landscape", comment: "TSSettingsIndex")
-        case .usesLargeFont:
-            return NSLocalizedString("Size", comment: "TSSettingsIndex")
         }
     }
 
@@ -57,14 +51,10 @@ enum TSSettingsIndex: Int, CaseIterable {
             } else {
                 return highlighted ? NSLocalizedString("ON", comment: "TSSettingsIndex") : NSLocalizedString("OFF", comment: "TSSettingsIndex")
             }
-        case .keepInPlace: fallthrough
-        case .hideAtSnapshot: fallthrough
-        case .usesInvertedColor:
-            return highlighted ? NSLocalizedString("Inverted", comment: "TSSettingsIndex") : NSLocalizedString("Classic", comment: "TSSettingsIndex")
+        case .keepInPlace, .hideAtSnapshot:
+            return highlighted ? NSLocalizedString("ON", comment: "TSSettingsIndex") : NSLocalizedString("OFF", comment: "TSSettingsIndex")
         case .usesRotation:
             return highlighted ? NSLocalizedString("Follow", comment: "TSSettingsIndex") : NSLocalizedString("Hide", comment: "TSSettingsIndex")
-        case .usesLargeFont:
-            return highlighted ? NSLocalizedString("Large", comment: "TSSettingsIndex") : NSLocalizedString("Standard", comment: "TSSettingsIndex")
         }
     }
 }

@@ -112,6 +112,28 @@
 /* No comment provided by engineer. */
 "Open HUD" = "打开悬浮窗";
 
+/* Edit screen */
+"Text Vertical" = "文字垂直";
+"Top" = "顶";
+"Middle" = "中";
+"Bottom" = "底";
+"Portrait X Offset" = "竖屏X偏移";
+"Portrait Y Offset" = "竖屏Y偏移";
+"Landscape X Offset" = "横屏X偏移";
+"Landscape Y Offset" = "横屏Y偏移";
+"文字颜色" = "文字颜色";
+"文字大小" = "文字大小";
+"文字对齐" = "文字对齐";
+"左" = "左";
+"中" = "中";
+"右" = "右";
+"文字透明度" = "文字透明度";
+"背景颜色" = "背景颜色";
+"背景透明度" = "背景透明度";
+"保存" = "保存";
+"取消" = "取消";
+"Hello World!" = "Hello World!";
+
 /* No comment provided by engineer. */
 "Pass-through" = "触摸穿透";
 

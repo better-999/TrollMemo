@@ -576,6 +576,7 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
         notify_register_dispatch(NOTIFY_LAUNCHED_HUD, &anyToken, dispatch_get_main_queue(), ^(int token) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             notify_cancel(token);
+            strongSelf->_isRemoteHUDActive = YES;
             [strongSelf->_impactFeedbackGenerator impactOccurred];
             [strongSelf reloadMainButtonState];
             dispatch_semaphore_signal(semaphore);

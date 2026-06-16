@@ -126,6 +126,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     UINotificationFeedbackGenerator *_notificationFeedbackGenerator;
     BOOL _isFocused;                           // YES=高亮聚焦，NO=半透明虚化
     NSLayoutConstraint *_topConstraint;        // 竖直位置（拖拽会改 constant）
+    NSLayoutConstraint *_centerYConstraint;
+    NSLayoutConstraint *_bottomConstraint;
     NSLayoutConstraint *_centerXConstraint;
     NSLayoutConstraint *_leadingConstraint;
     NSLayoutConstraint *_trailingConstraint;
@@ -241,7 +243,14 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     BOOL usesInvertedColor = [self usesInvertedColor];
     HUD_FONT_WEIGHT = (usesInvertedColor ? UIFontWeightMedium : UIFontWeightRegular);
     HUD_INACTIVE_OPACITY = (usesInvertedColor ? 1.0 : 0.667);
-    [_blurView setEffect:(usesInvertedColor ? nil : _blurEffect)];
+    NSNumber *backgroundAlphaNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
+    CGFloat backgroundAlpha = backgroundAlphaNumber ? [backgroundAlphaNumber floatValue] : 0.0;
+    if (backgroundAlpha <= 0.001f && !usesInvertedColor) {
+        [_blurView setEffect:nil];
+        _blurView.backgroundColor = [UIColor clearColor];
+    } else {
+        [_blurView setEffect:(usesInvertedColor ? nil : _blurEffect)];
+    }
     [_lockedView setHidden:usesInvertedColor];
 
     BOOL hideAtSnapshot = [self hideAtSnapshot];
@@ -420,6 +429,40 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     return 0;
 }
 
+- (CGFloat)portraitOffsetX
+{
+    [self loadUserDefaults:NO];
+    return [[_userDefaults objectForKey:HUDUserDefaultsKeyPortraitOffsetX] doubleValue];
+}
+
+- (CGFloat)portraitOffsetY
+{
+    [self loadUserDefaults:NO];
+    return [[_userDefaults objectForKey:HUDUserDefaultsKeyPortraitOffsetY] doubleValue];
+}
+
+- (CGFloat)landscapeOffsetX
+{
+    [self loadUserDefaults:NO];
+    return [[_userDefaults objectForKey:HUDUserDefaultsKeyLandscapeOffsetX] doubleValue];
+}
+
+- (CGFloat)landscapeOffsetY
+{
+    [self loadUserDefaults:NO];
+    return [[_userDefaults objectForKey:HUDUserDefaultsKeyLandscapeOffsetY] doubleValue];
+}
+
+- (NSInteger)textVerticalPosition
+{
+    [self loadUserDefaults:NO];
+    NSNumber *value = [_userDefaults objectForKey:HUDUserDefaultsKeyTextVerticalPosition];
+    if (!value) {
+        return 0;
+    }
+    return MAX(0, MIN(2, [value integerValue]));
+}
+
 - (instancetype)init
 {
     self = [super init];
@@ -569,14 +612,23 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [_blurView.layer setMaskedCorners:((isCenteredMost && !isLandscape) ? kCornerMaskBottom : kCornerMaskAll)];
 
     BOOL usesCustomOffset = [self usesCustomOffset];
+    (void)usesCustomOffset;
+
     CGFloat realCustomOffsetX = 0;
     CGFloat realCustomOffsetY = 0;
 
-    if (usesCustomOffset)
-    {
-        realCustomOffsetX = [self realCustomOffsetX] * (-1);
-        realCustomOffsetY = [self realCustomOffsetY];
+    if (isLandscape) {
+        realCustomOffsetX = [self landscapeOffsetX] * (-1);
+        realCustomOffsetY = [self landscapeOffsetY];
+    } else {
+        realCustomOffsetX = [self portraitOffsetX];
+        realCustomOffsetY = [self portraitOffsetY];
     }
+
+    NSInteger verticalPosition = [self textVerticalPosition];
+    _topConstraint = nil;
+    _centerYConstraint = nil;
+    _bottomConstraint = nil;
 
     UILayoutGuide *layoutGuide = self.view.safeAreaLayoutGuide;
     if (isLandscape)
@@ -613,16 +665,31 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         ]];
 
         /* Flexible Constraint */
-        _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:minimumLandscapeTopConstant];
-        if (!isCentered) {
-            CGFloat currentPositionY = [self currentLandscapePositionY];
-            if (currentPositionY < CGFLOAT_MAX) {
-                _topConstraint.constant = currentPositionY;
+        if (verticalPosition == 1) {
+            _centerYConstraint = [_contentView.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor constant:realCustomOffsetY];
+            _centerYConstraint.priority = UILayoutPriorityDefaultLow;
+            [_constraints addObject:_centerYConstraint];
+        } else if (verticalPosition == 2) {
+            _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor constant:minimumLandscapeBottomConstant];
+            if (!isCentered) {
+                CGFloat currentPositionY = [self currentLandscapePositionY];
+                if (currentPositionY < CGFLOAT_MAX) {
+                    _bottomConstraint.constant = currentPositionY;
+                }
             }
+            _bottomConstraint.priority = UILayoutPriorityDefaultLow;
+            [_constraints addObject:_bottomConstraint];
+        } else {
+            _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:minimumLandscapeTopConstant];
+            if (!isCentered) {
+                CGFloat currentPositionY = [self currentLandscapePositionY];
+                if (currentPositionY < CGFLOAT_MAX) {
+                    _topConstraint.constant = currentPositionY;
+                }
+            }
+            _topConstraint.priority = UILayoutPriorityDefaultLow;
+            [_constraints addObject:_topConstraint];
         }
-        _topConstraint.priority = UILayoutPriorityDefaultLow;
-
-        [_constraints addObject:_topConstraint];
     }
     else
     {
@@ -661,16 +728,31 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
             ]];
 
             /* Flexible Constraint */
-            _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:layoutGuide.topAnchor constant:minimumTopConstraintConstant];
-            if (!isCentered) {
-                CGFloat currentPositionY = [self currentPositionY];
-                if (currentPositionY < CGFLOAT_MAX) {
-                    _topConstraint.constant = currentPositionY;
+            if (verticalPosition == 1) {
+                _centerYConstraint = [_contentView.centerYAnchor constraintEqualToAnchor:layoutGuide.centerYAnchor constant:realCustomOffsetY];
+                _centerYConstraint.priority = UILayoutPriorityDefaultLow;
+                [_constraints addObject:_centerYConstraint];
+            } else if (verticalPosition == 2) {
+                _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:layoutGuide.bottomAnchor constant:minimumBottomConstraintConstant];
+                if (!isCentered) {
+                    CGFloat currentPositionY = [self currentPositionY];
+                    if (currentPositionY < CGFLOAT_MAX) {
+                        _bottomConstraint.constant = currentPositionY;
+                    }
                 }
+                _bottomConstraint.priority = UILayoutPriorityDefaultLow;
+                [_constraints addObject:_bottomConstraint];
+            } else {
+                _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:layoutGuide.topAnchor constant:minimumTopConstraintConstant];
+                if (!isCentered) {
+                    CGFloat currentPositionY = [self currentPositionY];
+                    if (currentPositionY < CGFLOAT_MAX) {
+                        _topConstraint.constant = currentPositionY;
+                    }
+                }
+                _topConstraint.priority = UILayoutPriorityDefaultLow;
+                [_constraints addObject:_topConstraint];
             }
-            _topConstraint.priority = UILayoutPriorityDefaultLow;
-
-            [_constraints addObject:_topConstraint];
         }
     }
 
@@ -931,7 +1013,17 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (backgroundAlpha < 0.0 || backgroundAlpha > 1.0) {
         backgroundAlpha = 0.0;
     }
-    self.hudTextView.backgroundColor = [bgColor colorWithAlphaComponent:backgroundAlpha];
+
+    if (backgroundAlpha <= 0.001f) {
+        self.hudTextView.backgroundColor = [UIColor clearColor];
+        [_blurView setEffect:nil];
+        _blurView.backgroundColor = [UIColor clearColor];
+    } else {
+        [_blurView setEffect:nil];
+        UIColor *filledBackground = [bgColor colorWithAlphaComponent:backgroundAlpha];
+        _blurView.backgroundColor = filledBackground;
+        self.hudTextView.backgroundColor = [UIColor clearColor];
+    }
 
     // 按文字实际尺寸更新容器大小，避免每次新建约束
     CGSize newSize = [self.hudTextView sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
