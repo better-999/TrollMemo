@@ -1047,11 +1047,11 @@ static const CGFloat kHUDTextVerticalPadding = 6.0;
     }
 
     NSNumber *textSizeNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextSize];
-    CGFloat textSize = textSizeNumber ? [textSizeNumber floatValue] : 10.0;
-    if (textSize < 5.0 || textSize > 50.0) {
-        textSize = 10.0;
+    CGFloat fontSize = textSizeNumber ? [textSizeNumber floatValue] : 10.0;
+    if (fontSize < 5.0 || fontSize > 50.0) {
+        fontSize = 10.0;
     }
-    self.hudTextView.font = [UIFont systemFontOfSize:textSize];
+    self.hudTextView.font = [UIFont systemFontOfSize:fontSize];
 
     NSNumber *textAlignmentNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextAlignment];
     self.hudTextView.textAlignment = textAlignmentNumber ? (NSTextAlignment)[textAlignmentNumber integerValue] : NSTextAlignmentCenter;
