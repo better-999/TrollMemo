@@ -13,10 +13,11 @@
 #import "TrollMemo-Swift.h"
 #import "../supports/hudapp-bridging-header.h"
 
-@interface EditTextSettingsViewController () <UITextViewDelegate>
+@interface EditTextSettingsViewController () <UITextViewDelegate, TSSettingsControllerDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIView *contentView;
+@property (nonatomic, strong) UIView *bottomBar;
 @property (nonatomic, strong) UITextView *textViewPreview;
 @property (nonatomic, strong) UIColorWell *textColorWell;
 @property (nonatomic, strong) UIStepper *textSizeStepper;
@@ -35,8 +36,26 @@
 @property (nonatomic, strong) UIButton *saveButton;
 @property (nonatomic, strong) UIButton *cancelButton;
 @property (nonatomic, strong) NSMutableDictionary *currentSettings;
+@property (nonatomic, strong) NSMutableDictionary *committedSettings;
+@property (nonatomic, strong) NSMutableDictionary *draftBehaviorSettings;
+@property (nonatomic, assign) BOOL didFinishEditing;
 
 @end
+
+static NSArray<HUDUserDefaultsKey> *EditBehaviorSettingKeys(void)
+{
+    static NSArray<HUDUserDefaultsKey> *keys;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        keys = @[
+            HUDUserDefaultsKeyPassthroughMode,
+            HUDUserDefaultsKeyKeepInPlace,
+            HUDUserDefaultsKeyHideAtSnapshot,
+            HUDUserDefaultsKeyUsesRotation,
+        ];
+    });
+    return keys;
+}
 
 @implementation EditTextSettingsViewController
 
@@ -238,31 +257,46 @@
 
     _behaviorSettingsController = [[TSSettingsController alloc] init];
     _behaviorSettingsController.embeddedInEditSheet = YES;
-    _behaviorSettingsController.delegate = self.behaviorSettingsDelegate;
+    _behaviorSettingsController.delegate = self;
     _behaviorSettingsController.alreadyLaunched = self.hudAlreadyLaunched;
     [self addChildViewController:_behaviorSettingsController];
     [_behaviorSettingsContainer addSubview:_behaviorSettingsController.view];
     _behaviorSettingsController.view.translatesAutoresizingMaskIntoConstraints = NO;
     [_behaviorSettingsController didMoveToParentViewController:self];
 
+    _bottomBar = [[UIView alloc] init];
+    _bottomBar.translatesAutoresizingMaskIntoConstraints = NO;
+    _bottomBar.backgroundColor = [UIColor systemBackgroundColor];
+    [self.view addSubview:_bottomBar];
+
     _saveButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _saveButton.translatesAutoresizingMaskIntoConstraints = NO;
     [_saveButton setTitle:NSLocalizedString(@"保存", nil) forState:UIControlStateNormal];
     [_saveButton addTarget:self action:@selector(saveButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [_contentView addSubview:_saveButton];
+    [_bottomBar addSubview:_saveButton];
 
     _cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
     [_cancelButton setTitle:NSLocalizedString(@"取消", nil) forState:UIControlStateNormal];
     [_cancelButton addTarget:self action:@selector(cancelButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [_contentView addSubview:_cancelButton];
+    [_bottomBar addSubview:_cancelButton];
 
     UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
+        [_bottomBar.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+        [_bottomBar.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        [_bottomBar.bottomAnchor constraintEqualToAnchor:safeArea.bottomAnchor],
+        [_bottomBar.heightAnchor constraintEqualToConstant:56],
+
+        [_saveButton.centerYAnchor constraintEqualToAnchor:_bottomBar.centerYAnchor],
+        [_saveButton.centerXAnchor constraintEqualToAnchor:_bottomBar.centerXAnchor constant:-60],
+        [_cancelButton.centerYAnchor constraintEqualToAnchor:_bottomBar.centerYAnchor],
+        [_cancelButton.centerXAnchor constraintEqualToAnchor:_bottomBar.centerXAnchor constant:60],
+
         [_scrollView.topAnchor constraintEqualToAnchor:safeArea.topAnchor],
         [_scrollView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [_scrollView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [_scrollView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+        [_scrollView.bottomAnchor constraintEqualToAnchor:_bottomBar.topAnchor],
 
         [_contentView.topAnchor constraintEqualToAnchor:_scrollView.contentLayoutGuide.topAnchor],
         [_contentView.leadingAnchor constraintEqualToAnchor:_scrollView.contentLayoutGuide.leadingAnchor],
@@ -348,19 +382,22 @@
         [_behaviorSettingsContainer.topAnchor constraintEqualToAnchor:_behaviorSectionLabel.bottomAnchor constant:12],
         [_behaviorSettingsContainer.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:12],
         [_behaviorSettingsContainer.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-12],
-        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:120],
+        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:136],
 
         [_behaviorSettingsController.view.topAnchor constraintEqualToAnchor:_behaviorSettingsContainer.topAnchor],
         [_behaviorSettingsController.view.leadingAnchor constraintEqualToAnchor:_behaviorSettingsContainer.leadingAnchor],
         [_behaviorSettingsController.view.trailingAnchor constraintEqualToAnchor:_behaviorSettingsContainer.trailingAnchor],
         [_behaviorSettingsController.view.bottomAnchor constraintEqualToAnchor:_behaviorSettingsContainer.bottomAnchor],
 
-        [_saveButton.topAnchor constraintEqualToAnchor:_behaviorSettingsContainer.bottomAnchor constant:28],
-        [_saveButton.centerXAnchor constraintEqualToAnchor:_contentView.centerXAnchor constant:-60],
-        [_cancelButton.centerYAnchor constraintEqualToAnchor:_saveButton.centerYAnchor],
-        [_cancelButton.centerXAnchor constraintEqualToAnchor:_contentView.centerXAnchor constant:60],
-        [_saveButton.bottomAnchor constraintEqualToAnchor:_contentView.bottomAnchor constant:-24],
+        [_behaviorSettingsContainer.bottomAnchor constraintEqualToAnchor:_contentView.bottomAnchor constant:-24],
     ]];
+
+    _committedSettings = [[LoadHUDSettingsPlist] mutableCopy] ?: [NSMutableDictionary dictionary];
+    _draftBehaviorSettings = [NSMutableDictionary dictionary];
+    for (HUDUserDefaultsKey key in EditBehaviorSettingKeys()) {
+        id value = _committedSettings[key];
+        _draftBehaviorSettings[key] = value ?: @NO;
+    }
 
     _currentSettings = [NSMutableDictionary dictionary];
     [self loadCurrentSettings];
@@ -377,7 +414,15 @@
     [super viewDidLoad];
 }
 
-#pragma mark - 控件事件（只更新内存预览，不写盘）
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    if (!self.didFinishEditing && self.isBeingDismissed) {
+        [self restoreCommittedSettingsToHUD];
+    }
+}
+
+#pragma mark - 控件事件（调节时实时预览 HUD，保存后才固定）
 
 - (void)colorWellDidChange:(UIColorWell *)sender {
     if (sender == _textColorWell) {
@@ -386,6 +431,7 @@
         [_currentSettings setObject:sender.selectedColor forKey:HUDUserDefaultsKeyBackgroundColor];
     }
     [self updatePreview];
+    [self pushPreviewToHUD];
 }
 
 - (void)stepperDidChange:(UIStepper *)sender {
@@ -393,6 +439,7 @@
         [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyTextSize];
     }
     [self updatePreview];
+    [self pushPreviewToHUD];
 }
 
 - (void)segmentedControlDidChange:(UISegmentedControl *)sender {
@@ -409,6 +456,7 @@
         [_currentSettings setObject:@(sender.selectedSegmentIndex) forKey:HUDUserDefaultsKeyTextVerticalPosition];
     }
     [self updatePreview];
+    [self pushPreviewToHUD];
 }
 
 - (void)sliderDidChange:(UISlider *)sender {
@@ -426,10 +474,12 @@
         [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyLandscapeOffsetY];
     }
     [self updatePreview];
+    [self pushPreviewToHUD];
 }
 
 - (void)saveButtonTapped:(UIButton *)sender {
-    [self saveSettings]; // 写入 plist 并通知 HUD
+    [self saveSettings];
+    self.didFinishEditing = YES;
     if ([self.delegate respondsToSelector:@selector(editTextSettingsDidSave)]) {
         [self.delegate editTextSettingsDidSave];
     }
@@ -437,14 +487,15 @@
 }
 
 - (void)cancelButtonTapped:(UIButton *)sender {
-    // 取消：丢弃 currentSettings，不调用 saveSettings
+    [self restoreCommittedSettingsToHUD];
+    self.didFinishEditing = YES;
     if ([self.delegate respondsToSelector:@selector(editTextSettingsDidCancel)]) {
         [self.delegate editTextSettingsDidCancel];
     }
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-#pragma mark - 预览区刷新（仅影响本页 textViewPreview，不影响 HUD）
+#pragma mark - 预览区刷新（本页预览 + 通过 pushPreviewToHUD 同步到浮窗）
 
 - (void)updatePreview {
     UIColor *textColor = [_currentSettings objectForKey:HUDUserDefaultsKeyTextColor];
@@ -475,11 +526,53 @@
     }
 }
 
+- (void)mergeDraftSettingsIntoPlist:(NSMutableDictionary *)settings
+{
+    settings[HUDUserDefaultsKeyTextContent] = _textViewPreview.text;
+    settings[HUDUserDefaultsKeyTextSize] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextSize];
+    settings[HUDUserDefaultsKeyTextAlignment] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlignment];
+    settings[HUDUserDefaultsKeyTextAlpha] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlpha];
+    settings[HUDUserDefaultsKeyBackgroundAlpha] = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
+    settings[HUDUserDefaultsKeyTextVerticalPosition] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextVerticalPosition];
+    settings[HUDUserDefaultsKeyPortraitOffsetX] = [_currentSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetX];
+    settings[HUDUserDefaultsKeyPortraitOffsetY] = [_currentSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetY];
+    settings[HUDUserDefaultsKeyLandscapeOffsetX] = [_currentSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetX];
+    settings[HUDUserDefaultsKeyLandscapeOffsetY] = [_currentSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetY];
+
+    NSData *textColorData = [NSKeyedArchiver archivedDataWithRootObject:[_currentSettings objectForKey:HUDUserDefaultsKeyTextColor] requiringSecureCoding:NO error:nil];
+    if (textColorData) {
+        settings[HUDUserDefaultsKeyTextColor] = textColorData;
+    }
+
+    NSData *bgColorData = [NSKeyedArchiver archivedDataWithRootObject:[_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundColor] requiringSecureCoding:NO error:nil];
+    if (bgColorData) {
+        settings[HUDUserDefaultsKeyBackgroundColor] = bgColorData;
+    }
+
+    for (HUDUserDefaultsKey key in EditBehaviorSettingKeys()) {
+        settings[key] = _draftBehaviorSettings[key] ?: @NO;
+    }
+}
+
+- (void)pushPreviewToHUD
+{
+    NSMutableDictionary *previewSettings = [_committedSettings mutableCopy];
+    [self mergeDraftSettingsIntoPlist:previewSettings];
+    SaveHUDSettingsPlist(previewSettings);
+    notify_post(NOTIFY_RELOAD_HUD_INSTANT);
+}
+
+- (void)restoreCommittedSettingsToHUD
+{
+    SaveHUDSettingsPlist(_committedSettings);
+    notify_post(NOTIFY_RELOAD_HUD_INSTANT);
+}
+
 #pragma mark - 读写共享 plist
 
 // 打开页面时：从 plist 加载到 currentSettings，并同步到各控件
 - (void)loadCurrentSettings {
-    NSMutableDictionary *savedSettings = LoadHUDSettingsPlist();
+    NSMutableDictionary *savedSettings = [_committedSettings mutableCopy] ?: [LoadHUDSettingsPlist() mutableCopy];
 
     _currentSettings[HUDUserDefaultsKeyTextContent] = [savedSettings objectForKey:HUDUserDefaultsKeyTextContent] ?: NSLocalizedString(@"Hello World!", nil);
     _currentSettings[HUDUserDefaultsKeyTextColor] = [self colorFromSettingsData:[savedSettings objectForKey:HUDUserDefaultsKeyTextColor] fallback:[UIColor redColor]];
@@ -508,36 +601,13 @@
     _landscapeOffsetYSlider.value = [_currentSettings[HUDUserDefaultsKeyLandscapeOffsetY] floatValue];
 }
 
-// 点保存时：合并进 plist 文件，并发送 NOTIFY_RELOAD_HUD 通知 HUD 进程刷新
+// 点保存时：合并草稿写入 plist，并即时刷新 HUD
 - (void)saveSettings {
-    NSMutableDictionary *settings = LoadHUDSettingsPlist();
-
-    settings[HUDUserDefaultsKeyTextContent] = _textViewPreview.text;
-
-    // UIColor 需序列化为 NSData 才能存入 plist
-    NSData *textColorData = [NSKeyedArchiver archivedDataWithRootObject:[_currentSettings objectForKey:HUDUserDefaultsKeyTextColor] requiringSecureCoding:NO error:nil];
-    if (textColorData) {
-        settings[HUDUserDefaultsKeyTextColor] = textColorData;
-    }
-
-    settings[HUDUserDefaultsKeyTextSize] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextSize];
-    settings[HUDUserDefaultsKeyTextAlignment] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlignment];
-    settings[HUDUserDefaultsKeyTextAlpha] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlpha];
-
-    NSData *bgColorData = [NSKeyedArchiver archivedDataWithRootObject:[_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundColor] requiringSecureCoding:NO error:nil];
-    if (bgColorData) {
-        settings[HUDUserDefaultsKeyBackgroundColor] = bgColorData;
-    }
-
-    settings[HUDUserDefaultsKeyBackgroundAlpha] = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
-    settings[HUDUserDefaultsKeyTextVerticalPosition] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextVerticalPosition];
-    settings[HUDUserDefaultsKeyPortraitOffsetX] = [_currentSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetX];
-    settings[HUDUserDefaultsKeyPortraitOffsetY] = [_currentSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetY];
-    settings[HUDUserDefaultsKeyLandscapeOffsetX] = [_currentSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetX];
-    settings[HUDUserDefaultsKeyLandscapeOffsetY] = [_currentSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetY];
-
+    NSMutableDictionary *settings = [_committedSettings mutableCopy];
+    [self mergeDraftSettingsIntoPlist:settings];
     SaveHUDSettingsPlist(settings);
-    notify_post(NOTIFY_RELOAD_HUD); // HUDRootViewController 监听此通知后调用 reloadUserDefaults
+    _committedSettings = settings;
+    notify_post(NOTIFY_RELOAD_HUD_INSTANT);
 }
 
 #pragma mark - UITextViewDelegate
@@ -545,6 +615,22 @@
 - (void)textViewDidChange:(UITextView *)textView {
     [_currentSettings setObject:textView.text forKey:HUDUserDefaultsKeyTextContent];
     [self updatePreview];
+    [self pushPreviewToHUD];
+}
+
+#pragma mark - TSSettingsControllerDelegate
+
+- (BOOL)settingHighlightedWithKey:(NSString *)key
+{
+    NSNumber *mode = _draftBehaviorSettings[key];
+    return mode != nil ? [mode boolValue] : NO;
+}
+
+- (void)settingDidSelectWithKey:(NSString *)key
+{
+    BOOL highlighted = [self settingHighlightedWithKey:key];
+    _draftBehaviorSettings[key] = @(!highlighted);
+    [self pushPreviewToHUD];
 }
 
 @end

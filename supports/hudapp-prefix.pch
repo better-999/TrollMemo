@@ -47,6 +47,9 @@
 // APP -> HUD: Notify HUD that the user defaults has been changed by APP.
 #define NOTIFY_RELOAD_HUD "ch.better.notification.hud.reload"
 
+// APP -> HUD: Reload HUD immediately without focus/blur transition animations.
+#define NOTIFY_RELOAD_HUD_INSTANT "ch.better.notification.hud.reload.instant"
+
 // HUD -> APP: Notify APP that the user defaults has been changed by HUD.
 #define NOTIFY_RELOAD_APP "ch.better.notification.app.reload"
 

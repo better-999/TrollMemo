@@ -156,10 +156,15 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 // 注册 Darwin 通知与 KVO：主 App 改配置 / 锁屏 / 偏移字号变更时刷新 HUD
 - (void)registerNotifications
 {
-    int token;
+    int reloadToken;
     // 主 App 保存文字或设置后 post 此通知
-    notify_register_dispatch(NOTIFY_RELOAD_HUD, &token, dispatch_get_main_queue(), ^(int token) {
+    notify_register_dispatch(NOTIFY_RELOAD_HUD, &reloadToken, dispatch_get_main_queue(), ^(int token) {
         [self reloadUserDefaults];
+    });
+
+    int instantReloadToken;
+    notify_register_dispatch(NOTIFY_RELOAD_HUD_INSTANT, &instantReloadToken, dispatch_get_main_queue(), ^(int token) {
+        [self reloadUserDefaultsInstant];
     });
 
     CFNotificationCenterRef darwinCenter = CFNotificationCenterGetDarwinNotifyCenter();
@@ -227,6 +232,16 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 // 配置变更后的总入口：更新样式、布局、文字，并安排自动虚化
 - (void)reloadUserDefaults
 {
+    [self reloadUserDefaultsAnimated:YES];
+}
+
+- (void)reloadUserDefaultsInstant
+{
+    [self reloadUserDefaultsAnimated:NO];
+}
+
+- (void)applyReloadedAppearanceSettings
+{
     [self loadUserDefaults:YES];
 
     BOOL usesCustomFontSize = [self usesCustomFontSize];
@@ -259,20 +274,39 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     } else {
         [_containerView setupContainerAsDisplayContentInScreenshots];
     }
+}
+
+- (void)reloadUserDefaultsAnimated:(BOOL)animated
+{
+    [self applyReloadedAppearanceSettings];
 
     [self removeAllAnimations];
     [self resetGestureRecognizers];
-    [self updateViewConstraints];
 
-    if (!_isFocused) {
-        [self onFocus:_contentView];
+    if (animated) {
+        [self updateViewConstraints];
+
+        if (!_isFocused) {
+            [self onFocus:_contentView];
+        } else {
+            [self keepFocus:_contentView];
+        }
+
+        [self applyTextSettings];
+        [self performSelector:@selector(onBlur:) withObject:_contentView afterDelay:IDLE_INTERVAL];
     } else {
-        [self keepFocus:_contentView];
-    }
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onBlur:) object:_contentView];
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onFocus:) object:_contentView];
+        [_contentView.layer removeAllAnimations];
+        _contentView.transform = CGAffineTransformIdentity;
+        _contentView.alpha = _isFocused ? 1.0 : HUD_INACTIVE_OPACITY;
 
-    [self applyTextSettings];
-    // 几秒无操作后进入半透明「虚化」状态
-    [self performSelector:@selector(onBlur:) withObject:_contentView afterDelay:IDLE_INTERVAL];
+        [UIView performWithoutAnimation:^{
+            [self updateViewConstraints];
+            [self applyTextSettings];
+            [self.view layoutIfNeeded];
+        }];
+    }
 }
 
 + (BOOL)passthroughMode

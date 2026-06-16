@@ -607,7 +607,6 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
 
     EditTextSettingsViewController *settingsViewController = [[EditTextSettingsViewController alloc] init];
     settingsViewController.delegate = self;
-    settingsViewController.behaviorSettingsDelegate = self;
     settingsViewController.hudAlreadyLaunched = _isRemoteHUDActive;
     settingsViewController.modalPresentationStyle = UIModalPresentationPageSheet;
     if (@available(iOS 15.0, *)) {
@@ -650,8 +649,7 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
 #pragma mark - EditTextSettingsViewControllerDelegate
 
 - (void)editTextSettingsDidSave {
-    log_debug(OS_LOG_DEFAULT, "EditText settings saved, notifying HUD to reload.");
-    notify_post(NOTIFY_RELOAD_HUD);
+    log_debug(OS_LOG_DEFAULT, "EditText settings saved.");
     [self reloadMainButtonState];
 }
 

@@ -25,8 +25,8 @@ import UIKit
             titleLabel.isHidden = true
             closeButton.isHidden = true
             view.backgroundColor = .clear
-            collectionView.sideInset = 12
             collectionView.cellSize = CGSize(width: 140, height: 56)
+            collectionView.sideInset = 8
         }
     }
 
