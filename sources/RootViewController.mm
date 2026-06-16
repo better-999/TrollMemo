@@ -86,6 +86,35 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     }];
     [self.view addSubview:self.backgroundView];
 
+    UILayoutGuide *safeArea = self.backgroundView.safeAreaLayoutGuide;
+
+    // 初始化并设置主按钮（须先于编辑文字按钮，后者约束依赖 _mainButton）
+    _mainButton = [MainButton buttonWithType:UIButtonTypeSystem];
+    [_mainButton setTintColor:[UIColor whiteColor]];
+    [_mainButton addTarget:self action:@selector(tapMainButton:) forControlEvents:UIControlEventTouchUpInside];
+    if (@available(iOS 15.0, *))
+    {
+        UIButtonConfiguration *config = [UIButtonConfiguration tintedButtonConfiguration];
+        [config setTitleTextAttributesTransformer:^NSDictionary <NSAttributedStringKey, id> * _Nonnull(NSDictionary <NSAttributedStringKey, id> * _Nonnull textAttributes) {
+            NSMutableDictionary *newAttributes = [textAttributes mutableCopy];
+            [newAttributes setObject:[UIFont boldSystemFontOfSize:32.0] forKey:NSFontAttributeName];
+            return newAttributes;
+        }];
+        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
+        [_mainButton setConfiguration:config];
+    }
+    else
+    {
+        [_mainButton.titleLabel setFont:[UIFont boldSystemFontOfSize:32.0]];
+    }
+    [self.backgroundView addSubview:_mainButton];
+
+    [_mainButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [NSLayoutConstraint activateConstraints:@[
+        [_mainButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
+        [_mainButton.centerYAnchor constraintEqualToAnchor:self.backgroundView.centerYAnchor],
+    ]];
+
     // 初始化并设置编辑文字按钮
     _editTextButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [_editTextButton setTintColor:[UIColor whiteColor]];
@@ -114,39 +143,11 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [self.backgroundView addSubview:_editTextButton];
 
     [_editTextButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    UILayoutGuide *safeArea = self.backgroundView.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
         [_editTextButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
-        [_editTextButton.bottomAnchor constraintEqualToAnchor:_mainButton.topAnchor constant:-20.0f], // 放置在_mainButton正上方，留20pt间距
+        [_editTextButton.bottomAnchor constraintEqualToAnchor:_mainButton.topAnchor constant:-20.0f],
         [_editTextButton.widthAnchor constraintEqualToConstant:120.0f],
         [_editTextButton.heightAnchor constraintEqualToConstant:50.0f],
-    ]];
-
-    // 初始化并设置主按钮
-    _mainButton = [MainButton buttonWithType:UIButtonTypeSystem];
-    [_mainButton setTintColor:[UIColor whiteColor]];
-    [_mainButton addTarget:self action:@selector(tapMainButton:) forControlEvents:UIControlEventTouchUpInside];
-    if (@available(iOS 15.0, *))
-    {
-        UIButtonConfiguration *config = [UIButtonConfiguration tintedButtonConfiguration];
-        [config setTitleTextAttributesTransformer:^NSDictionary <NSAttributedStringKey, id> * _Nonnull(NSDictionary <NSAttributedStringKey, id> * _Nonnull textAttributes) {
-            NSMutableDictionary *newAttributes = [textAttributes mutableCopy];
-            [newAttributes setObject:[UIFont boldSystemFontOfSize:32.0] forKey:NSFontAttributeName];
-            return newAttributes;
-        }];
-        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
-        [_mainButton setConfiguration:config];
-    }
-    else
-    {
-        [_mainButton.titleLabel setFont:[UIFont boldSystemFontOfSize:32.0]];
-    }
-    [self.backgroundView addSubview:_mainButton];
-
-    [_mainButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [NSLayoutConstraint activateConstraints:@[
-        [_mainButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
-        [_mainButton.centerYAnchor constraintEqualToAnchor:self.backgroundView.centerYAnchor],
     ]];
 
     // 初始化并设置设置按钮
