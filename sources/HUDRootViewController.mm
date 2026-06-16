@@ -686,75 +686,30 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
             [_constraints addObject:_centerYConstraint];
         } else if (verticalPosition == 2) {
             _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor constant:minimumLandscapeBottomConstant + realCustomOffsetY];
-            if (!isCentered) {
-                CGFloat currentPositionY = [self currentLandscapePositionY];
-                if (currentPositionY < CGFLOAT_MAX) {
-                    _bottomConstraint.constant = currentPositionY;
-                }
-            }
             [_constraints addObject:_bottomConstraint];
         } else {
             _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:minimumLandscapeTopConstant + realCustomOffsetY];
-            if (!isCentered) {
-                CGFloat currentPositionY = [self currentLandscapePositionY];
-                if (currentPositionY < CGFLOAT_MAX) {
-                    _topConstraint.constant = currentPositionY;
-                }
-            }
             [_constraints addObject:_topConstraint];
         }
     }
     else
     {
-        [_constraints addObjectsFromArray:@[
-            [_contentView.centerXAnchor constraintEqualToAnchor:layoutGuide.centerXAnchor constant:realCustomOffsetX],
-        ]];
+        [_constraints addObject:[_contentView.centerXAnchor constraintEqualToAnchor:layoutGuide.centerXAnchor constant:realCustomOffsetX]];
 
-        if (isCenteredMost && !isPad) {
-            [_constraints addObject:[_contentView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:0]];
-        }
-        else
-        {
-            CGFloat minimumTopConstraintConstant = 0;
-            CGFloat minimumBottomConstraintConstant = 0;
+        CGFloat safeTop = CGRectGetMinY(layoutGuide.layoutFrame);
+        CGFloat safeBottomInset = CGRectGetHeight(self.view.bounds) - CGRectGetMaxY(layoutGuide.layoutFrame);
 
-            if (CGRectGetMinY(layoutGuide.layoutFrame) >= 51) {
-                minimumTopConstraintConstant = -8;
-                minimumBottomConstraintConstant = -4;
-            }
-            else if (CGRectGetMinY(layoutGuide.layoutFrame) > 30) {
-                minimumTopConstraintConstant = -12;
-                minimumBottomConstraintConstant = -4;
-            } else {
-                minimumTopConstraintConstant = (isPad ? 30 : 20);
-                minimumBottomConstraintConstant = -20;
-            }
-
-            minimumTopConstraintConstant += realCustomOffsetY;
-            minimumBottomConstraintConstant += realCustomOffsetY;
-
-            if (verticalPosition == 1) {
-                _centerYConstraint = [_contentView.centerYAnchor constraintEqualToAnchor:layoutGuide.centerYAnchor constant:realCustomOffsetY];
-                [_constraints addObject:_centerYConstraint];
-            } else if (verticalPosition == 2) {
-                _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:layoutGuide.bottomAnchor constant:minimumBottomConstraintConstant];
-                if (!isCentered) {
-                    CGFloat currentPositionY = [self currentPositionY];
-                    if (currentPositionY < CGFLOAT_MAX) {
-                        _bottomConstraint.constant = currentPositionY;
-                    }
-                }
-                [_constraints addObject:_bottomConstraint];
-            } else {
-                _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:layoutGuide.topAnchor constant:minimumTopConstraintConstant];
-                if (!isCentered) {
-                    CGFloat currentPositionY = [self currentPositionY];
-                    if (currentPositionY < CGFLOAT_MAX) {
-                        _topConstraint.constant = currentPositionY;
-                    }
-                }
-                [_constraints addObject:_topConstraint];
-            }
+        if (verticalPosition == 1) {
+            _centerYConstraint = [_contentView.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor constant:realCustomOffsetY];
+            [_constraints addObject:_centerYConstraint];
+        } else if (verticalPosition == 2) {
+            CGFloat baseBottom = -(safeBottomInset + (isPad ? 24.0 : 16.0));
+            _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor constant:baseBottom + realCustomOffsetY];
+            [_constraints addObject:_bottomConstraint];
+        } else {
+            CGFloat baseTop = safeTop + (isPad ? 24.0 : 8.0);
+            _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:baseTop + realCustomOffsetY];
+            [_constraints addObject:_topConstraint];
         }
     }
 
