@@ -311,7 +311,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 
 + (BOOL)passthroughMode
 {
-    return [[[NSDictionary dictionaryWithContentsOfFile:HUDResolvedPath(USER_DEFAULTS_PATH)] objectForKey:HUDUserDefaultsKeyPassthroughMode] boolValue];
+    return YES;
 }
 
 - (BOOL)isLandscapeOrientation
@@ -995,6 +995,37 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 
 #pragma mark - 文字样式（从 plist 读取并应用到 hudTextView）
 
+static const CGFloat kHUDTextHorizontalPadding = 8.0;
+static const CGFloat kHUDTextVerticalPadding = 6.0;
+
+- (CGSize)measuredHUDTextContentSizeForText:(NSString *)text font:(UIFont *)font
+{
+    NSString *measureText = text.length ? text : @" ";
+    UIFont *measureFont = font ?: [UIFont systemFontOfSize:10.0];
+    NSDictionary *attributes = @{NSFontAttributeName: measureFont};
+
+    CGFloat maxLineWidth = 0.0;
+    NSArray<NSString *> *lines = [measureText componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    for (NSString *line in lines) {
+        NSString *lineText = line.length ? line : @" ";
+        CGRect lineRect = [lineText boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)
+                                                 options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                              attributes:attributes
+                                                 context:nil];
+        maxLineWidth = MAX(maxLineWidth, ceil(lineRect.size.width));
+    }
+
+    if (maxLineWidth < 1.0) {
+        maxLineWidth = 1.0;
+    }
+
+    CGRect fullRect = [measureText boundingRectWithSize:CGSizeMake(maxLineWidth, CGFLOAT_MAX)
+                                                options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                             attributes:attributes
+                                                context:nil];
+    return CGSizeMake(maxLineWidth, MAX(ceil(fullRect.size.height), 1.0));
+}
+
 // 读取 EditTextSettingsViewController 保存的配置，渲染到桌面文字视图
 - (void)applyTextSettings {
     [self loadUserDefaults:NO];
@@ -1060,9 +1091,9 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     }
 
     // 按文字实际尺寸更新容器大小，避免每次新建约束
-    CGSize newSize = [self.hudTextView sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    _hudTextWidthConstraint.constant = newSize.width;
-    _hudTextHeightConstraint.constant = newSize.height;
+    CGSize textSize = [self measuredHUDTextContentSizeForText:textContent font:self.hudTextView.font];
+    _hudTextWidthConstraint.constant = textSize.width + kHUDTextHorizontalPadding;
+    _hudTextHeightConstraint.constant = textSize.height + kHUDTextVerticalPadding;
 
     [self.view layoutIfNeeded];
 }

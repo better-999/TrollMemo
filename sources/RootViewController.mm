@@ -340,17 +340,13 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
 
 - (BOOL)passthroughMode
 {
-    [self loadUserDefaults:NO];
-    // 从用户默认设置中获取穿透模式，如果不存在则默认为 NO
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeyPassthroughMode];
-    return mode != nil ? [mode boolValue] : NO;
+    return YES;
 }
 
 - (void)setPassthroughMode:(BOOL)passthroughMode
 {
     [self loadUserDefaults:NO];
-    // 设置穿透模式并保存用户默认设置
-    [_userDefaults setObject:@(passthroughMode) forKey:HUDUserDefaultsKeyPassthroughMode];
+    [_userDefaults setObject:@YES forKey:HUDUserDefaultsKeyPassthroughMode];
     [self saveUserDefaults];
 }
 

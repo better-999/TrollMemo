@@ -28,6 +28,7 @@ open class SPLarkSettingsCollectionView: UICollectionView {
     let cellIdentificator: String = "SPLarkSettingsCollectionViewCell"
     var cellSize: CGSize = CGSize.init(width: 156, height: 60)
     var sideInset: CGFloat = 27
+    var forceSingleRow: Bool = false
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -64,8 +65,27 @@ open class SPLarkSettingsCollectionView: UICollectionView {
         return self.dequeueReusableCell(withReuseIdentifier: self.cellIdentificator, for: indexPath) as! SPLarkSettingsCollectionViewCell
     }
     
-    func layout(y: CGFloat) {
-        self.frame = CGRect.init(x: 0, y: y, width: (self.superview?.frame.width ?? 0), height: self.cellSize.height * 2 + self.layout.minimumInteritemSpacing)
-        self.layout.itemSize = self.cellSize
+    func layout(y: CGFloat, itemCount: Int = 0) {
+        let availableWidth = self.superview?.frame.width ?? 0
+        var itemSize = self.cellSize
+        var rowCount = 2
+
+        if self.forceSingleRow && itemCount > 0 {
+            rowCount = 1
+            let spacing = self.layout.minimumLineSpacing
+            let totalSpacing = spacing * CGFloat(max(itemCount - 1, 0))
+            let horizontalInset = self.sideInset * 2
+            let computedWidth = floor((availableWidth - horizontalInset - totalSpacing) / CGFloat(itemCount))
+            itemSize = CGSize(width: max(computedWidth, 72), height: itemSize.height)
+            self.isScrollEnabled = false
+        } else {
+            self.isScrollEnabled = true
+        }
+
+        let rowSpacing = rowCount > 1 ? self.layout.minimumInteritemSpacing : 0
+        let height = itemSize.height * CGFloat(rowCount) + rowSpacing
+        self.frame = CGRect(x: 0, y: y, width: availableWidth, height: height)
+        self.layout.itemSize = itemSize
+        self.layout.invalidateLayout()
     }
 }

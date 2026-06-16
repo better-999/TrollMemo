@@ -25,14 +25,17 @@ import UIKit
             titleLabel.isHidden = true
             closeButton.isHidden = true
             view.backgroundColor = .clear
-            collectionView.cellSize = CGSize(width: 140, height: 56)
+            collectionView.forceSingleRow = true
+            collectionView.cellSize = CGSize(width: 100, height: 52)
             collectionView.sideInset = 8
+            collectionView.layout.minimumLineSpacing = 8
+            collectionView.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
         }
     }
 
     open override func viewDidLayoutSubviews() {
         if embeddedInEditSheet {
-            collectionView.layout(y: 8)
+            collectionView.layout(y: 8, itemCount: settingsCount())
             return
         }
         super.viewDidLayoutSubviews()
@@ -73,7 +76,7 @@ import UIKit
     }
 
     open override func settingDidSelect(index: Int, completion: @escaping () -> ()) {
-        if index == 0 && alreadyLaunched {
+        if settingKey(index: index) == HUDUserDefaultsKeyPassthroughMode && alreadyLaunched {
             restartRequired = true
         }
         delegate?.settingDidSelect(key: settingKey(index: index))

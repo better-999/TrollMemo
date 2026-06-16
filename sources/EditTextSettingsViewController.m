@@ -48,7 +48,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         keys = @[
-            HUDUserDefaultsKeyPassthroughMode,
             HUDUserDefaultsKeyKeepInPlace,
             HUDUserDefaultsKeyHideAtSnapshot,
             HUDUserDefaultsKeyUsesRotation,
@@ -87,12 +86,12 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _textViewPreview = [[UITextView alloc] init];
     _textViewPreview.translatesAutoresizingMaskIntoConstraints = NO;
     _textViewPreview.font = [UIFont systemFontOfSize:17.0];
-    _textViewPreview.textColor = [UIColor blackColor];
-    _textViewPreview.backgroundColor = [UIColor systemGray5Color];
+    _textViewPreview.textColor = [UIColor labelColor];
+    _textViewPreview.backgroundColor = [UIColor secondarySystemBackgroundColor];
     _textViewPreview.layer.cornerRadius = 5.0;
     _textViewPreview.layer.borderColor = [UIColor systemGray2Color].CGColor;
     _textViewPreview.layer.borderWidth = 1.0;
-    _textViewPreview.textAlignment = NSTextAlignmentCenter;
+    _textViewPreview.textAlignment = NSTextAlignmentNatural;
     _textViewPreview.delegate = self;
     _textViewPreview.text = [savedSettings objectForKey:HUDUserDefaultsKeyTextContent] ?: NSLocalizedString(@"Hello World!", nil);
     [_contentView addSubview:_textViewPreview];
@@ -382,7 +381,7 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
         [_behaviorSettingsContainer.topAnchor constraintEqualToAnchor:_behaviorSectionLabel.bottomAnchor constant:12],
         [_behaviorSettingsContainer.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:12],
         [_behaviorSettingsContainer.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-12],
-        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:136],
+        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:72],
 
         [_behaviorSettingsController.view.topAnchor constraintEqualToAnchor:_behaviorSettingsContainer.topAnchor],
         [_behaviorSettingsController.view.leadingAnchor constraintEqualToAnchor:_behaviorSettingsContainer.leadingAnchor],
@@ -401,7 +400,8 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 
     _currentSettings = [NSMutableDictionary dictionary];
     [self loadCurrentSettings];
-    [self updatePreview];
+    [self configurePlainTextEditor];
+    [self pushPreviewToHUD];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -430,7 +430,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     } else if (sender == _backgroundColorWell) {
         [_currentSettings setObject:sender.selectedColor forKey:HUDUserDefaultsKeyBackgroundColor];
     }
-    [self updatePreview];
     [self pushPreviewToHUD];
 }
 
@@ -438,7 +437,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     if (sender == _textSizeStepper) {
         [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyTextSize];
     }
-    [self updatePreview];
     [self pushPreviewToHUD];
 }
 
@@ -455,7 +453,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     } else if (sender == _textVerticalSegmentedControl) {
         [_currentSettings setObject:@(sender.selectedSegmentIndex) forKey:HUDUserDefaultsKeyTextVerticalPosition];
     }
-    [self updatePreview];
     [self pushPreviewToHUD];
 }
 
@@ -473,7 +470,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     } else if (sender == _landscapeOffsetYSlider) {
         [_currentSettings setObject:@(sender.value) forKey:HUDUserDefaultsKeyLandscapeOffsetY];
     }
-    [self updatePreview];
     [self pushPreviewToHUD];
 }
 
@@ -495,39 +491,19 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-#pragma mark - 预览区刷新（本页预览 + 通过 pushPreviewToHUD 同步到浮窗）
+#pragma mark - 文本编辑框（仅编辑文字，样式只同步到浮窗）
 
-- (void)updatePreview {
-    UIColor *textColor = [_currentSettings objectForKey:HUDUserDefaultsKeyTextColor];
-    if (textColor) {
-        _textViewPreview.textColor = textColor;
-    }
-
-    NSNumber *textSize = [_currentSettings objectForKey:HUDUserDefaultsKeyTextSize];
-    if (textSize) {
-        _textViewPreview.font = [UIFont systemFontOfSize:[textSize floatValue]];
-    }
-
-    NSNumber *textAlignment = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlignment];
-    if (textAlignment) {
-        _textViewPreview.textAlignment = (NSTextAlignment)[textAlignment integerValue];
-    }
-
-    NSNumber *textAlpha = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlpha];
-    _textViewPreview.alpha = textAlpha ? [textAlpha floatValue] : 1.0;
-
-    UIColor *bgColor = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundColor] ?: [UIColor blackColor];
-    NSNumber *bgAlpha = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
-    CGFloat alpha = bgAlpha ? [bgAlpha floatValue] : 0.0;
-    if (alpha <= 0.001f) {
-        _textViewPreview.backgroundColor = [UIColor clearColor];
-    } else {
-        _textViewPreview.backgroundColor = [bgColor colorWithAlphaComponent:alpha];
-    }
+- (void)configurePlainTextEditor {
+    _textViewPreview.font = [UIFont systemFontOfSize:17.0];
+    _textViewPreview.textColor = [UIColor labelColor];
+    _textViewPreview.backgroundColor = [UIColor secondarySystemBackgroundColor];
+    _textViewPreview.alpha = 1.0;
+    _textViewPreview.textAlignment = NSTextAlignmentNatural;
 }
 
 - (void)mergeDraftSettingsIntoPlist:(NSMutableDictionary *)settings
 {
+    settings[HUDUserDefaultsKeyPassthroughMode] = @YES;
     settings[HUDUserDefaultsKeyTextContent] = _textViewPreview.text;
     settings[HUDUserDefaultsKeyTextSize] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextSize];
     settings[HUDUserDefaultsKeyTextAlignment] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlignment];
@@ -614,7 +590,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 
 - (void)textViewDidChange:(UITextView *)textView {
     [_currentSettings setObject:textView.text forKey:HUDUserDefaultsKeyTextContent];
-    [self updatePreview];
     [self pushPreviewToHUD];
 }
 

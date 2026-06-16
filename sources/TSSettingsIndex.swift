@@ -14,7 +14,7 @@ enum TSSettingsIndex: Int, CaseIterable {
     case usesRotation
 
     static var embeddedEditCases: [TSSettingsIndex] {
-        [.passthroughMode, .keepInPlace, .hideAtSnapshot, .usesRotation]
+        [.keepInPlace, .hideAtSnapshot, .usesRotation]
     }
 
     var key: String {
