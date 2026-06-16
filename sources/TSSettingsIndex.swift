@@ -14,7 +14,7 @@ enum TSSettingsIndex: Int, CaseIterable {
     case usesRotation
 
     static var embeddedEditCases: [TSSettingsIndex] {
-        [.keepInPlace, .hideAtSnapshot, .usesRotation]
+        [.hideAtSnapshot, .usesRotation]
     }
 
     var key: String {

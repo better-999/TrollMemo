@@ -13,6 +13,34 @@
 #import "TrollMemo-Swift.h"
 #import "../supports/hudapp-bridging-header.h"
 
+@interface PasteEnabledTextView : UITextView
+@end
+
+@implementation PasteEnabledTextView
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.editable = YES;
+        self.selectable = YES;
+        self.scrollEnabled = YES;
+    }
+    return self;
+}
+
+- (BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
+    if (action == @selector(paste:)) {
+        return self.isEditable && [UIPasteboard generalPasteboard].hasStrings;
+    }
+    return [super canPerformAction:action withSender:sender];
+}
+
+@end
+
 @interface EditTextSettingsViewController () <UITextViewDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;
@@ -33,6 +61,7 @@
 @property (nonatomic, strong) UILabel *behaviorSectionLabel;
 @property (nonatomic, strong) UIView *behaviorSettingsContainer;
 @property (nonatomic, strong) TSSettingsController *behaviorSettingsController;
+@property (nonatomic, strong) UIButton *resetButton;
 @property (nonatomic, strong) UIButton *saveButton;
 @property (nonatomic, strong) UIButton *cancelButton;
 @property (nonatomic, strong) NSMutableDictionary *currentSettings;
@@ -48,7 +77,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         keys = @[
-            HUDUserDefaultsKeyKeepInPlace,
             HUDUserDefaultsKeyHideAtSnapshot,
             HUDUserDefaultsKeyUsesRotation,
         ];
@@ -83,7 +111,7 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 
     NSMutableDictionary *savedSettings = LoadHUDSettingsPlist();
 
-    _textViewPreview = [[UITextView alloc] init];
+    _textViewPreview = [[PasteEnabledTextView alloc] init];
     _textViewPreview.translatesAutoresizingMaskIntoConstraints = NO;
     _textViewPreview.font = [UIFont systemFontOfSize:17.0];
     _textViewPreview.textColor = [UIColor labelColor];
@@ -192,8 +220,8 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 
     _portraitOffsetXSlider = [[UISlider alloc] init];
     _portraitOffsetXSlider.translatesAutoresizingMaskIntoConstraints = NO;
-    _portraitOffsetXSlider.minimumValue = -300.0;
-    _portraitOffsetXSlider.maximumValue = 300.0;
+    _portraitOffsetXSlider.minimumValue = -1000.0;
+    _portraitOffsetXSlider.maximumValue = 1000.0;
     _portraitOffsetXSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetX] floatValue];
     [_portraitOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
     [_portraitOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
@@ -206,8 +234,8 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 
     _portraitOffsetYSlider = [[UISlider alloc] init];
     _portraitOffsetYSlider.translatesAutoresizingMaskIntoConstraints = NO;
-    _portraitOffsetYSlider.minimumValue = -300.0;
-    _portraitOffsetYSlider.maximumValue = 300.0;
+    _portraitOffsetYSlider.minimumValue = -1000.0;
+    _portraitOffsetYSlider.maximumValue = 1000.0;
     _portraitOffsetYSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyPortraitOffsetY] floatValue];
     [_portraitOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
     [_portraitOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
@@ -220,8 +248,8 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 
     _landscapeOffsetXSlider = [[UISlider alloc] init];
     _landscapeOffsetXSlider.translatesAutoresizingMaskIntoConstraints = NO;
-    _landscapeOffsetXSlider.minimumValue = -300.0;
-    _landscapeOffsetXSlider.maximumValue = 300.0;
+    _landscapeOffsetXSlider.minimumValue = -1000.0;
+    _landscapeOffsetXSlider.maximumValue = 1000.0;
     _landscapeOffsetXSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetX] floatValue];
     [_landscapeOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
     [_landscapeOffsetXSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
@@ -234,8 +262,8 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 
     _landscapeOffsetYSlider = [[UISlider alloc] init];
     _landscapeOffsetYSlider.translatesAutoresizingMaskIntoConstraints = NO;
-    _landscapeOffsetYSlider.minimumValue = -300.0;
-    _landscapeOffsetYSlider.maximumValue = 300.0;
+    _landscapeOffsetYSlider.minimumValue = -1000.0;
+    _landscapeOffsetYSlider.maximumValue = 1000.0;
     _landscapeOffsetYSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetY] floatValue];
     [_landscapeOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
     [_landscapeOffsetYSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
@@ -274,6 +302,12 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     [_saveButton addTarget:self action:@selector(saveButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [_bottomBar addSubview:_saveButton];
 
+    _resetButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    _resetButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [_resetButton setTitle:NSLocalizedString(@"Reset", nil) forState:UIControlStateNormal];
+    [_resetButton addTarget:self action:@selector(resetButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [_bottomBar addSubview:_resetButton];
+
     _cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
     [_cancelButton setTitle:NSLocalizedString(@"取消", nil) forState:UIControlStateNormal];
@@ -288,9 +322,11 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
         [_bottomBar.heightAnchor constraintEqualToConstant:56],
 
         [_saveButton.centerYAnchor constraintEqualToAnchor:_bottomBar.centerYAnchor],
-        [_saveButton.centerXAnchor constraintEqualToAnchor:_bottomBar.centerXAnchor constant:-60],
+        [_saveButton.centerXAnchor constraintEqualToAnchor:_bottomBar.centerXAnchor],
+        [_resetButton.centerYAnchor constraintEqualToAnchor:_bottomBar.centerYAnchor],
+        [_resetButton.trailingAnchor constraintEqualToAnchor:_saveButton.leadingAnchor constant:-32],
         [_cancelButton.centerYAnchor constraintEqualToAnchor:_bottomBar.centerYAnchor],
-        [_cancelButton.centerXAnchor constraintEqualToAnchor:_bottomBar.centerXAnchor constant:60],
+        [_cancelButton.leadingAnchor constraintEqualToAnchor:_saveButton.trailingAnchor constant:32],
 
         [_scrollView.topAnchor constraintEqualToAnchor:safeArea.topAnchor],
         [_scrollView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
@@ -491,6 +527,25 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (void)resetButtonTapped:(UIButton *)sender {
+    NSString *textContent = _textViewPreview.text ?: @"";
+
+    [_currentSettings setObject:[UIColor redColor] forKey:HUDUserDefaultsKeyTextColor];
+    [_currentSettings setObject:@(NSTextAlignmentCenter) forKey:HUDUserDefaultsKeyTextAlignment];
+    [_currentSettings setObject:@(1) forKey:HUDUserDefaultsKeyTextVerticalPosition];
+    [_currentSettings setObject:@(0.0f) forKey:HUDUserDefaultsKeyPortraitOffsetX];
+    [_currentSettings setObject:@(0.0f) forKey:HUDUserDefaultsKeyPortraitOffsetY];
+    [_currentSettings setObject:@(0.0f) forKey:HUDUserDefaultsKeyLandscapeOffsetX];
+    [_currentSettings setObject:@(0.0f) forKey:HUDUserDefaultsKeyLandscapeOffsetY];
+    [_currentSettings setObject:@(1.0f) forKey:HUDUserDefaultsKeyTextAlpha];
+    [_currentSettings setObject:@(0.0f) forKey:HUDUserDefaultsKeyBackgroundAlpha];
+    [_currentSettings setObject:textContent forKey:HUDUserDefaultsKeyTextContent];
+
+    [self syncControlsFromCurrentSettings];
+    [self configurePlainTextEditor];
+    [self pushPreviewToHUD];
+}
+
 #pragma mark - 文本编辑框（仅编辑文字，样式只同步到浮窗）
 
 - (void)configurePlainTextEditor {
@@ -504,6 +559,7 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 - (void)mergeDraftSettingsIntoPlist:(NSMutableDictionary *)settings
 {
     settings[HUDUserDefaultsKeyPassthroughMode] = @YES;
+    settings[HUDUserDefaultsKeyKeepInPlace] = @NO;
     settings[HUDUserDefaultsKeyTextContent] = _textViewPreview.text;
     settings[HUDUserDefaultsKeyTextSize] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextSize];
     settings[HUDUserDefaultsKeyTextAlignment] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlignment];
@@ -563,6 +619,10 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _currentSettings[HUDUserDefaultsKeyLandscapeOffsetX] = [savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetX] ?: @(0.0f);
     _currentSettings[HUDUserDefaultsKeyLandscapeOffsetY] = [savedSettings objectForKey:HUDUserDefaultsKeyLandscapeOffsetY] ?: @(0.0f);
 
+    [self syncControlsFromCurrentSettings];
+}
+
+- (void)syncControlsFromCurrentSettings {
     _textViewPreview.text = _currentSettings[HUDUserDefaultsKeyTextContent];
     _textColorWell.selectedColor = _currentSettings[HUDUserDefaultsKeyTextColor];
     _textSizeStepper.value = [_currentSettings[HUDUserDefaultsKeyTextSize] doubleValue];

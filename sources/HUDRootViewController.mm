@@ -353,9 +353,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 
 - (BOOL)keepInPlace
 {
-    [self loadUserDefaults:NO];
-    NSNumber *mode = [_userDefaults objectForKey:HUDUserDefaultsKeyKeepInPlace];
-    return mode != nil ? [mode boolValue] : NO;
+    return NO;
 }
 
 - (BOOL)hideAtSnapshot
@@ -682,39 +680,27 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         minimumLandscapeTopConstant = (isPad ? 30 : 10);
         minimumLandscapeBottomConstant = (isPad ? -34 : -14);
 
-        minimumLandscapeTopConstant += realCustomOffsetY;
-        minimumLandscapeBottomConstant += realCustomOffsetY;
-
-        /* Fixed Constraints */
-        [_constraints addObjectsFromArray:@[
-            [_contentView.topAnchor constraintGreaterThanOrEqualToAnchor:self.view.topAnchor constant:minimumLandscapeTopConstant],
-            [_contentView.bottomAnchor constraintLessThanOrEqualToAnchor:self.view.bottomAnchor constant:minimumLandscapeBottomConstant],
-        ]];
-
         /* Flexible Constraint */
         if (verticalPosition == 1) {
             _centerYConstraint = [_contentView.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor constant:realCustomOffsetY];
-            _centerYConstraint.priority = UILayoutPriorityDefaultLow;
             [_constraints addObject:_centerYConstraint];
         } else if (verticalPosition == 2) {
-            _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor constant:minimumLandscapeBottomConstant];
+            _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor constant:minimumLandscapeBottomConstant + realCustomOffsetY];
             if (!isCentered) {
                 CGFloat currentPositionY = [self currentLandscapePositionY];
                 if (currentPositionY < CGFLOAT_MAX) {
                     _bottomConstraint.constant = currentPositionY;
                 }
             }
-            _bottomConstraint.priority = UILayoutPriorityDefaultLow;
             [_constraints addObject:_bottomConstraint];
         } else {
-            _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:minimumLandscapeTopConstant];
+            _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:minimumLandscapeTopConstant + realCustomOffsetY];
             if (!isCentered) {
                 CGFloat currentPositionY = [self currentLandscapePositionY];
                 if (currentPositionY < CGFLOAT_MAX) {
                     _topConstraint.constant = currentPositionY;
                 }
             }
-            _topConstraint.priority = UILayoutPriorityDefaultLow;
             [_constraints addObject:_topConstraint];
         }
     }
@@ -747,16 +733,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
             minimumTopConstraintConstant += realCustomOffsetY;
             minimumBottomConstraintConstant += realCustomOffsetY;
 
-            /* Fixed Constraints */
-            [_constraints addObjectsFromArray:@[
-                [_contentView.topAnchor constraintGreaterThanOrEqualToAnchor:layoutGuide.topAnchor constant:minimumTopConstraintConstant],
-                [_contentView.bottomAnchor constraintLessThanOrEqualToAnchor:layoutGuide.bottomAnchor constant:minimumBottomConstraintConstant],
-            ]];
-
-            /* Flexible Constraint */
             if (verticalPosition == 1) {
                 _centerYConstraint = [_contentView.centerYAnchor constraintEqualToAnchor:layoutGuide.centerYAnchor constant:realCustomOffsetY];
-                _centerYConstraint.priority = UILayoutPriorityDefaultLow;
                 [_constraints addObject:_centerYConstraint];
             } else if (verticalPosition == 2) {
                 _bottomConstraint = [_contentView.bottomAnchor constraintEqualToAnchor:layoutGuide.bottomAnchor constant:minimumBottomConstraintConstant];
@@ -766,7 +744,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
                         _bottomConstraint.constant = currentPositionY;
                     }
                 }
-                _bottomConstraint.priority = UILayoutPriorityDefaultLow;
                 [_constraints addObject:_bottomConstraint];
             } else {
                 _topConstraint = [_contentView.topAnchor constraintEqualToAnchor:layoutGuide.topAnchor constant:minimumTopConstraintConstant];
@@ -776,7 +753,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
                         _topConstraint.constant = currentPositionY;
                     }
                 }
-                _topConstraint.priority = UILayoutPriorityDefaultLow;
                 [_constraints addObject:_topConstraint];
             }
         }
