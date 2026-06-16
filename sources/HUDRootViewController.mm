@@ -2,18 +2,18 @@
 //  HUDRootViewController.mm
 //  TrollMemo
 //
-//  Created by Lessica on 2024/1/24.
+//  桌面 HUD 的根视图控制器，运行在独立 HUD 进程（-hud）中。
+//  负责：在全局悬浮窗显示自定义文字、响应拖拽/点击、监听配置变更与锁屏状态。
+//  文字样式从共享 plist 读取，由主 App 的 EditTextSettingsViewController 写入。
 //
 
 #import <notify.h>
-#import <net/if.h>
-#import <ifaddrs.h>
 #import <objc/runtime.h>
 #import <mach/vm_param.h>
 #import <Foundation/Foundation.h>
 
 #import "HUDRootViewController.h"
-#import "RootViewController.h"
+#import "HUDHelper.h"
 #import "TrollMemo-Swift.h"
 #import "../supports/hudapp-bridging-header.h"
 
@@ -29,6 +29,7 @@
 #define NOTIFY_UI_LOCKSTATE    "com.apple.springboard.lockstate"
 #define NOTIFY_LS_APP_CHANGED  "com.apple.LaunchServices.ApplicationsChanged"
 
+// 主 App 被卸载时，HUD 进程自行退出（TrollSpeed 同款保活逻辑）
 static void LaunchServicesApplicationStateChanged
 (CFNotificationCenterRef center,
  void *observer,
@@ -56,6 +57,7 @@ static void LaunchServicesApplicationStateChanged
     }
 }
 
+// 锁屏时隐藏 HUD，解锁后重新显示
 static void SpringBoardLockStatusChanged
 (CFNotificationCenterRef center,
  void *observer,
@@ -89,19 +91,8 @@ static void SpringBoardLockStatusChanged
     }
 }
 
-#pragma mark - NetworkSpeed13
-
-#define KILOBITS 1000
-#define MEGABITS 1000000
-#define GIGABITS 1000000000
-#define KILOBYTES (1 << 10)
-#define MEGABYTES (1 << 20)
-#define GIGABYTES (1 << 30)
-#define UPDATE_INTERVAL 1.0
-#define SHOW_ALWAYS 1
-#define INLINE_SEPARATOR "\t"
+// 无操作若干秒后自动「虚化」HUD；失焦时的透明度
 #define IDLE_INTERVAL 3.0
-
 static const double HUD_MIN_FONT_SIZE = 9.0;
 static const double HUD_MAX_FONT_SIZE = 10.0;
 static const double HUD_MIN_CORNER_RADIUS = 4.5;
@@ -109,298 +100,6 @@ static const double HUD_MAX_CORNER_RADIUS = 5.0;
 static double HUD_FONT_SIZE = 8.0;
 static UIFontWeight HUD_FONT_WEIGHT = UIFontWeightRegular;
 static CGFloat HUD_INACTIVE_OPACITY = 0.667;
-static uint8_t HUD_SHOW_UPLOAD_SPEED = 1;
-static uint8_t HUD_SHOW_DOWNLOAD_SPEED = 1;
-static uint8_t HUD_SHOW_DOWNLOAD_SPEED_FIRST = 1;
-static uint8_t HUD_SHOW_SECOND_SPEED_IN_NEW_LINE = 0;
-
-typedef struct {
-    uint64_t inputBytes;
-    uint64_t outputBytes;
-} UpDownBytes;
-
-static NSString *formattedSpeed(uint64_t bytes, BOOL isFocused)
-{
-    if (isFocused)
-    {
-        if (0 == 0 /*HUD_DATA_UNIT*/)
-        {
-            if (bytes < KILOBYTES) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 KB", @"formattedSpeed");
-                });
-                return _string;
-            }
-            else if (bytes < MEGABYTES) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f KB", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / KILOBYTES];
-            }
-            else if (bytes < GIGABYTES) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f MB", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / MEGABYTES];
-            }
-            else {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f GB", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / GIGABYTES];
-            }
-        }
-        else
-        {
-            if (bytes < KILOBITS) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 Kb", @"formattedSpeed");
-                });
-                return _string;
-            }
-            else if (bytes < MEGABITS) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f Kb", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / KILOBITS];
-            }
-            else if (bytes < GIGABITS) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Mb", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / MEGABITS];
-            }
-            else {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Gb", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
-            }
-        }
-    }
-    else {
-        if (0 == 0 /*HUD_DATA_UNIT*/)
-        {
-            if (bytes < KILOBYTES) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 KB/s", @"formattedSpeed");
-                });
-                return _string;
-            }
-            else if (bytes < MEGABYTES) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f KB/s", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / KILOBYTES];
-            }
-            else if (bytes < GIGABYTES) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f MB/s", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / MEGABYTES];
-            }
-            else {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f GB/s", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / GIGABYTES];
-            }
-        }
-        else
-        {
-            if (bytes < KILOBITS) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"0 Kb/s", @"formattedSpeed");
-                });
-                return _string;
-            }
-            else if (bytes < MEGABITS) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.0f Kb/s", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / KILOBITS];
-            }
-            else if (bytes < GIGABITS) {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Mb/s", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / MEGABITS];
-            }
-            else {
-                static NSString *_string = nil;
-                static dispatch_once_t onceToken;
-                dispatch_once(&onceToken, ^{
-                    _string = NSLocalizedString(@"%.2f Gb/s", @"formattedSpeed");
-                });
-                return [NSString stringWithFormat:_string, (double)bytes / GIGABITS];
-            }
-        }
-    }
-}
-
-static UpDownBytes getUpDownBytes()
-{
-    struct ifaddrs *ifa_list = 0, *ifa;
-    UpDownBytes upDownBytes;
-    upDownBytes.inputBytes = 0;
-    upDownBytes.outputBytes = 0;
-
-    if (getifaddrs(&ifa_list) == -1) return upDownBytes;
-
-    for (ifa = ifa_list; ifa; ifa = ifa->ifa_next)
-    {
-        /* Skip invalid interfaces */
-        if (ifa->ifa_name == NULL || ifa->ifa_addr == NULL || ifa->ifa_data == NULL)
-            continue;
-
-        /* Skip interfaces that are not link level interfaces */
-        if (AF_LINK != ifa->ifa_addr->sa_family)
-            continue;
-
-        /* Skip interfaces that are not up or running */
-        if (!(ifa->ifa_flags & IFF_UP) && !(ifa->ifa_flags & IFF_RUNNING))
-            continue;
-
-        /* Skip interfaces that are not ethernet or cellular */
-        if (strncmp(ifa->ifa_name, "en", 2) && strncmp(ifa->ifa_name, "pdp_ip", 6))
-            continue;
-
-        struct if_data *if_data = (struct if_data *)ifa->ifa_data;
-
-        upDownBytes.inputBytes += if_data->ifi_ibytes;
-        upDownBytes.outputBytes += if_data->ifi_obytes;
-    }
-
-    freeifaddrs(ifa_list);
-    return upDownBytes;
-}
-
-static BOOL shouldUpdateSpeedLabel;
-static uint64_t prevOutputBytes = 0, prevInputBytes = 0;
-static NSAttributedString *attributedUploadPrefix = nil;
-static NSAttributedString *attributedDownloadPrefix = nil;
-static NSAttributedString *attributedInlineSeparator = nil;
-static NSAttributedString *attributedLineSeparator = nil;
-
-static NSAttributedString *formattedAttributedString(BOOL isFocused)
-{
-    @autoreleasepool
-    {
-        if (!attributedInlineSeparator)
-            attributedInlineSeparator = [[NSAttributedString alloc] initWithString:[NSString stringWithUTF8String:INLINE_SEPARATOR] attributes:@{ NSFontAttributeName: [UIFont boldSystemFontOfSize:HUD_FONT_SIZE] }];
-        if (!attributedLineSeparator)
-            attributedLineSeparator = [[NSAttributedString alloc] initWithString:@"\n" attributes:@{ NSFontAttributeName: [UIFont boldSystemFontOfSize:HUD_FONT_SIZE] }];
-
-        NSMutableAttributedString *mutableString = [[NSMutableAttributedString alloc] init];
-
-        UpDownBytes upDownBytes = getUpDownBytes();
-
-        uint64_t upDiff;
-        uint64_t downDiff;
-
-        if (isFocused)
-        {
-            upDiff = upDownBytes.outputBytes;
-            downDiff = upDownBytes.inputBytes;
-        }
-        else
-        {
-            if (upDownBytes.outputBytes > prevOutputBytes)
-                upDiff = upDownBytes.outputBytes - prevOutputBytes;
-            else
-                upDiff = 0;
-
-            if (upDownBytes.inputBytes > prevInputBytes)
-                downDiff = upDownBytes.inputBytes - prevInputBytes;
-            else
-                downDiff = 0;
-        }
-
-        prevOutputBytes = upDownBytes.outputBytes;
-        prevInputBytes = upDownBytes.inputBytes;
-
-        if (!SHOW_ALWAYS && (upDiff < 2 * KILOBYTES && downDiff < 2 * KILOBYTES))
-        {
-            shouldUpdateSpeedLabel = NO;
-            return nil;
-        }
-        else shouldUpdateSpeedLabel = YES;
-
-        if (HUD_SHOW_DOWNLOAD_SPEED_FIRST)
-        {
-            if (HUD_SHOW_DOWNLOAD_SPEED)
-            {
-                [mutableString appendAttributedString:attributedDownloadPrefix];
-                [mutableString appendAttributedString:[[NSAttributedString alloc] initWithString:formattedSpeed(downDiff, isFocused) attributes:@{ NSFontAttributeName: [UIFont monospacedDigitSystemFontOfSize:HUD_FONT_SIZE weight:HUD_FONT_WEIGHT] }]];
-            }
-
-            if (HUD_SHOW_UPLOAD_SPEED)
-            {
-                if ([mutableString length] > 0)
-                {
-                    if (HUD_SHOW_SECOND_SPEED_IN_NEW_LINE) [mutableString appendAttributedString:attributedLineSeparator];
-                    else [mutableString appendAttributedString:attributedInlineSeparator];
-                }
-
-                [mutableString appendAttributedString:attributedUploadPrefix];
-                [mutableString appendAttributedString:[[NSAttributedString alloc] initWithString:formattedSpeed(upDiff, isFocused) attributes:@{ NSFontAttributeName: [UIFont monospacedDigitSystemFontOfSize:HUD_FONT_SIZE weight:HUD_FONT_WEIGHT] }]];
-            }
-        }
-        else
-        {
-            if (HUD_SHOW_UPLOAD_SPEED)
-            {
-                [mutableString appendAttributedString:attributedUploadPrefix];
-                [mutableString appendAttributedString:[[NSAttributedString alloc] initWithString:formattedSpeed(upDiff, isFocused) attributes:@{ NSFontAttributeName: [UIFont monospacedDigitSystemFontOfSize:HUD_FONT_SIZE weight:HUD_FONT_WEIGHT] }]];
-            }
-            if (HUD_SHOW_DOWNLOAD_SPEED)
-            {
-                if ([mutableString length] > 0)
-                {
-                    if (HUD_SHOW_SECOND_SPEED_IN_NEW_LINE) [mutableString appendAttributedString:attributedLineSeparator];
-                    else [mutableString appendAttributedString:attributedInlineSeparator];
-                }
-
-                [mutableString appendAttributedString:attributedDownloadPrefix];
-                [mutableString appendAttributedString:[[NSAttributedString alloc] initWithString:formattedSpeed(downDiff, isFocused) attributes:@{ NSFontAttributeName: [UIFont monospacedDigitSystemFontOfSize:HUD_FONT_SIZE weight:HUD_FONT_WEIGHT] }]];
-            }
-        }
-
-        return [mutableString copy];
-    }
-}
-
-#pragma mark - HUDRootViewController
 
 @interface HUDRootViewController (Troll)
 - (void)updateOrientation:(UIInterfaceOrientation)orientation animateWithDuration:(NSTimeInterval)duration;
@@ -410,20 +109,19 @@ static const CACornerMask kCornerMaskBottom = kCALayerMinXMaxYCorner | kCALayerM
 static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner | kCALayerMinXMaxYCorner | kCALayerMaxXMaxYCorner;
 
 @implementation HUDRootViewController {
-    NSMutableDictionary *_userDefaults;
+    NSMutableDictionary *_userDefaults;       // 从 USER_DEFAULTS_PATH plist 加载的配置
     NSMutableArray <NSLayoutConstraint *> *_constraints;
     UIBlurEffect *_blurEffect;
-    UIVisualEffectView *_blurView;
-    ScreenshotInvisibleContainer *_containerView;
-    UIView *_contentView;
-    UIImageView *_lockedView;
-    NSTimer *_timer;
+    UIVisualEffectView *_blurView;            // 毛玻璃背景容器
+    ScreenshotInvisibleContainer *_containerView; // 截图时隐藏/显示 HUD 内容
+    UIView *_contentView;                      // 可拖拽的整体 HUD 区域
+    UIImageView *_lockedView;                  // 锁定位置时显示的锁图标
     UITapGestureRecognizer *_tapGestureRecognizer;
     UIPanGestureRecognizer *_panGestureRecognizer;
     UIImpactFeedbackGenerator *_impactFeedbackGenerator;
     UINotificationFeedbackGenerator *_notificationFeedbackGenerator;
-    BOOL _isFocused;
-    NSLayoutConstraint *_topConstraint;
+    BOOL _isFocused;                           // YES=高亮聚焦，NO=半透明虚化
+    NSLayoutConstraint *_topConstraint;        // 竖直位置（拖拽会改 constant）
     NSLayoutConstraint *_centerXConstraint;
     NSLayoutConstraint *_leadingConstraint;
     NSLayoutConstraint *_trailingConstraint;
@@ -432,20 +130,14 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     BOOL _shouldKeepIdle;
     BOOL _canAdjustOrientation;
     BOOL _isPassthroughMode;
-    BOOL _usesBitrate;
-    BOOL _usesArrowPrefixes;
-    BOOL _singleLineMode;
     BOOL _usesLargeFont;
     BOOL _usesRotation;
     BOOL _usesInvertedColor;
     BOOL _keepInPlace;
     BOOL _hideAtSnapshot;
-    UITextView *_hudTextView;
-    NSTimer *_loopTimer;
-    struct {
-        uint64_t inputBytes;
-        uint64_t outputBytes;
-    } _lastBytes;
+    UITextView *_hudTextView;                  // 桌面显示文字的视图
+    NSLayoutConstraint *_hudTextWidthConstraint;  // 随文字内容动态更新
+    NSLayoutConstraint *_hudTextHeightConstraint;
     CGPoint _centerOffset;
     UIInterfaceOrientation _interfaceOrientation;
     BOOL _isLandscape;
@@ -455,9 +147,11 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     CGFloat _safeAreaBottomInset;
 }
 
+// 注册 Darwin 通知与 KVO：主 App 改配置 / 锁屏 / 偏移字号变更时刷新 HUD
 - (void)registerNotifications
 {
     int token;
+    // 主 App 保存文字或设置后 post 此通知
     notify_register_dispatch(NOTIFY_RELOAD_HUD, &token, dispatch_get_main_queue(), ^(int token) {
         [self reloadUserDefaults];
     });
@@ -482,19 +176,13 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         CFNotificationSuspensionBehaviorCoalesce
     );
 
+    // 仅监听偏移/字号（存在 GetStandardUserDefaults）；文字配置走 plist + NOTIFY_RELOAD_HUD
     NSUserDefaults *userDefaults = GetStandardUserDefaults();
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyUsesCustomFontSize options:NSKeyValueObservingOptionNew context:nil];
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomFontSize options:NSKeyValueObservingOptionNew context:nil];
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyUsesCustomOffset options:NSKeyValueObservingOptionNew context:nil];
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetX options:NSKeyValueObservingOptionNew context:nil];
     [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetY options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextContent options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextColor options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextSize options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextAlignment options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyTextAlpha options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyBackgroundColor options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyBackgroundAlpha options:NSKeyValueObservingOptionNew context:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
@@ -502,25 +190,20 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomFontSize] ||
         [keyPath isEqualToString:HUDUserDefaultsKeyUsesCustomOffset] ||
         [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomOffsetX] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomOffsetY] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyTextContent] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyTextColor] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyTextSize] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyTextAlignment] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyTextAlpha] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyBackgroundColor] ||
-        [keyPath isEqualToString:HUDUserDefaultsKeyBackgroundAlpha])
+        [keyPath isEqualToString:HUDUserDefaultsKeyRealCustomOffsetY])
     {
         [self reloadUserDefaults];
     }
 }
 
+// 从共享 plist 文件加载配置到内存
 - (void)loadUserDefaults:(BOOL)forceReload
 {
     if (forceReload || !_userDefaults)
         _userDefaults = [[NSDictionary dictionaryWithContentsOfFile:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH))] mutableCopy] ?: [NSMutableDictionary dictionary];
 }
 
+// HUD 侧修改配置（如拖拽保存 Y 坐标）时写回 plist，并通知主 App
 - (void)saveUserDefaults
 {
     BOOL wroteSucceed = [_userDefaults writeToFile:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH)) atomically:YES];
@@ -533,6 +216,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     }
 }
 
+// 配置变更后的总入口：更新样式、布局、文字，并安排自动虚化
 - (void)reloadUserDefaults
 {
     [self loadUserDefaults:YES];
@@ -561,11 +245,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         [_containerView setupContainerAsDisplayContentInScreenshots];
     }
 
-    prevInputBytes = 0;
-    prevOutputBytes = 0;
-    attributedUploadPrefix = nil;
-    attributedDownloadPrefix = nil;
-
     [self removeAllAnimations];
     [self resetGestureRecognizers];
     [self updateViewConstraints];
@@ -576,6 +255,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         [self keepFocus:_contentView];
     }
 
+    [self applyTextSettings];
+    // 几秒无操作后进入半透明「虚化」状态
     [self performSelector:@selector(onBlur:) withObject:_contentView afterDelay:IDLE_INTERVAL];
 }
 
@@ -741,21 +422,11 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [_orientationObserver invalidate];
 }
 
-- (void)updateSpeedLabel
-{
-    log_debug(OS_LOG_DEFAULT, "updateSpeedLabel");
-    NSAttributedString *attributedText = formattedAttributedString(_isFocused);
-    if (attributedText) {
-        [self.hudTextView setAttributedText:attributedText];
-    }
-    [self.hudTextView sizeToFit];
-}
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    /* Just put your HUD view here */
 
+    // 视图层级：contentView → 截图容器 → 毛玻璃 blurView → hudTextView（文字）
     _contentView = [[UIView alloc] init];
     _contentView.backgroundColor = [UIColor clearColor];
     _contentView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -782,6 +453,22 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     self.hudTextView.layer.masksToBounds = YES; // 裁剪子视图到圆角
     [_blurView.contentView addSubview:self.hudTextView];
 
+    // 文字居中；宽高约束在 applyTextSettings 里按内容动态调整
+    _hudTextWidthConstraint = [_hudTextView.widthAnchor constraintEqualToConstant:100];
+    _hudTextHeightConstraint = [_hudTextView.heightAnchor constraintEqualToConstant:44];
+    [NSLayoutConstraint activateConstraints:@[
+        [_hudTextView.centerXAnchor constraintEqualToAnchor:_blurView.contentView.centerXAnchor],
+        [_hudTextView.centerYAnchor constraintEqualToAnchor:_blurView.contentView.centerYAnchor],
+        _hudTextWidthConstraint,
+        _hudTextHeightConstraint,
+        [_blurView.widthAnchor constraintEqualToAnchor:_hudTextView.widthAnchor],
+        [_blurView.heightAnchor constraintEqualToAnchor:_hudTextView.heightAnchor],
+        [_containerView.hiddenContainer.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
+        [_containerView.hiddenContainer.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor],
+        [_contentView.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
+        [_contentView.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor],
+    ]];
+
     _lockedView = [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"lock.fill"]];
     _lockedView.tintColor = [UIColor whiteColor];
     _lockedView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -804,25 +491,21 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [_contentView setUserInteractionEnabled:YES];
 
     [self reloadUserDefaults];
-    [self applyTextSettings]; // 在视图加载后应用文本设置
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    notify_post(NOTIFY_LAUNCHED_HUD);
+    notify_post(NOTIFY_LAUNCHED_HUD); // 通知主 App：HUD 已就绪
 }
 
+// 原 TrollSpeed 用于刷新网速的定时器；文字模式无需轮询，保留空实现以兼容锁屏回调
 - (void)resetLoopTimer
 {
-    [_timer invalidate];
-    _timer = [NSTimer scheduledTimerWithTimeInterval:UPDATE_INTERVAL target:self selector:@selector(updateSpeedLabel) userInfo:nil repeats:YES];
 }
 
 - (void)stopLoopTimer
 {
-    [_timer invalidate];
-    _timer = nil;
 }
 
 - (void)viewSafeAreaInsetsDidChange
@@ -833,6 +516,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [self updateViewConstraints];
 }
 
+// 根据横竖屏、安全区、用户拖拽记录的位置，计算 HUD 在屏幕上的约束
 - (void)updateViewConstraints
 {
     [NSLayoutConstraint deactivateConstraints:_constraints];
@@ -849,8 +533,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     BOOL isCenteredMost = false;
     BOOL isPad = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
 
-    HUD_SHOW_DOWNLOAD_SPEED_FIRST = isCentered;
-    HUD_SHOW_SECOND_SPEED_IN_NEW_LINE = !isCentered;
     [_lockedView setImage:[UIImage systemImageNamed:(isCentered ? @"hand.raised.slash.fill" : @"lock.fill")]];
     [_blurView.layer setMaskedCorners:((isCenteredMost && !isLandscape) ? kCornerMaskBottom : kCornerMaskAll)];
 
@@ -970,6 +652,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [super updateViewConstraints];
 }
 
+#pragma mark - 聚焦 / 虚化动画（点击 HUD 高亮，闲置后半透明）
+
 - (void)keepFocus:(UIView *)view
 {
     [self onFocus:view duration:0];
@@ -991,8 +675,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onFocus:) object:view];
 
     _isFocused = YES;
-    [self updateSpeedLabel];
-    [self resetLoopTimer];
+    [self applyTextSettings]; // 聚焦时以完整透明度显示文字
 
     BOOL isCentered = false;
 
@@ -1028,8 +711,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(onFocus:) object:view];
 
     _isFocused = NO;
-    [self updateSpeedLabel];
-    [self resetLoopTimer];
+    [self applyTextSettings]; // 虚化时仍刷新文字，但整体 alpha 降为 HUD_INACTIVE_OPACITY
 
     [UIView animateWithDuration:duration delay:0.0 usingSpringWithDamping:1.0 initialSpringVelocity:1.0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState animations:^{
         view.transform = CGAffineTransformIdentity;
@@ -1094,6 +776,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     [_hudTextView.layer addAnimation:animationReverse forKey:@"opacity"];
 }
 
+// 拖拽改变 HUD 垂直位置；若开启「固定位置」则震动并闪锁图标
 - (void)panGestureRecognized:(UIPanGestureRecognizer *)sender
 {
     if (!_isFocused)
@@ -1162,84 +845,73 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     }
 }
 
-#pragma mark - Text Settings
+#pragma mark - 文字样式（从 plist 读取并应用到 hudTextView）
 
+// 读取 EditTextSettingsViewController 保存的配置，渲染到桌面文字视图
 - (void)applyTextSettings {
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [self loadUserDefaults:NO];
 
-    // 文字内容
-    NSString *textContent = [userDefaults stringForKey:HUDUserDefaultsKeyTextContent] ?: NSLocalizedString(@"Hello World!", nil);
+    // --- 文字内容 ---
+    NSString *textContent = [_userDefaults objectForKey:HUDUserDefaultsKeyTextContent];
+    if (!textContent) {
+        textContent = NSLocalizedString(@"Hello World!", nil);
+    }
     self.hudTextView.text = textContent;
 
-    // 文字颜色
-    NSData *textColorData = [userDefaults dataForKey:HUDUserDefaultsKeyTextColor];
+    // --- 文字颜色（plist 里存的是 NSKeyedArchiver 序列化的 NSData）---
+    NSData *textColorData = [_userDefaults objectForKey:HUDUserDefaultsKeyTextColor];
     if (textColorData) {
         UIColor *textColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:textColorData error:nil];
-        if (textColor) {
-            self.hudTextView.textColor = textColor;
-        }
+        self.hudTextView.textColor = textColor ?: [UIColor whiteColor];
     } else {
-        self.hudTextView.textColor = [UIColor whiteColor]; // HUD默认白色
+        self.hudTextView.textColor = [UIColor whiteColor];
     }
 
-    // 文字大小
-    CGFloat textSize = [userDefaults floatForKey:HUDUserDefaultsKeyTextSize];
-    if (textSize < 5.0 || textSize > 50.0) { // 检查有效范围
-        textSize = 10.0; // 默认值
+    NSNumber *textSizeNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextSize];
+    CGFloat textSize = textSizeNumber ? [textSizeNumber floatValue] : 10.0;
+    if (textSize < 5.0 || textSize > 50.0) {
+        textSize = 10.0;
     }
     self.hudTextView.font = [UIFont systemFontOfSize:textSize];
 
-    // 文字对齐
-    NSTextAlignment textAlignment = [userDefaults integerForKey:HUDUserDefaultsKeyTextAlignment];
-    self.hudTextView.textAlignment = textAlignment;
+    NSNumber *textAlignmentNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextAlignment];
+    self.hudTextView.textAlignment = textAlignmentNumber ? (NSTextAlignment)[textAlignmentNumber integerValue] : NSTextAlignmentCenter;
 
-    // 文字透明度
-    CGFloat textAlpha = [userDefaults floatForKey:HUDUserDefaultsKeyTextAlpha];
-    if (textAlpha < 0.0 || textAlpha > 1.0) { // 检查有效范围
-        textAlpha = 1.0; // 默认完全不透明
+    NSNumber *textAlphaNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextAlpha];
+    CGFloat textAlpha = textAlphaNumber ? [textAlphaNumber floatValue] : 1.0;
+    if (textAlpha < 0.0 || textAlpha > 1.0) {
+        textAlpha = 1.0;
     }
     self.hudTextView.alpha = textAlpha;
 
-    // 背景颜色
-    NSData *bgColorData = [userDefaults dataForKey:HUDUserDefaultsKeyBackgroundColor];
+    // --- 背景色与背景透明度（与文字透明度分开控制）---
+    NSData *bgColorData = [_userDefaults objectForKey:HUDUserDefaultsKeyBackgroundColor];
+    UIColor *bgColor = [UIColor blackColor];
     if (bgColorData) {
-        UIColor *bgColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:bgColorData error:nil];
-        if (bgColor) {
-            self.hudTextView.backgroundColor = bgColor; // 设置背景颜色
+        UIColor *decodedBgColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:bgColorData error:nil];
+        if (decodedBgColor) {
+            bgColor = decodedBgColor;
         }
-    } else {
-        self.hudTextView.backgroundColor = [UIColor blackColor]; // 默认黑色背景
     }
 
-    // 背景透明度
-    CGFloat backgroundAlpha = [userDefaults floatForKey:HUDUserDefaultsKeyBackgroundAlpha];
-    if (backgroundAlpha < 0.0 || backgroundAlpha > 1.0) { // 检查有效范围
-        backgroundAlpha = 1.0; // 默认完全透明
+    NSNumber *backgroundAlphaNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
+    CGFloat backgroundAlpha = backgroundAlphaNumber ? [backgroundAlphaNumber floatValue] : 0.0;
+    if (backgroundAlpha < 0.0 || backgroundAlpha > 1.0) {
+        backgroundAlpha = 0.0;
     }
-    self.hudTextView.alpha = backgroundAlpha; // 设置背景透明度
+    self.hudTextView.backgroundColor = [bgColor colorWithAlphaComponent:backgroundAlpha];
 
-    // 重新计算文本视图的尺寸以适应内容
+    // 按文字实际尺寸更新容器大小，避免每次新建约束
     CGSize newSize = [self.hudTextView sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    
-    // 更新HUD容器视图的尺寸
-    [_hudTextView.widthAnchor constraintEqualToConstant:newSize.width + 20].active = YES; // 添加一些内边距
-    [_hudTextView.heightAnchor constraintEqualToConstant:newSize.height + 20].active = YES;
+    _hudTextWidthConstraint.constant = newSize.width;
+    _hudTextHeightConstraint.constant = newSize.height;
 
-    // 调整 _blurView 的尺寸以包裹 _hudTextView，并添加圆角
-    [_blurView.widthAnchor constraintEqualToAnchor:_hudTextView.widthAnchor].active = YES;
-    [_blurView.heightAnchor constraintEqualToAnchor:_hudTextView.heightAnchor].active = YES;
-    _blurView.layer.cornerRadius = HUD_MAX_CORNER_RADIUS; // 5像素圆角
-    _blurView.layer.masksToBounds = YES;
-
-    // 更新 _contentView 的尺寸以包裹 _blurView
-    [_contentView.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor].active = YES;
-    [_contentView.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor].active = YES;
-
-    // 确保布局更新
     [self.view layoutIfNeeded];
 }
 
 @end
+
+#pragma mark - 屏幕旋转（TrollSpeed 遗留扩展）
 
 @implementation HUDRootViewController (Troll)
 
@@ -1268,6 +940,7 @@ static inline CGRect orientationBounds(UIInterfaceOrientation orientation, CGRec
     }
 }
 
+// 未开启「随屏幕旋转」时，横屏隐藏 HUD，竖屏恢复显示
 - (void)updateOrientation:(UIInterfaceOrientation)orientation animateWithDuration:(NSTimeInterval)duration
 {
     BOOL usesRotation = [self usesRotation];

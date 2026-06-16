@@ -10,18 +10,19 @@
 
 [<img width="150" src="https://docs.havoc.app/img/badges/get_square.svg" />][now-on-havoc]
 
-Shows upload &amp; download speed below the status bar.
+Shows custom text overlay on the home screen via a persistent HUD.
 
-Tested and expected to work on all iOS versions supported by opa334’s TrollStore.
+Tested and expected to work on all iOS versions supported by opa334's TrollStore.
 
 ## How it works?
 
-[TrollStore](https://github.com/opa334/TrollStore) + [UIDaemon](https://github.com/limneos/UIDaemon) + [NetworkSpeed13](https://github.com/lwlsw/NetworkSpeed13) + (some magic)
+[TrollStore](https://github.com/opa334/TrollStore) + [UIDaemon](https://github.com/limneos/UIDaemon) + (TrollSpeed magic)
 \=
 
-- An TrollStore app to spawn HUD process with root privilege.
-- Don’t call `waitpid` to that process. Let it go.
+- A TrollStore app to spawn a HUD process with root privilege.
+- Don't call `waitpid` on that process. Let it go.
 - A HUD app with entitlements from `assistivetouchd` to display and persist global windows.
+- Custom text content, color, size, and alignment are stored in a shared plist and rendered on the HUD.
 
 ## How to build?
 

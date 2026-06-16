@@ -226,3 +226,20 @@ NSUserDefaults *GetStandardUserDefaults(void)
     });
     return _userDefaults;
 }
+
+NSMutableDictionary *LoadHUDSettingsPlist(void)
+{
+    return [[NSDictionary dictionaryWithContentsOfFile:JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH)] mutableCopy] ?: [NSMutableDictionary dictionary];
+}
+
+BOOL SaveHUDSettingsPlist(NSDictionary *settings)
+{
+    BOOL wroteSucceed = [settings writeToFile:JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH) atomically:YES];
+    if (wroteSucceed) {
+        [[NSFileManager defaultManager] setAttributes:@{
+            NSFileOwnerAccountID: @501,
+            NSFileGroupOwnerAccountID: @501,
+        } ofItemAtPath:JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH) error:nil];
+    }
+    return wroteSucceed;
+}

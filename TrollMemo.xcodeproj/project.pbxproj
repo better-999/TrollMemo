@@ -96,6 +96,8 @@
 		CC91309E2B616541006E3280 /* HUDBackdropLabel.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC91309D2B616541006E3280 /* HUDBackdropLabel.mm */; };
 		CC9130A32B616C18006E3280 /* HUDBackdropView.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC9130A22B616C18006E3280 /* HUDBackdropView.mm */; };
 		CC9130A72B62A33A006E3280 /* TSSettingsIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9130A62B62A33A006E3280 /* TSSettingsIndex.swift */; };
+		CCEDITTEXT032DABF001C7C9E /* EditTextSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CCEDITTEXT022DABF001C7C9E /* EditTextSettingsViewController.m */; };
+		CCEDITTEXT042DABF001C7C9E /* EditTextSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CCEDITTEXT022DABF001C7C9E /* EditTextSettingsViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -200,6 +202,8 @@
 		CC9130A22B616C18006E3280 /* HUDBackdropView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = HUDBackdropView.mm; sourceTree = "<group>"; };
 		CC9130A52B62A262006E3280 /* hudapp-bridging-header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "hudapp-bridging-header.h"; sourceTree = "<group>"; };
 		CC9130A62B62A33A006E3280 /* TSSettingsIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TSSettingsIndex.swift; sourceTree = "<group>"; };
+		CCEDITTEXT012DABF001C7C9E /* EditTextSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EditTextSettingsViewController.h; sourceTree = "<group>"; };
+		CCEDITTEXT022DABF001C7C9E /* EditTextSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EditTextSettingsViewController.m; sourceTree = "<group>"; };
 		CCB6B6FA2B5C06DD00AD2A89 /* NSUserDefaults+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSUserDefaults+Private.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -311,6 +315,8 @@
 				CC711D2E2B5BF5C6007235A6 /* MainButton.mm */,
 				CC711D3E2B5BF5C6007235A6 /* RootViewController.h */,
 				CC711D1F2B5BF5C6007235A6 /* RootViewController.mm */,
+				CCEDITTEXT012DABF001C7C9E /* EditTextSettingsViewController.h */,
+				CCEDITTEXT022DABF001C7C9E /* EditTextSettingsViewController.m */,
 				CC711D232B5BF5C6007235A6 /* TSEventFetcher.h */,
 				CC711D472B5BF5C6007235A6 /* TSEventFetcher.mm */,
 				CC9130A62B62A33A006E3280 /* TSSettingsIndex.swift */,
@@ -563,6 +569,7 @@
 				CC654E2D2DABD9C200D54F83 /* SPLarkTransitioningDelegate.swift in Sources */,
 				CC654E2E2DABD9C200D54F83 /* SPLarkSettingsCollectionViewCell.swift in Sources */,
 				CC654E2F2DABD9C200D54F83 /* HUDMainWindow.mm in Sources */,
+				CCEDITTEXT032DABF001C7C9E /* EditTextSettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -603,6 +610,7 @@
 				CC711D5A2B5BF5C6007235A6 /* SPLarkTransitioningDelegate.swift in Sources */,
 				CC711D542B5BF5C6007235A6 /* SPLarkSettingsCollectionViewCell.swift in Sources */,
 				CC711D4C2B5BF5C6007235A6 /* HUDMainWindow.mm in Sources */,
+				CCEDITTEXT042DABF001C7C9E /* EditTextSettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

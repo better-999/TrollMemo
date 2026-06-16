@@ -119,6 +119,8 @@ jobs:
           GIT_TAG=$(git describe --tags --always --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
           echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
 
+          ./gen-control.sh "$GIT_TAG"
+
           SCHEME="${{ github.event.inputs.scheme }}"
           echo "Building with scheme: $SCHEME"
           

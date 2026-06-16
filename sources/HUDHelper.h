@@ -18,4 +18,7 @@ OBJC_EXTERN void SimulateMemoryPressure(void);
 
 OBJC_EXTERN NSUserDefaults *GetStandardUserDefaults(void);
 
+OBJC_EXTERN NSMutableDictionary *LoadHUDSettingsPlist(void);
+OBJC_EXTERN BOOL SaveHUDSettingsPlist(NSDictionary *settings);
+
 NS_ASSUME_NONNULL_END
