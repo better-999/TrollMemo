@@ -27,13 +27,42 @@ extern "C" int posix_spawnattr_set_persona_gid_np(const posix_spawnattr_t* __res
 static void HUDSpawnApplyRootPersona(posix_spawnattr_t *attr)
 {
 #if !TARGET_OS_SIMULATOR
-    if (!IsJailbrokenHUDEnvironment()) {
-        return;
-    }
+    // TrollStore 也需要 root persona 才能显示全局 HUD（与 TrollSpeed 一致）
     posix_spawnattr_set_persona_np(attr, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
     posix_spawnattr_set_persona_uid_np(attr, 0);
     posix_spawnattr_set_persona_gid_np(attr, 0);
 #endif
+}
+
+static const char *HUDExecutablePath(void)
+{
+    static char *executablePath = NULL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *path = [[NSBundle mainBundle] executablePath];
+        if (path.length > 0) {
+            executablePath = strdup(path.fileSystemRepresentation);
+            return;
+        }
+        uint32_t size = 0;
+        _NSGetExecutablePath(NULL, &size);
+        executablePath = (char *)calloc(1, size);
+        _NSGetExecutablePath(executablePath, &size);
+    });
+    return executablePath;
+}
+
+static void EnsureHUDRuntimePaths(void)
+{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    [fm createDirectoryAtPath:[HUDResolvedPath(HUD_PID_PATH) stringByDeletingLastPathComponent]
+    withIntermediateDirectories:YES
+                     attributes:nil
+                          error:nil];
+    [fm createDirectoryAtPath:[HUDResolvedPath(USER_DEFAULTS_PATH) stringByDeletingLastPathComponent]
+    withIntermediateDirectories:YES
+                     attributes:nil
+                          error:nil];
 }
 
 BOOL IsJailbrokenHUDEnvironment(void)
@@ -125,7 +154,11 @@ BOOL IsHUDEnabled(void)
 
 void SetHUDEnabled(BOOL isEnabled)
 {
-    notify_post(NOTIFY_DISMISSAL_HUD);
+    if (isEnabled) {
+        EnsureHUDRuntimePaths();
+    } else {
+        notify_post(NOTIFY_DISMISSAL_HUD);
+    }
 
     posix_spawnattr_t attr;
     posix_spawnattr_init(&attr);
@@ -165,11 +198,11 @@ void SetHUDEnabled(BOOL isEnabled)
         return;
     }
 
-    static char *executablePath = NULL;
-    uint32_t executablePathSize = 0;
-    _NSGetExecutablePath(NULL, &executablePathSize);
-    executablePath = (char *)calloc(1, executablePathSize);
-    _NSGetExecutablePath(executablePath, &executablePathSize);
+    static const char *executablePath = NULL;
+    static dispatch_once_t execOnceToken;
+    dispatch_once(&execOnceToken, ^{
+        executablePath = HUDExecutablePath();
+    });
 
     if (isEnabled)
     {
@@ -181,7 +214,7 @@ void SetHUDEnabled(BOOL isEnabled)
         const char *args[] = { executablePath, "-hud", NULL };
         rc = posix_spawn(&task_pid, executablePath, NULL, &attr, (char **)args, environ);
         if (rc != 0) {
-            log_debug(OS_LOG_DEFAULT, "posix_spawn error %s", strerror(rc));
+            log_debug(OS_LOG_DEFAULT, "posix_spawn -hud error %s", strerror(rc));
         }
 
         posix_spawnattr_destroy(&attr);
@@ -191,12 +224,10 @@ void SetHUDEnabled(BOOL isEnabled)
         }
 
         log_debug(OS_LOG_DEFAULT, "spawned %{public}s -hud pid = %{public}d", executablePath, task_pid);
-
-        int unused;
-        waitpid(task_pid, &unused, WNOHANG);
     }
     else
     {
+        notify_post(NOTIFY_DISMISSAL_HUD);
         [NSThread sleepForTimeInterval:FADE_OUT_DURATION];
 
         int rc;
@@ -204,7 +235,7 @@ void SetHUDEnabled(BOOL isEnabled)
         const char *args[] = { executablePath, "-exit", NULL };
         rc = posix_spawn(&task_pid, executablePath, NULL, &attr, (char **)args, environ);
         if (rc != 0) {
-            log_debug(OS_LOG_DEFAULT, "posix_spawn error %s", strerror(rc));
+            log_debug(OS_LOG_DEFAULT, "posix_spawn -exit error %s", strerror(rc));
         }
 
         posix_spawnattr_destroy(&attr);

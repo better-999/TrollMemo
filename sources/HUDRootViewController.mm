@@ -39,6 +39,10 @@ static void LaunchServicesApplicationStateChanged
 {
     /* Application installed or uninstalled */
 
+    if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/TrollMemo.app"]) {
+        return;
+    }
+
     BOOL isAppInstalled = NO;
 
     for (LSApplicationProxy *app in [[objc_getClass("LSApplicationWorkspace") defaultWorkspace] allApplications])
@@ -48,11 +52,6 @@ static void LaunchServicesApplicationStateChanged
             isAppInstalled = YES;
             break;
         }
-    }
-
-    if (!isAppInstalled)
-    {
-        isAppInstalled = [[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/TrollMemo.app"];
     }
 
     if (!isAppInstalled)
@@ -181,13 +180,15 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         CFNotificationSuspensionBehaviorCoalesce
     );
 
-    // 仅监听偏移/字号（存在 GetStandardUserDefaults）；文字配置走 plist + NOTIFY_RELOAD_HUD
-    NSUserDefaults *userDefaults = GetStandardUserDefaults();
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyUsesCustomFontSize options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomFontSize options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyUsesCustomOffset options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetX options:NSKeyValueObservingOptionNew context:nil];
-    [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetY options:NSKeyValueObservingOptionNew context:nil];
+    // 偏移/字号走 App 容器 UserDefaults；TrollStore HUD 进程跳过 KVO，靠 NOTIFY_RELOAD_HUD 刷新 plist 配置
+    if (IsJailbrokenHUDEnvironment()) {
+        NSUserDefaults *userDefaults = GetStandardUserDefaults();
+        [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyUsesCustomFontSize options:NSKeyValueObservingOptionNew context:nil];
+        [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomFontSize options:NSKeyValueObservingOptionNew context:nil];
+        [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyUsesCustomOffset options:NSKeyValueObservingOptionNew context:nil];
+        [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetX options:NSKeyValueObservingOptionNew context:nil];
+        [userDefaults addObserver:self forKeyPath:HUDUserDefaultsKeyRealCustomOffsetY options:NSKeyValueObservingOptionNew context:nil];
+    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {

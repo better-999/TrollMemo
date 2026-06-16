@@ -124,10 +124,18 @@ int main(int argc, char *argv[])
             log_debug(OS_LOG_DEFAULT, "HUD pid %d, pgid %d", pid, pgid);
 
             NSString *pidString = [NSString stringWithFormat:@"%d", pid];
+            NSError *pidWriteError = nil;
+            [[NSFileManager defaultManager] createDirectoryAtPath:[pidPath stringByDeletingLastPathComponent]
+                                      withIntermediateDirectories:YES
+                                                       attributes:nil
+                                                            error:nil];
             [pidString writeToFile:pidPath
                         atomically:YES
                           encoding:NSUTF8StringEncoding
-                             error:nil];
+                             error:&pidWriteError];
+            if (pidWriteError) {
+                log_debug(OS_LOG_DEFAULT, "failed to write pid file: %{public}@", pidWriteError);
+            }
 
             [UIScreen initialize];
             CFRunLoopGetCurrent();
