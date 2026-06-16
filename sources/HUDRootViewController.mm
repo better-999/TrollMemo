@@ -52,6 +52,11 @@ static void LaunchServicesApplicationStateChanged
 
     if (!isAppInstalled)
     {
+        isAppInstalled = [[NSFileManager defaultManager] fileExistsAtPath:@"/Applications/TrollMemo.app"];
+    }
+
+    if (!isAppInstalled)
+    {
         UIApplication *app = [UIApplication sharedApplication];
         [app terminateWithSuccess];
     }

@@ -108,6 +108,7 @@
     _textAlphaSlider.maximumValue = 1.0;
     _textAlphaSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyTextAlpha] floatValue] ?: 1.0;
     [_textAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
+    [_textAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
     [self.view addSubview:_textAlphaSlider];
 
     UILabel *backgroundColorLabel = [[UILabel alloc] init];
@@ -132,6 +133,7 @@
     _backgroundAlphaSlider.maximumValue = 1.0;
     _backgroundAlphaSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha] floatValue] ?: 0.0;
     [_backgroundAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
+    [_backgroundAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
     [self.view addSubview:_backgroundAlphaSlider];
 
     _saveButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -173,11 +175,11 @@
 
         [textAlphaLabel.topAnchor constraintEqualToAnchor:textAlignmentLabel.bottomAnchor constant:20],
         [textAlphaLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
-        [_textAlphaSlider.centerYAnchor constraintEqualToAnchor:textAlphaLabel.centerYAnchor],
+        [_textAlphaSlider.topAnchor constraintEqualToAnchor:textAlphaLabel.bottomAnchor constant:8],
+        [_textAlphaSlider.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
         [_textAlphaSlider.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
-        [_textAlphaSlider.leadingAnchor constraintGreaterThanOrEqualToAnchor:textAlphaLabel.trailingAnchor constant:10],
 
-        [backgroundColorLabel.topAnchor constraintEqualToAnchor:textAlphaLabel.bottomAnchor constant:20],
+        [backgroundColorLabel.topAnchor constraintEqualToAnchor:_textAlphaSlider.bottomAnchor constant:20],
         [backgroundColorLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
         [_backgroundColorWell.centerYAnchor constraintEqualToAnchor:backgroundColorLabel.centerYAnchor],
         [_backgroundColorWell.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
@@ -186,12 +188,12 @@
 
         [backgroundAlphaLabel.topAnchor constraintEqualToAnchor:backgroundColorLabel.bottomAnchor constant:20],
         [backgroundAlphaLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
-        [_backgroundAlphaSlider.centerYAnchor constraintEqualToAnchor:backgroundAlphaLabel.centerYAnchor],
+        [_backgroundAlphaSlider.topAnchor constraintEqualToAnchor:backgroundAlphaLabel.bottomAnchor constant:8],
+        [_backgroundAlphaSlider.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
         [_backgroundAlphaSlider.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
-        [_backgroundAlphaSlider.leadingAnchor constraintGreaterThanOrEqualToAnchor:backgroundAlphaLabel.trailingAnchor constant:10],
 
         [_saveButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor constant:-60],
-        [_saveButton.topAnchor constraintEqualToAnchor:backgroundAlphaLabel.bottomAnchor constant:40],
+        [_saveButton.topAnchor constraintEqualToAnchor:_backgroundAlphaSlider.bottomAnchor constant:40],
         [_cancelButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor constant:60],
         [_cancelButton.centerYAnchor constraintEqualToAnchor:_saveButton.centerYAnchor],
     ]];

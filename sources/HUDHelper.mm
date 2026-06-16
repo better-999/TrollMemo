@@ -78,6 +78,7 @@ void SetHUDEnabled(BOOL isEnabled)
     posix_spawnattr_set_persona_gid_np(&attr, 0);
 #endif
 
+    BOOL launchDaemonHandled = NO;
     if (access(LAUNCH_DAEMON_PATH, F_OK) == 0)
     {
         if (!isEnabled) {
@@ -86,29 +87,27 @@ void SetHUDEnabled(BOOL isEnabled)
 
         int rc;
         pid_t task_pid;
-        static const char *executablePath = JBROOT_PATH_CSTRING("/usr/bin/launchctl");
-        const char *args[] = { executablePath, isEnabled ? "load" : "unload", LAUNCH_DAEMON_PATH, NULL };
-        rc = posix_spawn(&task_pid, executablePath, NULL, &attr, (char **)args, environ);
-        if (rc != 0) {
-            log_debug(OS_LOG_DEFAULT, "posix_spawn error %s", strerror(rc));
-        }
+        static const char *launchctlPath = JBROOT_PATH_CSTRING("/usr/bin/launchctl");
+        const char *args[] = { launchctlPath, isEnabled ? "load" : "unload", LAUNCH_DAEMON_PATH, NULL };
+        rc = posix_spawn(&task_pid, launchctlPath, NULL, &attr, (char **)args, environ);
+        if (rc == 0) {
+            int status = 0;
+            do {
+                if (waitpid(task_pid, &status, 0) != -1) {
+                    log_debug(OS_LOG_DEFAULT, "launchctl child status %d", WEXITSTATUS(status));
+                }
+            } while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
-        posix_spawnattr_destroy(&attr);
-
-        if (rc != 0) {
-            return;
-        }
-
-        log_debug(OS_LOG_DEFAULT, "spawned %{public}s -exit pid = %{public}d", executablePath, task_pid);
-
-        int status;
-        do {
-            if (waitpid(task_pid, &status, 0) != -1)
-            {
-                log_debug(OS_LOG_DEFAULT, "child status %d", WEXITSTATUS(status));
+            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                launchDaemonHandled = YES;
             }
-        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        } else {
+            log_debug(OS_LOG_DEFAULT, "posix_spawn launchctl error %s", strerror(rc));
+        }
+    }
 
+    if (launchDaemonHandled) {
+        posix_spawnattr_destroy(&attr);
         return;
     }
 

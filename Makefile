@@ -26,9 +26,9 @@ TrollMemo_FILES += $(wildcard sources/KIF/*.mm sources/KIF/*.m)
 TrollMemo_FILES += $(wildcard sources/*.swift)
 TrollMemo_FILES += $(wildcard sources/SPLarkController/*.swift)
 TrollMemo_FILES += $(wildcard sources/SnapshotSafeView/*.swift)
+TrollMemo_FILES += libroot/dyn.c
 
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
-TrollMemo_FILES += libroot/dyn.c
 TrollMemo_LIBRARIES += roothide
 endif
 

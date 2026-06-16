@@ -21,6 +21,9 @@
 static BOOL _gShouldToggleHUDAfterLaunch = NO;
 static const CGFloat _gAuthorLabelBottomConstraintConstantCompact = -20.f;
 static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
+static const CGFloat _gPrimaryButtonWidth = 240.f;
+static const CGFloat _gPrimaryButtonHeight = 50.f;
+static const CGFloat _gPrimaryButtonFontSize = 22.f;
 
 @interface RootViewController () <EditTextSettingsViewControllerDelegate>
 
@@ -68,6 +71,32 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(toggleHUDNotificationReceived:) name:kToggleHUDAfterLaunchNotificationName object:nil];
 }
 
+- (void)setPrimaryButtonTitle:(NSString *)title forButton:(UIButton *)button
+{
+    if (@available(iOS 15.0, *))
+    {
+        UIButtonConfiguration *config = button.configuration ?: [UIButtonConfiguration tintedButtonConfiguration];
+        config.title = title;
+        [button setConfiguration:config];
+    }
+    else
+    {
+        [button setTitle:title forState:UIControlStateNormal];
+    }
+}
+
+- (UIButtonConfiguration *)primaryButtonConfiguration
+{
+    UIButtonConfiguration *config = [UIButtonConfiguration tintedButtonConfiguration];
+    [config setTitleTextAttributesTransformer:^NSDictionary <NSAttributedStringKey, id> * _Nonnull(NSDictionary <NSAttributedStringKey, id> * _Nonnull textAttributes) {
+        NSMutableDictionary *newAttributes = [textAttributes mutableCopy];
+        [newAttributes setObject:[UIFont boldSystemFontOfSize:_gPrimaryButtonFontSize] forKey:NSFontAttributeName];
+        return newAttributes;
+    }];
+    [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
+    return config;
+}
+
 - (void)loadView
 {
     CGRect bounds = UIScreen.mainScreen.bounds;
@@ -94,18 +123,11 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [_mainButton addTarget:self action:@selector(tapMainButton:) forControlEvents:UIControlEventTouchUpInside];
     if (@available(iOS 15.0, *))
     {
-        UIButtonConfiguration *config = [UIButtonConfiguration tintedButtonConfiguration];
-        [config setTitleTextAttributesTransformer:^NSDictionary <NSAttributedStringKey, id> * _Nonnull(NSDictionary <NSAttributedStringKey, id> * _Nonnull textAttributes) {
-            NSMutableDictionary *newAttributes = [textAttributes mutableCopy];
-            [newAttributes setObject:[UIFont boldSystemFontOfSize:32.0] forKey:NSFontAttributeName];
-            return newAttributes;
-        }];
-        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
-        [_mainButton setConfiguration:config];
+        [_mainButton setConfiguration:[self primaryButtonConfiguration]];
     }
     else
     {
-        [_mainButton.titleLabel setFont:[UIFont boldSystemFontOfSize:32.0]];
+        [_mainButton.titleLabel setFont:[UIFont boldSystemFontOfSize:_gPrimaryButtonFontSize]];
     }
     [self.backgroundView addSubview:_mainButton];
 
@@ -113,32 +135,26 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [NSLayoutConstraint activateConstraints:@[
         [_mainButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
         [_mainButton.centerYAnchor constraintEqualToAnchor:self.backgroundView.centerYAnchor],
+        [_mainButton.widthAnchor constraintEqualToConstant:_gPrimaryButtonWidth],
+        [_mainButton.heightAnchor constraintEqualToConstant:_gPrimaryButtonHeight],
     ]];
 
     // 初始化并设置编辑文字按钮
     _editTextButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [_editTextButton setTintColor:[UIColor whiteColor]];
     [_editTextButton addTarget:self action:@selector(tapEditTextButton:) forControlEvents:UIControlEventTouchUpInside];
-    // 根据当前语言设置按钮标题
-    if ([[[NSLocale preferredLanguages] firstObject] hasPrefix:@"zh"]) {
-        [_editTextButton setTitle:@"编辑文字" forState:UIControlStateNormal];
-    } else {
-        [_editTextButton setTitle:@"Edit Text" forState:UIControlStateNormal];
-    }
     if (@available(iOS 15.0, *))
     {
-        UIButtonConfiguration *config = [UIButtonConfiguration tintedButtonConfiguration];
-        [config setTitleTextAttributesTransformer:^NSDictionary <NSAttributedStringKey, id> * _Nonnull(NSDictionary <NSAttributedStringKey, id> * _Nonnull textAttributes) {
-            NSMutableDictionary *newAttributes = [textAttributes mutableCopy];
-            [newAttributes setObject:[UIFont boldSystemFontOfSize:20.0] forKey:NSFontAttributeName];
-            return newAttributes;
-        }];
-        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
-        [_editTextButton setConfiguration:config];
+        [_editTextButton setConfiguration:[self primaryButtonConfiguration]];
     }
     else
     {
-        [_editTextButton.titleLabel setFont:[UIFont boldSystemFontOfSize:20.0]];
+        [_editTextButton.titleLabel setFont:[UIFont boldSystemFontOfSize:_gPrimaryButtonFontSize]];
+    }
+    if ([[[NSLocale preferredLanguages] firstObject] hasPrefix:@"zh"]) {
+        [self setPrimaryButtonTitle:@"编辑文字" forButton:_editTextButton];
+    } else {
+        [self setPrimaryButtonTitle:@"Edit Text" forButton:_editTextButton];
     }
     [self.backgroundView addSubview:_editTextButton];
 
@@ -146,8 +162,8 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [NSLayoutConstraint activateConstraints:@[
         [_editTextButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
         [_editTextButton.bottomAnchor constraintEqualToAnchor:_mainButton.topAnchor constant:-20.0f],
-        [_editTextButton.widthAnchor constraintEqualToConstant:120.0f],
-        [_editTextButton.heightAnchor constraintEqualToConstant:50.0f],
+        [_editTextButton.widthAnchor constraintEqualToConstant:_gPrimaryButtonWidth],
+        [_editTextButton.heightAnchor constraintEqualToConstant:_gPrimaryButtonHeight],
     ]];
 
     // 初始化并设置设置按钮
@@ -516,7 +532,7 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     [UIView transitionWithView:self.backgroundView duration:HUD_TRANSITION_DURATION options:UIViewAnimationOptionTransitionCrossDissolve animations:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         // 根据HUD是否激活设置主按钮标题和作者标签文本
-        [strongSelf->_mainButton setTitle:(strongSelf->_isRemoteHUDActive ? NSLocalizedString(@"Exit HUD", nil) : NSLocalizedString(@"Open HUD", nil)) forState:UIControlStateNormal];
+        [strongSelf setPrimaryButtonTitle:(strongSelf->_isRemoteHUDActive ? NSLocalizedString(@"Exit HUD", nil) : NSLocalizedString(@"Open HUD", nil)) forButton:strongSelf->_mainButton];
         [strongSelf->_authorLabel setAttributedText:(strongSelf->_isRemoteHUDActive ? hintAttributedString : creditsAttributedString)];
     } completion:nil];
 }
@@ -564,39 +580,43 @@ static const CGFloat _gAuthorLabelBottomConstraintConstantRegular = -80.f;
     log_debug(OS_LOG_DEFAULT, "- [RootViewController tapMainButton:%{public}@]", sender);
 
     BOOL isNowEnabled = [self isHUDEnabled];
-    [self setHUDEnabled:!isNowEnabled]; // 切换HUD启用状态
+    [self setHUDEnabled:!isNowEnabled];
     isNowEnabled = !isNowEnabled;
 
-    if (isNowEnabled) // 如果HUD现在已启用
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self reloadMainButtonState];
+    });
+
+    if (isNowEnabled)
     {
         dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
 
-        [_impactFeedbackGenerator prepare]; // 准备触觉反馈
+        [_impactFeedbackGenerator prepare];
         int anyToken;
         __weak typeof(self) weakSelf = self;
         notify_register_dispatch(NOTIFY_LAUNCHED_HUD, &anyToken, dispatch_get_main_queue(), ^(int token) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             notify_cancel(token);
-            [strongSelf->_impactFeedbackGenerator impactOccurred]; // 发生触觉反馈
-            dispatch_semaphore_signal(semaphore); // 发送信号
+            [strongSelf->_impactFeedbackGenerator impactOccurred];
+            [strongSelf reloadMainButtonState];
+            dispatch_semaphore_signal(semaphore);
         });
 
-        [self.backgroundView setUserInteractionEnabled:NO]; // 禁用背景视图用户交互
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
-            intptr_t timedOut = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC))); // 等待信号或超时
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            intptr_t timedOut = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)));
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (timedOut) {
-                    log_error(OS_LOG_DEFAULT, "Timed out waiting for HUD to launch"); // 记录HUD启动超时错误
+                    log_error(OS_LOG_DEFAULT, "Timed out waiting for HUD to launch");
+                    [strongSelf reloadMainButtonState];
                 }
-                [self.backgroundView setUserInteractionEnabled:YES]; // 启用背景视图用户交互
             });
         });
     }
-    else // 如果HUD现在已禁用
+    else
     {
-        [self.backgroundView setUserInteractionEnabled:NO]; // 禁用背景视图用户交互
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [self.backgroundView setUserInteractionEnabled:YES]; // 启用背景视图用户交互
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(FADE_OUT_DURATION * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self reloadMainButtonState];
         });
     }
 }
