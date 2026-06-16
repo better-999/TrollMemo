@@ -62,10 +62,11 @@ public class ScreenshotInvisibleContainer: UITextField {
     // MARK: - Private methods
     
     private func setupInitialState() {
-        appendContent(to: hiddenContainer)
-
         backgroundColor = .clear
         isUserInteractionEnabled = content.isUserInteractionEnabled
+        setNeedsLayout()
+        layoutIfNeeded()
+        appendContent(to: hiddenContainer)
     }
     
     private func activateLayoutConstraintsOfContent(to view: UIView) {

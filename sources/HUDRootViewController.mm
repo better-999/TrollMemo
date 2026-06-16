@@ -370,7 +370,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (extraUserDefaults) {
         return [extraUserDefaults[HUDUserDefaultsKeyUsesCustomFontSize] boolValue];
     }
-    return [GetStandardUserDefaults() boolForKey:HUDUserDefaultsKeyUsesCustomFontSize];
+    if (IsJailbrokenHUDEnvironment()) {
+        return [GetStandardUserDefaults() boolForKey:HUDUserDefaultsKeyUsesCustomFontSize];
+    }
+    return NO;
 }
 
 - (CGFloat)realCustomFontSize {
@@ -378,7 +381,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (extraUserDefaults) {
         return [extraUserDefaults[HUDUserDefaultsKeyRealCustomFontSize] doubleValue];
     }
-    return [GetStandardUserDefaults() doubleForKey:HUDUserDefaultsKeyRealCustomFontSize];
+    if (IsJailbrokenHUDEnvironment()) {
+        return [GetStandardUserDefaults() doubleForKey:HUDUserDefaultsKeyRealCustomFontSize];
+    }
+    return 9;
 }
 
 - (BOOL)usesCustomOffset {
@@ -386,7 +392,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (extraUserDefaults) {
         return [extraUserDefaults[HUDUserDefaultsKeyUsesCustomOffset] boolValue];
     }
-    return [GetStandardUserDefaults() boolForKey:HUDUserDefaultsKeyUsesCustomOffset];
+    if (IsJailbrokenHUDEnvironment()) {
+        return [GetStandardUserDefaults() boolForKey:HUDUserDefaultsKeyUsesCustomOffset];
+    }
+    return NO;
 }
 
 - (CGFloat)realCustomOffsetX {
@@ -394,7 +403,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (extraUserDefaults) {
         return [extraUserDefaults[HUDUserDefaultsKeyRealCustomOffsetX] doubleValue];
     }
-    return [GetStandardUserDefaults() doubleForKey:HUDUserDefaultsKeyRealCustomOffsetX];
+    if (IsJailbrokenHUDEnvironment()) {
+        return [GetStandardUserDefaults() doubleForKey:HUDUserDefaultsKeyRealCustomOffsetX];
+    }
+    return 0;
 }
 
 - (CGFloat)realCustomOffsetY {
@@ -402,7 +414,10 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     if (extraUserDefaults) {
         return [extraUserDefaults[HUDUserDefaultsKeyRealCustomOffsetY] doubleValue];
     }
-    return [GetStandardUserDefaults() doubleForKey:HUDUserDefaultsKeyRealCustomOffsetY];
+    if (IsJailbrokenHUDEnvironment()) {
+        return [GetStandardUserDefaults() doubleForKey:HUDUserDefaultsKeyRealCustomOffsetY];
+    }
+    return 0;
 }
 
 - (instancetype)init
@@ -445,7 +460,18 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     _blurView.translatesAutoresizingMaskIntoConstraints = NO;
     _containerView = [[ScreenshotInvisibleContainer alloc] initWithContent:_blurView];
     _containerView.hiddenContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    [_contentView addSubview:_containerView.hiddenContainer];
+    [_containerView setNeedsLayout];
+    [_containerView layoutIfNeeded];
+
+    // hiddenContainer 依赖 UITextField 内部子视图，未就绪时不能对其建 Auto Layout 约束（会崩溃）
+    UIView *hudContainerHost = _containerView.hiddenContainer;
+    if (hudContainerHost) {
+        [_contentView addSubview:hudContainerHost];
+    } else {
+        log_debug(OS_LOG_DEFAULT, "hiddenContainer unavailable, using blurView directly");
+        [_contentView addSubview:_blurView];
+        hudContainerHost = _blurView;
+    }
 
     // 初始化 hudTextView
     self.hudTextView = [[UITextView alloc] initWithFrame:CGRectZero];
@@ -469,8 +495,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         _hudTextHeightConstraint,
         [_blurView.widthAnchor constraintEqualToAnchor:_hudTextView.widthAnchor],
         [_blurView.heightAnchor constraintEqualToAnchor:_hudTextView.heightAnchor],
-        [_containerView.hiddenContainer.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
-        [_containerView.hiddenContainer.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor],
+        [hudContainerHost.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
+        [hudContainerHost.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor],
         [_contentView.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
         [_contentView.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor],
     ]];
