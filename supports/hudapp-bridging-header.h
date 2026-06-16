@@ -12,6 +12,14 @@
 
 #import "HUDHelper.h"
 
+#ifndef NOTIFY_LAUNCHED_HUD
+#define NOTIFY_LAUNCHED_HUD "ch.better.notification.hud.launched"
+#define NOTIFY_DISMISSAL_HUD "ch.better.notification.hud.dismissal"
+#define NOTIFY_RELOAD_HUD "ch.better.notification.hud.reload"
+#define NOTIFY_RELOAD_HUD_INSTANT "ch.better.notification.hud.reload.instant"
+#define NOTIFY_RELOAD_APP "ch.better.notification.app.reload"
+#endif
+
 typedef NSString * HUDUserDefaultsKey;
 
 static HUDUserDefaultsKey const HUDUserDefaultsKeySelectedMode = @"selectedMode";

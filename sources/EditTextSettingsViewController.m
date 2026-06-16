@@ -13,7 +13,7 @@
 #import "TrollMemo-Swift.h"
 #import "../supports/hudapp-bridging-header.h"
 
-@interface EditTextSettingsViewController () <UITextViewDelegate, TSSettingsControllerDelegate>
+@interface EditTextSettingsViewController () <UITextViewDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIView *contentView;
@@ -42,9 +42,9 @@
 
 @end
 
-static NSArray<HUDUserDefaultsKey> *EditBehaviorSettingKeys(void)
+static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 {
-    static NSArray<HUDUserDefaultsKey> *keys;
+    static NSArray<NSString *> *keys;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         keys = @[
@@ -392,7 +392,7 @@ static NSArray<HUDUserDefaultsKey> *EditBehaviorSettingKeys(void)
         [_behaviorSettingsContainer.bottomAnchor constraintEqualToAnchor:_contentView.bottomAnchor constant:-24],
     ]];
 
-    _committedSettings = [[LoadHUDSettingsPlist] mutableCopy] ?: [NSMutableDictionary dictionary];
+    _committedSettings = LoadHUDSettingsPlist() ?: [NSMutableDictionary dictionary];
     _draftBehaviorSettings = [NSMutableDictionary dictionary];
     for (HUDUserDefaultsKey key in EditBehaviorSettingKeys()) {
         id value = _committedSettings[key];
@@ -549,7 +549,7 @@ static NSArray<HUDUserDefaultsKey> *EditBehaviorSettingKeys(void)
         settings[HUDUserDefaultsKeyBackgroundColor] = bgColorData;
     }
 
-    for (HUDUserDefaultsKey key in EditBehaviorSettingKeys()) {
+    for (NSString *key in EditBehaviorSettingKeys()) {
         settings[key] = _draftBehaviorSettings[key] ?: @NO;
     }
 }

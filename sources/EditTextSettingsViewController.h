@@ -10,10 +10,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface EditTextSettingsViewController : UIViewController
+@interface EditTextSettingsViewController : UIViewController <TSSettingsControllerDelegate>
 
 @property (nonatomic, weak) id<EditTextSettingsViewControllerDelegate> delegate;
-@property (nonatomic, weak) id<TSSettingsControllerDelegate> behaviorSettingsDelegate;
 @property (nonatomic, assign) BOOL hudAlreadyLaunched;
 
 @end
