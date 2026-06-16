@@ -1,11 +1,12 @@
 ARCHS := arm64  # arm64e
-SDKVERSION = 17.4
-TARGET := iphone:clang:17.4:14.0
+# 默认 SDK 与最低系统版本：适配 iOS 15.x（含 15.6）；CI 可通过 make SDK_VERSION=x.x 覆盖
+SDKVERSION ?= 15.6
+TARGET_IOS ?= 15.0
+TARGET := iphone:clang:$(SDKVERSION):$(TARGET_IOS)
 ifdef SDK_VERSION
-SDKVERSION = $(SDK_VERSION)
-TARGET := iphone:clang:$(SDK_VERSION):14.0
+SDKVERSION := $(SDK_VERSION)
+TARGET := iphone:clang:$(SDKVERSION):$(TARGET_IOS)
 endif
-# TARGET := iphone:15.5:latest
 INSTALL_TARGET_PROCESSES := TrollMemo
 ENT_PLIST := $(PWD)/supports/entitlements.plist
 LAUNCHD_PLIST := $(PWD)/layout/Library/LaunchDaemons/ch.better.hudservices.plist

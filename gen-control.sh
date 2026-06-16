@@ -20,7 +20,7 @@ Package: ch.better.trollmemo
 Name: TrollMemo
 Version: $VERSION
 Section: Tweaks
-Depends: firmware (>= 14.0)
+Depends: firmware (>= 15.0)
 Architecture: iphoneos-arm
 Author: better-999
 Maintainer: Lessica <82flex@gmail.com>

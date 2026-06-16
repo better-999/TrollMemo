@@ -43,58 +43,35 @@ jobs:
           path: theos
           submodules: recursive
 
-      - name: Set THEOS env
+      - name: Set THEOS env & prepare SDKs
         run: |
+          rm -rf $GITHUB_WORKSPACE/theos/sdks
           echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
 
-      - name: Setup iOS SDK for theos
+      - name: Checkout theos/sdks
+        uses: actions/checkout@v4
+        with:
+          repository: theos/sdks
+          ref: master
+          path: ${{ env.THEOS }}/sdks
+
+      - name: Detect SDK version for Makefile
         run: |
-          echo "=== Detecting Xcode iOS SDK ==="
-          
-          # Get Xcode SDK path
-          XCODE_SDK_PATH=$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs
-          
-          echo "Xcode SDK Path: $XCODE_SDK_PATH"
-          
-          # List all available SDKs in Xcode
-          echo "Available SDKs in Xcode:"
-          ls -la "$XCODE_SDK_PATH/" || echo "No SDKs found"
-          
-          # Find the actual SDK directory name
-          SDK_DIR=$(ls "$XCODE_SDK_PATH/" | grep -i "iphoneos" | head -1)
-          if [ -z "$SDK_DIR" ]; then
-            echo "ERROR: No iPhoneOS SDK found in Xcode!"
+          echo "Available SDKs:"
+          ls -la "$THEOS/sdks/" || true
+          # 优先使用 iPhoneOS 15.6 SDK，与设备系统版本对齐
+          PREFERRED_SDK=15.6
+          if [ -d "$THEOS/sdks/iPhoneOS${PREFERRED_SDK}.sdk" ]; then
+            SDK_VERSION=$PREFERRED_SDK
+          else
+            SDK_VERSION=$(ls "$THEOS/sdks" | sed -n 's/iPhoneOS\([0-9.]*\)\.sdk/\1/p' | sort -V | tail -1)
+          fi
+          if [ -z "$SDK_VERSION" ]; then
+            echo "ERROR: No iPhoneOS SDK found under $THEOS/sdks"
             exit 1
           fi
-          
-          echo "Found SDK directory: $SDK_DIR"
-          
-          # Extract version from directory name (e.g., iPhoneOS17.4.sdk -> 17.4)
-          SDK_VERSION=$(echo "$SDK_DIR" | sed 's/iPhoneOS//' | sed 's/.sdk//')
-          echo "Detected SDK Version: $SDK_VERSION"
-          
-          # Create symlink in theos/sdks with correct name
-          mkdir -p $THEOS/sdks
-          rm -f "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
-          ln -sf "$XCODE_SDK_PATH/$SDK_DIR" "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
-          
-          echo "Created symlink: $THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
-          ls -la $THEOS/sdks/
-          
-          # Verify symlink target exists
-          if [ -L "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk" ]; then
-            TARGET=$(readlink "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk")
-            echo "Symlink target: $TARGET"
-            if [ -e "$TARGET" ]; then
-              echo "Symlink target exists!"
-            else
-              echo "ERROR: Symlink target does not exist!"
-              exit 1
-            fi
-          fi
-          
-          # Set SDK_VERSION for build step
-          echo "SDK_VERSION=${SDK_VERSION}" >> $GITHUB_ENV
+          echo "Using SDK_VERSION=$SDK_VERSION"
+          echo "SDK_VERSION=$SDK_VERSION" >> $GITHUB_ENV
 
       - name: Checkout this repo
         uses: actions/checkout@v4
@@ -111,11 +88,13 @@ jobs:
           echo "Current directory: $(pwd)"
           echo "THEOS path: $THEOS"
           echo "SDK_VERSION: $SDK_VERSION"
-          echo "Files in directory:"
-          ls -la
+          test -d "$THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk" || {
+            echo "ERROR: SDK not found: $THEOS/sdks/iPhoneOS${SDK_VERSION}.sdk"
+            ls -la "$THEOS/sdks/"
+            exit 1
+          }
           echo "======================="
           
-          # Get version tag (fallback to commit sha if no tag)
           GIT_TAG=$(git describe --tags --always --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
           echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
 
@@ -124,51 +103,36 @@ jobs:
           SCHEME="${{ github.event.inputs.scheme }}"
           echo "Building with scheme: $SCHEME"
           
+          set -o pipefail
           if [ "$SCHEME" = "roothide" ]; then
-            THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1 make SDK_VERSION="$SDK_VERSION" clean package 2>&1 | tee build.log
           elif [ "$SCHEME" = "rootless" ]; then
-            THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            THEOS_PACKAGE_SCHEME=rootless FINALPACKAGE=1 make SDK_VERSION="$SDK_VERSION" clean package 2>&1 | tee build.log
           else
-            FINALPACKAGE=1 make clean package 2>&1 | tee build.log
+            FINALPACKAGE=1 make SDK_VERSION="$SDK_VERSION" clean package 2>&1 | tee build.log
           fi
           
           echo "=== Build Log (last 100 lines) ==="
           tail -100 build.log
           echo "==================================="
           
-          # Check for errors
-          if grep -q "error:" build.log; then
-            echo "=== Compilation Errors Found ==="
-            grep -A2 "error:" build.log
+          if grep -qiE '(^|[^a-z])error:' build.log; then
+            echo "=== Build errors found in log ==="
+            grep -iE '(^|[^a-z])error:' build.log | head -20
+            exit 1
+          fi
+          
+          if ! ls packages/*.tipa 1>/dev/null 2>&1; then
+            echo "ERROR: No .tipa file produced in packages/"
             exit 1
           fi
           
           echo "=== Build Complete ==="
-          echo "Packages directory:"
-          ls -la packages/ || echo "WARNING: packages directory not found!"
-          echo ""
-          echo "=== Checking .tipa file ==="
-          if [ -f "packages/"*.tipa ]; then
-            TIPAFILE=$(ls packages/*.tipa 2>/dev/null | head -1)
-            if [ -n "$TIPAFILE" ]; then
-              SIZE=$(stat -f%z "$TIPAFILE" 2>/dev/null || stat -c%s "$TIPAFILE" 2>/dev/null)
-              echo "Tipa file: $TIPAFILE"
-              echo "File size: $SIZE bytes"
-              if [ "$SIZE" -lt 10000 ]; then
-                echo "WARNING: File size seems too small! Checking contents:"
-                unzip -l "$TIPAFILE" || echo "Cannot list zip contents"
-              fi
-            fi
-          else
-            echo "ERROR: No .tipa file found!"
-          fi
-          echo "===================="
+          ls -la packages/*.tipa
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: TrollMemo${{ env.GIT_TAG }}_${{ github.event.inputs.scheme }}
-          path: |
-            project/packages/*.tipa
-            project/build.log
+          path: project/packages/*.tipa
           if-no-files-found: error
