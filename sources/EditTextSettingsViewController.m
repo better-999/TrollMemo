@@ -381,7 +381,7 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
         [_behaviorSettingsContainer.topAnchor constraintEqualToAnchor:_behaviorSectionLabel.bottomAnchor constant:12],
         [_behaviorSettingsContainer.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:12],
         [_behaviorSettingsContainer.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-12],
-        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:72],
+        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:88],
 
         [_behaviorSettingsController.view.topAnchor constraintEqualToAnchor:_behaviorSettingsContainer.topAnchor],
         [_behaviorSettingsController.view.leadingAnchor constraintEqualToAnchor:_behaviorSettingsContainer.leadingAnchor],

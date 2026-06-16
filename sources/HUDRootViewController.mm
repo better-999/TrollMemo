@@ -572,11 +572,16 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
         _hudTextHeightConstraint,
         [_blurView.widthAnchor constraintEqualToAnchor:_hudTextView.widthAnchor],
         [_blurView.heightAnchor constraintEqualToAnchor:_hudTextView.heightAnchor],
+        [hudContainerHost.centerXAnchor constraintEqualToAnchor:_contentView.centerXAnchor],
+        [hudContainerHost.centerYAnchor constraintEqualToAnchor:_contentView.centerYAnchor],
         [hudContainerHost.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
         [hudContainerHost.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor],
         [_contentView.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
         [_contentView.heightAnchor constraintEqualToAnchor:_blurView.heightAnchor],
     ]];
+
+    [_contentView setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+    [_contentView setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
 
     _lockedView = [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"lock.fill"]];
     _lockedView.tintColor = [UIColor whiteColor];
@@ -667,20 +672,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     UILayoutGuide *layoutGuide = self.view.safeAreaLayoutGuide;
     if (isLandscape)
     {
-        CGFloat notchHeight;
-        CGFloat paddingNearNotch;
-        CGFloat paddingFarFromNotch;
-
-        notchHeight = CGRectGetMinY(layoutGuide.layoutFrame);
-        paddingNearNotch = (notchHeight > 30) ? notchHeight - 16 : 4;
-        paddingFarFromNotch = (notchHeight > 30) ? -24 : -4;
-
-        paddingNearNotch += realCustomOffsetX;
-        paddingFarFromNotch += realCustomOffsetX;
-
         [_constraints addObjectsFromArray:@[
-            [_contentView.leadingAnchor constraintEqualToAnchor:layoutGuide.leadingAnchor constant:(_orientation == UIInterfaceOrientationLandscapeLeft ? -paddingFarFromNotch : paddingNearNotch)],
-            [_contentView.trailingAnchor constraintEqualToAnchor:layoutGuide.trailingAnchor constant:(_orientation == UIInterfaceOrientationLandscapeLeft ? -paddingNearNotch : paddingFarFromNotch)],
+            [_contentView.centerXAnchor constraintEqualToAnchor:layoutGuide.centerXAnchor constant:realCustomOffsetX],
         ]];
 
         CGFloat minimumLandscapeTopConstant = 0;
@@ -728,8 +721,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
     else
     {
         [_constraints addObjectsFromArray:@[
-            [_contentView.leadingAnchor constraintEqualToAnchor:layoutGuide.leadingAnchor constant:realCustomOffsetX],
-            [_contentView.trailingAnchor constraintEqualToAnchor:layoutGuide.trailingAnchor constant:realCustomOffsetX],
+            [_contentView.centerXAnchor constraintEqualToAnchor:layoutGuide.centerXAnchor constant:realCustomOffsetX],
         ]];
 
         if (isCenteredMost && !isPad) {
@@ -1091,10 +1083,12 @@ static const CGFloat kHUDTextVerticalPadding = 6.0;
     }
 
     // 按文字实际尺寸更新容器大小，避免每次新建约束
-    CGSize textSize = [self measuredHUDTextContentSizeForText:textContent font:self.hudTextView.font];
-    _hudTextWidthConstraint.constant = textSize.width + kHUDTextHorizontalPadding;
-    _hudTextHeightConstraint.constant = textSize.height + kHUDTextVerticalPadding;
+    CGSize textContentSize = [self measuredHUDTextContentSizeForText:textContent font:self.hudTextView.font];
+    _hudTextWidthConstraint.constant = textContentSize.width + kHUDTextHorizontalPadding;
+    _hudTextHeightConstraint.constant = textContentSize.height + kHUDTextVerticalPadding;
 
+    [self.view setNeedsUpdateConstraints];
+    [self.view updateConstraintsIfNeeded];
     [self.view layoutIfNeeded];
 }
 

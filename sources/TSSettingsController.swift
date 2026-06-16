@@ -26,7 +26,7 @@ import UIKit
             closeButton.isHidden = true
             view.backgroundColor = .clear
             collectionView.forceSingleRow = true
-            collectionView.cellSize = CGSize(width: 100, height: 52)
+            collectionView.cellSize = CGSize(width: 100, height: 68)
             collectionView.sideInset = 8
             collectionView.layout.minimumLineSpacing = 8
             collectionView.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
@@ -112,5 +112,17 @@ import UIKit
         if previousTraitCollection?.userInterfaceStyle != self.traitCollection.userInterfaceStyle {
             self.dismiss(animated: true, completion: nil)
         }
+    }
+}
+
+@available(iOS 8.2, *)
+extension TSSettingsController {
+    open override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = super.collectionView(collectionView, cellForItemAt: indexPath)
+        if embeddedInEditSheet, let settingsCell = cell as? SPLarkSettingsCollectionViewCell {
+            settingsCell.embeddedStyle = true
+            settingsCell.setNeedsLayout()
+        }
+        return cell
     }
 }

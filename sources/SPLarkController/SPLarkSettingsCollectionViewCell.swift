@@ -26,6 +26,7 @@ public class SPLarkSettingsCollectionViewCell: UICollectionViewCell {
 
     let titleLabel = UILabel()
     let subtitleLabel = UILabel()
+    var embeddedStyle = false
     
     public override var isHighlighted: Bool {
         didSet {
@@ -77,6 +78,7 @@ public class SPLarkSettingsCollectionViewCell: UICollectionViewCell {
     
     public override func prepareForReuse() {
         super.prepareForReuse()
+        embeddedStyle = false
         self.titleLabel.text = "Title"
         self.subtitleLabel.text = "Subtitle"
         self.layoutSubviews()
@@ -86,6 +88,11 @@ public class SPLarkSettingsCollectionViewCell: UICollectionViewCell {
         super.layoutSubviews()
         
         if self.isHighlighted {
+            return
+        }
+
+        if embeddedStyle {
+            layoutEmbeddedStyle()
             return
         }
         
@@ -115,5 +122,30 @@ public class SPLarkSettingsCollectionViewCell: UICollectionViewCell {
             self.titleLabel.frame.origin.x = sideInset
             self.titleLabel.frame.origin.y = topInset * 1.3
         }
+    }
+
+    private func layoutEmbeddedStyle() {
+        let sideInset: CGFloat = 4
+        let verticalInset: CGFloat = 6
+
+        titleLabel.font = UIFont.systemFont(ofSize: 10, weight: .regular)
+        titleLabel.textAlignment = .center
+        titleLabel.numberOfLines = 2
+        titleLabel.lineBreakMode = .byWordWrapping
+
+        subtitleLabel.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        subtitleLabel.textAlignment = .center
+        subtitleLabel.numberOfLines = 1
+
+        let contentWidth = max(frame.width - sideInset * 2, 0)
+
+        subtitleLabel.frame = CGRect(x: sideInset, y: 0, width: contentWidth, height: 16)
+        subtitleLabel.sizeToFit()
+        let subtitleHeight = min(subtitleLabel.frame.height, 18)
+        let subtitleY = frame.height - verticalInset - subtitleHeight
+        subtitleLabel.frame = CGRect(x: sideInset, y: subtitleY, width: contentWidth, height: subtitleHeight)
+
+        let titleHeight = max(subtitleY - verticalInset - 2, 22)
+        titleLabel.frame = CGRect(x: sideInset, y: verticalInset, width: contentWidth, height: titleHeight)
     }
 }

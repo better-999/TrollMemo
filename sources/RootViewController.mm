@@ -181,11 +181,6 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
         [_authorLabel.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
     ]];
 
-    // 为作者标签添加点击手势识别器
-    UITapGestureRecognizer *authorTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAuthorLabel:)];
-    [_authorLabel setUserInteractionEnabled:YES];
-    [_authorLabel addGestureRecognizer:authorTapGesture];
-
     [self verticalSizeClassUpdated];
 }
 
@@ -461,45 +456,9 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
         NSString *hintText = NSLocalizedString(@"You can quit this app now.\nThe HUD will persist on your screen.", nil);
         hintAttributedString = [[NSAttributedString alloc] initWithString:hintText attributes:defaultAttributes];
 
-        // GitHub图标附件
-        NSTextAttachment *githubIcon = [NSTextAttachment textAttachmentWithImage:[UIImage imageNamed:@"github-mark-white"]];
-        [githubIcon setBounds:CGRectMake(0, 0, 14, 14)];
-
-        // 国际化图标附件
-        NSTextAttachment *i18nIcon = [NSTextAttachment textAttachmentWithImage:[UIImage systemImageNamed:@"character.bubble.fill"]];
-        [i18nIcon setBounds:CGRectMake(0, 0, 14, 14)];
-
-        // GitHub图标文本
-        NSAttributedString *githubIconText = [NSAttributedString attributedStringWithAttachment:githubIcon];
-        NSMutableAttributedString *githubIconTextFull = [[NSMutableAttributedString alloc] initWithAttributedString:githubIconText];
-        [githubIconTextFull appendAttributedString:[[NSAttributedString alloc] initWithString:@" " attributes:creditsAttributes]];
-
-        // 国际化图标文本
-        NSAttributedString *i18nIconText = [NSAttributedString attributedStringWithAttachment:i18nIcon];
-        NSMutableAttributedString *i18nIconTextFull = [[NSMutableAttributedString alloc] initWithAttributedString:i18nIconText];
-        [i18nIconTextFull appendAttributedString:[[NSAttributedString alloc] initWithString:@" " attributes:creditsAttributes]];
-
-        // 制作人员文本内容
-        NSString *creditsText = NSLocalizedString(@"Made by @better, Base on @GITHUB@Lessica and @GITHUB@jmpews\nTranslation @TRANSLATION@", nil);
-        NSMutableAttributedString *creditsAttributedText = [[NSMutableAttributedString alloc] initWithString:creditsText attributes:creditsAttributes];
-
-        // 替换 "@GITHUB@" 为 GitHub 图标
-        NSRange atRange;
-
-        atRange = [creditsAttributedText.string rangeOfString:@"@GITHUB@"];
-        while (atRange.location != NSNotFound) {
-            [creditsAttributedText replaceCharactersInRange:atRange withAttributedString:githubIconTextFull];
-            atRange = [creditsAttributedText.string rangeOfString:@"@GITHUB@"];
-        }
-
-        // 替换 "@TRANSLATION@" 为国际化图标
-        atRange = [creditsAttributedText.string rangeOfString:@"@TRANSLATION@"];
-        while (atRange.location != NSNotFound) {
-            [creditsAttributedText replaceCharactersInRange:atRange withAttributedString:i18nIconTextFull];
-            atRange = [creditsAttributedText.string rangeOfString:@"@TRANSLATION@"];
-        }
-
-        creditsAttributedString = creditsAttributedText;
+        // 制作人员文本内容（纯文字，无跳转）
+        NSString *creditsText = NSLocalizedString(@"Made by @better-999, Base on Lessica and jmpews", nil);
+        creditsAttributedString = [[NSAttributedString alloc] initWithString:creditsText attributes:creditsAttributes];
     });
 
     __weak typeof(self) weakSelf = self;
@@ -536,18 +495,6 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
     // 切换设置的高亮状态并保存用户默认设置
     [_userDefaults setObject:@(!highlighted) forKey:key];
     [self saveUserDefaults];
-}
-
-- (void)tapAuthorLabel:(UITapGestureRecognizer *)sender
-{
-    // 如果远程HUD激活，则不执行任何操作
-    if (_isRemoteHUDActive) {
-        return;
-    }
-    NSString *repoURLString = @"https://TrollMemo.app";
-    NSURL *repoURL = [NSURL URLWithString:repoURLString];
-    // 打开仓库URL
-    [[UIApplication sharedApplication] openURL:repoURL options:@{} completionHandler:nil];
 }
 
 - (void)tapMainButton:(UIButton *)sender
