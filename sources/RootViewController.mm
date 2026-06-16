@@ -32,7 +32,6 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
 @implementation RootViewController {
     NSMutableDictionary *_userDefaults;
     MainButton *_mainButton;
-    UIButton *_settingsButton;
     UIButton *_editTextButton;
     UILabel *_authorLabel;
     NSLayoutConstraint *_authorLabelBottomConstraint;
@@ -152,9 +151,9 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
         [_editTextButton.titleLabel setFont:[UIFont boldSystemFontOfSize:_gPrimaryButtonFontSize]];
     }
     if ([[[NSLocale preferredLanguages] firstObject] hasPrefix:@"zh"]) {
-        [self setPrimaryButtonTitle:@"编辑文字" forButton:_editTextButton];
+        [self setPrimaryButtonTitle:@"编辑" forButton:_editTextButton];
     } else {
-        [self setPrimaryButtonTitle:@"Edit Text" forButton:_editTextButton];
+        [self setPrimaryButtonTitle:@"Edit" forButton:_editTextButton];
     }
     [self.backgroundView addSubview:_editTextButton];
 
@@ -164,26 +163,6 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
         [_editTextButton.bottomAnchor constraintEqualToAnchor:_mainButton.topAnchor constant:-20.0f],
         [_editTextButton.widthAnchor constraintEqualToConstant:_gPrimaryButtonWidth],
         [_editTextButton.heightAnchor constraintEqualToConstant:_gPrimaryButtonHeight],
-    ]];
-
-    // 初始化并设置设置按钮
-    _settingsButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [_settingsButton setTintColor:[UIColor whiteColor]];
-    [_settingsButton addTarget:self action:@selector(tapSettingsButton:) forControlEvents:UIControlEventTouchUpInside];
-    [_settingsButton setImage:[UIImage systemImageNamed:@"gear"] forState:UIControlStateNormal];
-    [self.backgroundView addSubview:_settingsButton];
-    if (@available(iOS 15.0, *))
-    {
-        UIButtonConfiguration *config = [UIButtonConfiguration tintedButtonConfiguration];
-        [config setCornerStyle:UIButtonConfigurationCornerStyleLarge];
-        [_settingsButton setConfiguration:config];
-    }
-    [_settingsButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [NSLayoutConstraint activateConstraints:@[
-        [_settingsButton.bottomAnchor constraintEqualToAnchor:safeArea.bottomAnchor constant:-20.0f],
-        [_settingsButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
-        [_settingsButton.widthAnchor constraintEqualToConstant:40.0f],
-        [_settingsButton.heightAnchor constraintEqualToConstant:40.0f],
     ]];
 
     // 初始化并设置作者标签
@@ -299,7 +278,7 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
     }
 
     // 重置自定义用户默认设置
-    BOOL removed = [[NSFileManager defaultManager] removeItemAtPath:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH)) error:nil];
+    BOOL removed = [[NSFileManager defaultManager] removeItemAtPath:HUDResolvedPath(USER_DEFAULTS_PATH) error:nil];
     if (removed)
     {
         // 终止HUD
@@ -314,14 +293,14 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
 {
     // 如果强制重新加载或用户默认设置为空，则从文件加载用户默认设置
     if (forceReload || !_userDefaults) {
-        _userDefaults = [[NSDictionary dictionaryWithContentsOfFile:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH))] mutableCopy] ?: [NSMutableDictionary dictionary];
+        _userDefaults = [[NSDictionary dictionaryWithContentsOfFile:HUDResolvedPath(USER_DEFAULTS_PATH)] mutableCopy] ?: [NSMutableDictionary dictionary];
     }
 }
 
 - (void)saveUserDefaults
 {
     // 将用户默认设置保存到文件并通知HUD重新加载
-    [_userDefaults writeToFile:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH)) atomically:YES];
+    [_userDefaults writeToFile:HUDResolvedPath(USER_DEFAULTS_PATH) atomically:YES];
     notify_post(NOTIFY_RELOAD_HUD);
 }
 
@@ -621,67 +600,21 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
     }
 }
 
-- (void)tapSettingsButton:(UIButton *)sender
-{
-    // 如果主按钮未启用，则不执行任何操作
-    if (![_mainButton isEnabled]) return;
-    log_debug(OS_LOG_DEFAULT, "- [RootViewController tapSettingsButton:%{public}@]", sender);
-
-    TSSettingsController *settingsViewController = [[TSSettingsController alloc] init];
-    settingsViewController.delegate = self;
-    settingsViewController.alreadyLaunched = _isRemoteHUDActive;
-
-    SPLarkTransitioningDelegate *transitioningDelegate = [[SPLarkTransitioningDelegate alloc] init];
-    settingsViewController.transitioningDelegate = transitioningDelegate;
-    settingsViewController.modalPresentationStyle = UIModalPresentationCustom;
-    settingsViewController.modalPresentationCapturesStatusBarAppearance = YES;
-    // 显示设置视图控制器
-    [self presentViewController:settingsViewController animated:YES completion:nil];
-}
-
-- (void)verticalSizeClassUpdated
-{
-    UIUserInterfaceSizeClass verticalClass = self.traitCollection.verticalSizeClass;
-    // 如果垂直尺寸类别为紧凑型
-    if (verticalClass == UIUserInterfaceSizeClassCompact) {
-        // 移除未使用的变量
-        [_settingsButton setHidden:YES]; // 隐藏设置按钮
-        [_authorLabelBottomConstraint setConstant:_gAuthorLabelBottomConstraintConstantCompact]; // 设置作者标签底部约束
-    } else {
-        // 移除未使用的变量
-        [_settingsButton setHidden:NO]; // 显示设置按钮
-        [_authorLabelBottomConstraint setConstant:_gAuthorLabelBottomConstraintConstantRegular]; // 设置作者标签底部约束
-    }
-}
-
-- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
-{
-    [self verticalSizeClassUpdated]; // 垂直尺寸类别改变时更新视图
-}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
-{
-    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
-    // 协调器动画完成时重新加载模式按钮状态
-    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
-        // No action needed here as reloadModeButtonState is removed
-    } completion:nil];
-}
-
 - (void)tapEditTextButton:(UIButton *)sender
 {
     log_debug(OS_LOG_DEFAULT, "- [RootViewController tapEditTextButton:%{public}@]", sender);
 
     EditTextSettingsViewController *settingsViewController = [[EditTextSettingsViewController alloc] init];
     settingsViewController.delegate = self;
+    settingsViewController.behaviorSettingsDelegate = self;
+    settingsViewController.hudAlreadyLaunched = _isRemoteHUDActive;
     settingsViewController.modalPresentationStyle = UIModalPresentationPageSheet;
     if (@available(iOS 15.0, *)) {
         if ([settingsViewController respondsToSelector:@selector(setSheetPresentationController:)]) {
             UISheetPresentationController *sheet = settingsViewController.sheetPresentationController;
             if (sheet) {
-                sheet.detents = @[UISheetPresentationControllerDetent.mediumDetent, UISheetPresentationControllerDetent.largeDetent];
-                sheet.prefersScrollingExpandsWhenScrolledToEdge = NO;
+                sheet.detents = @[UISheetPresentationControllerDetent.largeDetent];
+                sheet.prefersScrollingExpandsWhenScrolledToEdge = YES;
                 sheet.prefersEdgeAttachedInCompactHeight = YES;
                 sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = YES;
             }
@@ -690,19 +623,39 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
     [self presentViewController:settingsViewController animated:YES completion:nil];
 }
 
+- (void)verticalSizeClassUpdated
+{
+    UIUserInterfaceSizeClass verticalClass = self.traitCollection.verticalSizeClass;
+    if (verticalClass == UIUserInterfaceSizeClassCompact) {
+        [_authorLabelBottomConstraint setConstant:_gAuthorLabelBottomConstraintConstantCompact];
+    } else {
+        [_authorLabelBottomConstraint setConstant:_gAuthorLabelBottomConstraintConstantRegular];
+    }
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+    [self verticalSizeClassUpdated];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+    } completion:nil];
+}
+
 #pragma mark - EditTextSettingsViewControllerDelegate
 
 - (void)editTextSettingsDidSave {
     log_debug(OS_LOG_DEFAULT, "EditText settings saved, notifying HUD to reload.");
-    // 通知HUD重新加载，以便应用新的文本设置
     notify_post(NOTIFY_RELOAD_HUD);
-    // 重新加载主按钮状态，以防万一文本设置影响到主按钮（尽管目前没有）
-    [self reloadMainButtonState]; 
+    [self reloadMainButtonState];
 }
 
 - (void)editTextSettingsDidCancel {
     log_debug(OS_LOG_DEFAULT, "EditText settings cancelled.");
-    // 用户取消了设置，无需保存或刷新
 }
 
 @end

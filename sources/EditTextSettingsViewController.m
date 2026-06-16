@@ -10,21 +10,25 @@
 #import "EditTextSettingsViewController.h"
 #import <notify.h>
 #import "HUDHelper.h"
+#import "TrollMemo-Swift.h"
 #import "../supports/hudapp-bridging-header.h"
 
 @interface EditTextSettingsViewController () <UITextViewDelegate>
 
-// 界面控件
-@property (nonatomic, strong) UITextView *textViewPreview;              // 顶部预览区，所见即所得
-@property (nonatomic, strong) UIColorWell *textColorWell;                // 文字颜色
-@property (nonatomic, strong) UIStepper *textSizeStepper;                // 文字大小（5~50）
-@property (nonatomic, strong) UISegmentedControl *textAlignmentSegmentedControl; // 左/中/右对齐
-@property (nonatomic, strong) UISlider *textAlphaSlider;               // 文字透明度
-@property (nonatomic, strong) UIColorWell *backgroundColorWell;        // 背景颜色
-@property (nonatomic, strong) UISlider *backgroundAlphaSlider;           // 背景透明度
+@property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, strong) UIView *contentView;
+@property (nonatomic, strong) UITextView *textViewPreview;
+@property (nonatomic, strong) UIColorWell *textColorWell;
+@property (nonatomic, strong) UIStepper *textSizeStepper;
+@property (nonatomic, strong) UISegmentedControl *textAlignmentSegmentedControl;
+@property (nonatomic, strong) UISlider *textAlphaSlider;
+@property (nonatomic, strong) UIColorWell *backgroundColorWell;
+@property (nonatomic, strong) UISlider *backgroundAlphaSlider;
+@property (nonatomic, strong) UILabel *behaviorSectionLabel;
+@property (nonatomic, strong) UIView *behaviorSettingsContainer;
+@property (nonatomic, strong) TSSettingsController *behaviorSettingsController;
 @property (nonatomic, strong) UIButton *saveButton;
 @property (nonatomic, strong) UIButton *cancelButton;
-// 编辑过程中的临时配置，点「保存」才写入 plist
 @property (nonatomic, strong) NSMutableDictionary *currentSettings;
 
 @end
@@ -45,7 +49,15 @@
     self.view = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
     self.view.backgroundColor = [UIColor systemBackgroundColor];
 
-    // 与 HUD 共用同一份 plist（ch.better.hudapp.plist），保证主 App 与 HUD 读到相同配置
+    _scrollView = [[UIScrollView alloc] init];
+    _scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    _scrollView.alwaysBounceVertical = YES;
+    [self.view addSubview:_scrollView];
+
+    _contentView = [[UIView alloc] init];
+    _contentView.translatesAutoresizingMaskIntoConstraints = NO;
+    [_scrollView addSubview:_contentView];
+
     NSMutableDictionary *savedSettings = LoadHUDSettingsPlist();
 
     _textViewPreview = [[UITextView alloc] init];
@@ -59,23 +71,23 @@
     _textViewPreview.textAlignment = NSTextAlignmentCenter;
     _textViewPreview.delegate = self;
     _textViewPreview.text = [savedSettings objectForKey:HUDUserDefaultsKeyTextContent] ?: NSLocalizedString(@"Hello World!", nil);
-    [self.view addSubview:_textViewPreview];
+    [_contentView addSubview:_textViewPreview];
 
     UILabel *textColorLabel = [[UILabel alloc] init];
     textColorLabel.translatesAutoresizingMaskIntoConstraints = NO;
     textColorLabel.text = NSLocalizedString(@"文字颜色", nil);
-    [self.view addSubview:textColorLabel];
+    [_contentView addSubview:textColorLabel];
 
     _textColorWell = [[UIColorWell alloc] init];
     _textColorWell.translatesAutoresizingMaskIntoConstraints = NO;
     _textColorWell.selectedColor = [UIColor redColor];
     [_textColorWell addTarget:self action:@selector(colorWellDidChange:) forControlEvents:UIControlEventValueChanged];
-    [self.view addSubview:_textColorWell];
+    [_contentView addSubview:_textColorWell];
 
     UILabel *textSizeLabel = [[UILabel alloc] init];
     textSizeLabel.translatesAutoresizingMaskIntoConstraints = NO;
     textSizeLabel.text = NSLocalizedString(@"文字大小", nil);
-    [self.view addSubview:textSizeLabel];
+    [_contentView addSubview:textSizeLabel];
 
     _textSizeStepper = [[UIStepper alloc] init];
     _textSizeStepper.translatesAutoresizingMaskIntoConstraints = NO;
@@ -84,23 +96,23 @@
     _textSizeStepper.value = [[savedSettings objectForKey:HUDUserDefaultsKeyTextSize] floatValue] ?: 10.0;
     _textSizeStepper.stepValue = 1;
     [_textSizeStepper addTarget:self action:@selector(stepperDidChange:) forControlEvents:UIControlEventValueChanged];
-    [self.view addSubview:_textSizeStepper];
+    [_contentView addSubview:_textSizeStepper];
 
     UILabel *textAlignmentLabel = [[UILabel alloc] init];
     textAlignmentLabel.translatesAutoresizingMaskIntoConstraints = NO;
     textAlignmentLabel.text = NSLocalizedString(@"文字对齐", nil);
-    [self.view addSubview:textAlignmentLabel];
+    [_contentView addSubview:textAlignmentLabel];
 
     _textAlignmentSegmentedControl = [[UISegmentedControl alloc] initWithItems:@[NSLocalizedString(@"左", nil), NSLocalizedString(@"中", nil), NSLocalizedString(@"右", nil)]];
     _textAlignmentSegmentedControl.translatesAutoresizingMaskIntoConstraints = NO;
     _textAlignmentSegmentedControl.selectedSegmentIndex = [[savedSettings objectForKey:HUDUserDefaultsKeyTextAlignment] integerValue] ?: NSTextAlignmentCenter;
     [_textAlignmentSegmentedControl addTarget:self action:@selector(segmentedControlDidChange:) forControlEvents:UIControlEventValueChanged];
-    [self.view addSubview:_textAlignmentSegmentedControl];
+    [_contentView addSubview:_textAlignmentSegmentedControl];
 
     UILabel *textAlphaLabel = [[UILabel alloc] init];
     textAlphaLabel.translatesAutoresizingMaskIntoConstraints = NO;
     textAlphaLabel.text = NSLocalizedString(@"文字透明度", nil);
-    [self.view addSubview:textAlphaLabel];
+    [_contentView addSubview:textAlphaLabel];
 
     _textAlphaSlider = [[UISlider alloc] init];
     _textAlphaSlider.translatesAutoresizingMaskIntoConstraints = NO;
@@ -109,23 +121,23 @@
     _textAlphaSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyTextAlpha] floatValue] ?: 1.0;
     [_textAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
     [_textAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
-    [self.view addSubview:_textAlphaSlider];
+    [_contentView addSubview:_textAlphaSlider];
 
     UILabel *backgroundColorLabel = [[UILabel alloc] init];
     backgroundColorLabel.translatesAutoresizingMaskIntoConstraints = NO;
     backgroundColorLabel.text = NSLocalizedString(@"背景颜色", nil);
-    [self.view addSubview:backgroundColorLabel];
+    [_contentView addSubview:backgroundColorLabel];
 
     _backgroundColorWell = [[UIColorWell alloc] init];
     _backgroundColorWell.translatesAutoresizingMaskIntoConstraints = NO;
     _backgroundColorWell.selectedColor = [UIColor blackColor];
     [_backgroundColorWell addTarget:self action:@selector(colorWellDidChange:) forControlEvents:UIControlEventValueChanged];
-    [self.view addSubview:_backgroundColorWell];
+    [_contentView addSubview:_backgroundColorWell];
 
     UILabel *backgroundAlphaLabel = [[UILabel alloc] init];
     backgroundAlphaLabel.translatesAutoresizingMaskIntoConstraints = NO;
     backgroundAlphaLabel.text = NSLocalizedString(@"背景透明度", nil);
-    [self.view addSubview:backgroundAlphaLabel];
+    [_contentView addSubview:backgroundAlphaLabel];
 
     _backgroundAlphaSlider = [[UISlider alloc] init];
     _backgroundAlphaSlider.translatesAutoresizingMaskIntoConstraints = NO;
@@ -134,73 +146,126 @@
     _backgroundAlphaSlider.value = [[savedSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha] floatValue] ?: 0.0;
     [_backgroundAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventValueChanged];
     [_backgroundAlphaSlider addTarget:self action:@selector(sliderDidChange:) forControlEvents:UIControlEventTouchDragInside | UIControlEventTouchDragOutside];
-    [self.view addSubview:_backgroundAlphaSlider];
+    [_contentView addSubview:_backgroundAlphaSlider];
+
+    _behaviorSectionLabel = [[UILabel alloc] init];
+    _behaviorSectionLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    _behaviorSectionLabel.text = NSLocalizedString(@"Settings", nil);
+    _behaviorSectionLabel.font = [UIFont boldSystemFontOfSize:18.0];
+    [_contentView addSubview:_behaviorSectionLabel];
+
+    _behaviorSettingsContainer = [[UIView alloc] init];
+    _behaviorSettingsContainer.translatesAutoresizingMaskIntoConstraints = NO;
+    _behaviorSettingsContainer.backgroundColor = [UIColor blackColor];
+    _behaviorSettingsContainer.layer.cornerRadius = 12.0;
+    _behaviorSettingsContainer.clipsToBounds = YES;
+    [_contentView addSubview:_behaviorSettingsContainer];
+
+    _behaviorSettingsController = [[TSSettingsController alloc] init];
+    _behaviorSettingsController.embeddedInEditSheet = YES;
+    _behaviorSettingsController.delegate = self.behaviorSettingsDelegate;
+    _behaviorSettingsController.alreadyLaunched = self.hudAlreadyLaunched;
+    [self addChildViewController:_behaviorSettingsController];
+    [_behaviorSettingsContainer addSubview:_behaviorSettingsController.view];
+    _behaviorSettingsController.view.translatesAutoresizingMaskIntoConstraints = NO;
+    [_behaviorSettingsController didMoveToParentViewController:self];
 
     _saveButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _saveButton.translatesAutoresizingMaskIntoConstraints = NO;
     [_saveButton setTitle:NSLocalizedString(@"保存", nil) forState:UIControlStateNormal];
     [_saveButton addTarget:self action:@selector(saveButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_saveButton];
+    [_contentView addSubview:_saveButton];
 
     _cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
     [_cancelButton setTitle:NSLocalizedString(@"取消", nil) forState:UIControlStateNormal];
     [_cancelButton addTarget:self action:@selector(cancelButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_cancelButton];
+    [_contentView addSubview:_cancelButton];
 
     UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
     [NSLayoutConstraint activateConstraints:@[
-        [_textViewPreview.topAnchor constraintEqualToAnchor:safeArea.topAnchor constant:20],
-        [_textViewPreview.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
-        [_textViewPreview.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
+        [_scrollView.topAnchor constraintEqualToAnchor:safeArea.topAnchor],
+        [_scrollView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+        [_scrollView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        [_scrollView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+
+        [_contentView.topAnchor constraintEqualToAnchor:_scrollView.contentLayoutGuide.topAnchor],
+        [_contentView.leadingAnchor constraintEqualToAnchor:_scrollView.contentLayoutGuide.leadingAnchor],
+        [_contentView.trailingAnchor constraintEqualToAnchor:_scrollView.contentLayoutGuide.trailingAnchor],
+        [_contentView.bottomAnchor constraintEqualToAnchor:_scrollView.contentLayoutGuide.bottomAnchor],
+        [_contentView.widthAnchor constraintEqualToAnchor:_scrollView.frameLayoutGuide.widthAnchor],
+
+        [_textViewPreview.topAnchor constraintEqualToAnchor:_contentView.topAnchor constant:20],
+        [_textViewPreview.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_textViewPreview.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
         [_textViewPreview.heightAnchor constraintGreaterThanOrEqualToConstant:100],
 
         [textColorLabel.topAnchor constraintEqualToAnchor:_textViewPreview.bottomAnchor constant:20],
-        [textColorLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
+        [textColorLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_textColorWell.centerYAnchor constraintEqualToAnchor:textColorLabel.centerYAnchor],
-        [_textColorWell.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
+        [_textColorWell.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
         [_textColorWell.widthAnchor constraintEqualToConstant:44],
         [_textColorWell.heightAnchor constraintEqualToConstant:44],
 
         [textSizeLabel.topAnchor constraintEqualToAnchor:textColorLabel.bottomAnchor constant:20],
-        [textSizeLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
+        [textSizeLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_textSizeStepper.centerYAnchor constraintEqualToAnchor:textSizeLabel.centerYAnchor],
-        [_textSizeStepper.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
+        [_textSizeStepper.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
 
         [textAlignmentLabel.topAnchor constraintEqualToAnchor:textSizeLabel.bottomAnchor constant:20],
-        [textAlignmentLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
+        [textAlignmentLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_textAlignmentSegmentedControl.centerYAnchor constraintEqualToAnchor:textAlignmentLabel.centerYAnchor],
-        [_textAlignmentSegmentedControl.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
+        [_textAlignmentSegmentedControl.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
         [_textAlignmentSegmentedControl.leadingAnchor constraintGreaterThanOrEqualToAnchor:textAlignmentLabel.trailingAnchor constant:10],
 
         [textAlphaLabel.topAnchor constraintEqualToAnchor:textAlignmentLabel.bottomAnchor constant:20],
-        [textAlphaLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
+        [textAlphaLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_textAlphaSlider.topAnchor constraintEqualToAnchor:textAlphaLabel.bottomAnchor constant:8],
-        [_textAlphaSlider.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
-        [_textAlphaSlider.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
+        [_textAlphaSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_textAlphaSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
 
         [backgroundColorLabel.topAnchor constraintEqualToAnchor:_textAlphaSlider.bottomAnchor constant:20],
-        [backgroundColorLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
+        [backgroundColorLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_backgroundColorWell.centerYAnchor constraintEqualToAnchor:backgroundColorLabel.centerYAnchor],
-        [_backgroundColorWell.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
+        [_backgroundColorWell.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
         [_backgroundColorWell.widthAnchor constraintEqualToConstant:44],
         [_backgroundColorWell.heightAnchor constraintEqualToConstant:44],
 
         [backgroundAlphaLabel.topAnchor constraintEqualToAnchor:backgroundColorLabel.bottomAnchor constant:20],
-        [backgroundAlphaLabel.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
+        [backgroundAlphaLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_backgroundAlphaSlider.topAnchor constraintEqualToAnchor:backgroundAlphaLabel.bottomAnchor constant:8],
-        [_backgroundAlphaSlider.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:20],
-        [_backgroundAlphaSlider.trailingAnchor constraintEqualToAnchor:safeArea.trailingAnchor constant:-20],
+        [_backgroundAlphaSlider.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_backgroundAlphaSlider.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
 
-        [_saveButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor constant:-60],
-        [_saveButton.topAnchor constraintEqualToAnchor:_backgroundAlphaSlider.bottomAnchor constant:40],
-        [_cancelButton.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor constant:60],
+        [_behaviorSectionLabel.topAnchor constraintEqualToAnchor:_backgroundAlphaSlider.bottomAnchor constant:28],
+        [_behaviorSectionLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+
+        [_behaviorSettingsContainer.topAnchor constraintEqualToAnchor:_behaviorSectionLabel.bottomAnchor constant:12],
+        [_behaviorSettingsContainer.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:12],
+        [_behaviorSettingsContainer.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-12],
+        [_behaviorSettingsContainer.heightAnchor constraintEqualToConstant:150],
+
+        [_behaviorSettingsController.view.topAnchor constraintEqualToAnchor:_behaviorSettingsContainer.topAnchor],
+        [_behaviorSettingsController.view.leadingAnchor constraintEqualToAnchor:_behaviorSettingsContainer.leadingAnchor],
+        [_behaviorSettingsController.view.trailingAnchor constraintEqualToAnchor:_behaviorSettingsContainer.trailingAnchor],
+        [_behaviorSettingsController.view.bottomAnchor constraintEqualToAnchor:_behaviorSettingsContainer.bottomAnchor],
+
+        [_saveButton.topAnchor constraintEqualToAnchor:_behaviorSettingsContainer.bottomAnchor constant:28],
+        [_saveButton.centerXAnchor constraintEqualToAnchor:_contentView.centerXAnchor constant:-60],
         [_cancelButton.centerYAnchor constraintEqualToAnchor:_saveButton.centerYAnchor],
+        [_cancelButton.centerXAnchor constraintEqualToAnchor:_contentView.centerXAnchor constant:60],
+        [_saveButton.bottomAnchor constraintEqualToAnchor:_contentView.bottomAnchor constant:-24],
     ]];
 
     _currentSettings = [NSMutableDictionary dictionary];
     [self loadCurrentSettings];
     [self updatePreview];
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    [_behaviorSettingsController.view setNeedsLayout];
+    [_behaviorSettingsController.view layoutIfNeeded];
 }
 
 - (void)viewDidLoad {

@@ -205,18 +205,18 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 - (void)loadUserDefaults:(BOOL)forceReload
 {
     if (forceReload || !_userDefaults)
-        _userDefaults = [[NSDictionary dictionaryWithContentsOfFile:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH))] mutableCopy] ?: [NSMutableDictionary dictionary];
+        _userDefaults = [[NSDictionary dictionaryWithContentsOfFile:HUDResolvedPath(USER_DEFAULTS_PATH)] mutableCopy] ?: [NSMutableDictionary dictionary];
 }
 
 // HUD 侧修改配置（如拖拽保存 Y 坐标）时写回 plist，并通知主 App
 - (void)saveUserDefaults
 {
-    BOOL wroteSucceed = [_userDefaults writeToFile:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH)) atomically:YES];
+    BOOL wroteSucceed = [_userDefaults writeToFile:HUDResolvedPath(USER_DEFAULTS_PATH) atomically:YES];
     if (wroteSucceed) {
         [[NSFileManager defaultManager] setAttributes:@{
             NSFileOwnerAccountID: @501,
             NSFileGroupOwnerAccountID: @501,
-        } ofItemAtPath:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH)) error:nil];
+        } ofItemAtPath:HUDResolvedPath(USER_DEFAULTS_PATH) error:nil];
         notify_post(NOTIFY_RELOAD_APP);
     }
 }
@@ -267,7 +267,7 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 
 + (BOOL)passthroughMode
 {
-    return [[[NSDictionary dictionaryWithContentsOfFile:(JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH))] objectForKey:HUDUserDefaultsKeyPassthroughMode] boolValue];
+    return [[[NSDictionary dictionaryWithContentsOfFile:HUDResolvedPath(USER_DEFAULTS_PATH)] objectForKey:HUDUserDefaultsKeyPassthroughMode] boolValue];
 }
 
 - (BOOL)isLandscapeOrientation

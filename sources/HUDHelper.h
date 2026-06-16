@@ -18,6 +18,11 @@ OBJC_EXTERN void SimulateMemoryPressure(void);
 
 OBJC_EXTERN NSUserDefaults *GetStandardUserDefaults(void);
 
+#define HUD_PID_PATH @"/var/mobile/Library/Caches/ch.better.hudapp.pid"
+
+OBJC_EXTERN NSString *HUDResolvedPath(NSString *path);
+OBJC_EXTERN BOOL IsJailbrokenHUDEnvironment(void);
+
 OBJC_EXTERN NSMutableDictionary *LoadHUDSettingsPlist(void);
 OBJC_EXTERN BOOL SaveHUDSettingsPlist(NSDictionary *settings);
 

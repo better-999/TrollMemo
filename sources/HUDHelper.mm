@@ -8,6 +8,8 @@
 #import <spawn.h>
 #import <notify.h>
 #import <mach-o/dyld.h>
+#import <unistd.h>
+#import <signal.h>
 
 #import "HUDHelper.h"
 #import "NSUserDefaults+Private.h"
@@ -19,8 +21,71 @@ extern "C" int posix_spawnattr_set_persona_np(const posix_spawnattr_t* __restric
 extern "C" int posix_spawnattr_set_persona_uid_np(const posix_spawnattr_t* __restrict, uid_t);
 extern "C" int posix_spawnattr_set_persona_gid_np(const posix_spawnattr_t* __restrict, uid_t);
 
+
+#define LAUNCH_DAEMON_RELATIVE @"/Library/LaunchDaemons/ch.better.hudservices.plist"
+
+static void HUDSpawnApplyRootPersona(posix_spawnattr_t *attr)
+{
+#if !TARGET_OS_SIMULATOR
+    if (!IsJailbrokenHUDEnvironment()) {
+        return;
+    }
+    posix_spawnattr_set_persona_np(attr, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
+    posix_spawnattr_set_persona_uid_np(attr, 0);
+    posix_spawnattr_set_persona_gid_np(attr, 0);
+#endif
+}
+
+BOOL IsJailbrokenHUDEnvironment(void)
+{
+    static dispatch_once_t onceToken;
+    static BOOL jailbroken = NO;
+    dispatch_once(&onceToken, ^{
+        jailbroken = (access("/var/jb", F_OK) == 0)
+            || (access("/Library/PreferenceBundles/TrollMemoPrefs.bundle", F_OK) == 0)
+            || (access("/var/jb/Library/PreferenceBundles/TrollMemoPrefs.bundle", F_OK) == 0);
+    });
+    return jailbroken;
+}
+
+NSString *HUDResolvedPath(NSString *path)
+{
+#if TARGET_OS_SIMULATOR
+    return path;
+#else
+    if (!IsJailbrokenHUDEnvironment()) {
+        return path;
+    }
+    return JBROOT_PATH_NSSTRING(path);
+#endif
+}
+
+static BOOL IsHUDRunningFromPIDFile(void)
+{
+    NSString *pidPath = HUDResolvedPath(HUD_PID_PATH);
+    NSString *pidString = [NSString stringWithContentsOfFile:pidPath
+                                                    encoding:NSUTF8StringEncoding
+                                                       error:nil];
+    if (!pidString.length) {
+        return NO;
+    }
+
+    pid_t pid = (pid_t)[pidString intValue];
+    if (pid <= 0) {
+        return NO;
+    }
+
+    return kill(pid, 0) == 0;
+}
+
 BOOL IsHUDEnabled(void)
 {
+#if !TARGET_OS_SIMULATOR
+    if (!IsJailbrokenHUDEnvironment()) {
+        return IsHUDRunningFromPIDFile();
+    }
+#endif
+
     static char *executablePath = NULL;
     uint32_t executablePathSize = 0;
     _NSGetExecutablePath(NULL, &executablePathSize);
@@ -29,12 +94,7 @@ BOOL IsHUDEnabled(void)
 
     posix_spawnattr_t attr;
     posix_spawnattr_init(&attr);
-
-#if !TARGET_OS_SIMULATOR
-    posix_spawnattr_set_persona_np(&attr, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
-    posix_spawnattr_set_persona_uid_np(&attr, 0);
-    posix_spawnattr_set_persona_gid_np(&attr, 0);
-#endif
+    HUDSpawnApplyRootPersona(&attr);
 
     int rc;
     pid_t task_pid;
@@ -47,12 +107,12 @@ BOOL IsHUDEnabled(void)
     posix_spawnattr_destroy(&attr);
 
     if (rc != 0) {
-        return NO;
+        return IsHUDRunningFromPIDFile();
     }
 
     log_debug(OS_LOG_DEFAULT, "spawned %{public}s -check pid = %{public}d", executablePath, task_pid);
     
-    int status;
+    int status = 0;
     do {
         if (waitpid(task_pid, &status, 0) != -1)
         {
@@ -63,23 +123,17 @@ BOOL IsHUDEnabled(void)
     return WEXITSTATUS(status) != 0;
 }
 
-#define LAUNCH_DAEMON_PATH JBROOT_PATH_CSTRING("/Library/LaunchDaemons/ch.better.hudservices.plist")
-
 void SetHUDEnabled(BOOL isEnabled)
 {
     notify_post(NOTIFY_DISMISSAL_HUD);
 
     posix_spawnattr_t attr;
     posix_spawnattr_init(&attr);
-
-#if !TARGET_OS_SIMULATOR
-    posix_spawnattr_set_persona_np(&attr, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
-    posix_spawnattr_set_persona_uid_np(&attr, 0);
-    posix_spawnattr_set_persona_gid_np(&attr, 0);
-#endif
+    HUDSpawnApplyRootPersona(&attr);
 
     BOOL launchDaemonHandled = NO;
-    if (access(LAUNCH_DAEMON_PATH, F_OK) == 0)
+    NSString *launchDaemonPath = HUDResolvedPath(LAUNCH_DAEMON_RELATIVE);
+    if (IsJailbrokenHUDEnvironment() && access(launchDaemonPath.fileSystemRepresentation, F_OK) == 0)
     {
         if (!isEnabled) {
             [NSThread sleepForTimeInterval:FADE_OUT_DURATION];
@@ -88,7 +142,7 @@ void SetHUDEnabled(BOOL isEnabled)
         int rc;
         pid_t task_pid;
         static const char *launchctlPath = JBROOT_PATH_CSTRING("/usr/bin/launchctl");
-        const char *args[] = { launchctlPath, isEnabled ? "load" : "unload", LAUNCH_DAEMON_PATH, NULL };
+        const char *args[] = { launchctlPath, isEnabled ? "load" : "unload", launchDaemonPath.fileSystemRepresentation, NULL };
         rc = posix_spawn(&task_pid, launchctlPath, NULL, &attr, (char **)args, environ);
         if (rc == 0) {
             int status = 0;
@@ -228,17 +282,18 @@ NSUserDefaults *GetStandardUserDefaults(void)
 
 NSMutableDictionary *LoadHUDSettingsPlist(void)
 {
-    return [[NSDictionary dictionaryWithContentsOfFile:JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH)] mutableCopy] ?: [NSMutableDictionary dictionary];
+    return [[NSDictionary dictionaryWithContentsOfFile:HUDResolvedPath(USER_DEFAULTS_PATH)] mutableCopy] ?: [NSMutableDictionary dictionary];
 }
 
 BOOL SaveHUDSettingsPlist(NSDictionary *settings)
 {
-    BOOL wroteSucceed = [settings writeToFile:JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH) atomically:YES];
+    NSString *resolvedPath = HUDResolvedPath(USER_DEFAULTS_PATH);
+    BOOL wroteSucceed = [settings writeToFile:resolvedPath atomically:YES];
     if (wroteSucceed) {
         [[NSFileManager defaultManager] setAttributes:@{
             NSFileOwnerAccountID: @501,
             NSFileGroupOwnerAccountID: @501,
-        } ofItemAtPath:JBROOT_PATH_NSSTRING(USER_DEFAULTS_PATH) error:nil];
+        } ofItemAtPath:resolvedPath error:nil];
     }
     return wroteSucceed;
 }

@@ -16,7 +16,27 @@ import UIKit
 {
     @objc open weak var delegate: TSSettingsControllerDelegate?
     @objc open var alreadyLaunched: Bool = false
+    @objc open var embeddedInEditSheet: Bool = false
     internal var restartRequired = false
+
+    open override func viewDidLoad() {
+        super.viewDidLoad()
+        if embeddedInEditSheet {
+            titleLabel.isHidden = true
+            closeButton.isHidden = true
+            view.backgroundColor = .clear
+            collectionView.sideInset = 12
+            collectionView.cellSize = CGSize(width: 140, height: 56)
+        }
+    }
+
+    open override func viewDidLayoutSubviews() {
+        if embeddedInEditSheet {
+            collectionView.layout(y: 8)
+            return
+        }
+        super.viewDidLayoutSubviews()
+    }
 
     open override func settingsCount() -> Int {
         return TSSettingsIndex.allCases.count
@@ -78,6 +98,9 @@ import UIKit
     open override var shouldAutorotate: Bool { false }
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        if embeddedInEditSheet {
+            return
+        }
         super.traitCollectionDidChange(previousTraitCollection)
         if previousTraitCollection?.userInterfaceStyle != self.traitCollection.userInterfaceStyle {
             self.dismiss(animated: true, completion: nil)

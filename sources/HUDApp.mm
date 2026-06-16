@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 
         NSString *pidPath;
 #if !TARGET_OS_SIMULATOR
-        pidPath = JBROOT_PATH_NSSTRING(@"" PID_PATH);
+        pidPath = HUDResolvedPath(HUD_PID_PATH);
 #else
         pidPath = [[[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask].firstObject path] stringByAppendingPathComponent:@"ch.better.hudapp.pid"];
 #endif
