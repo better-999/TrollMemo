@@ -85,7 +85,7 @@ static const CGFloat _gPrimaryButtonFontSize = 22.f;
     }
 }
 
-- (UIButtonConfiguration *)primaryButtonConfiguration
+- (UIButtonConfiguration *)primaryButtonConfiguration API_AVAILABLE(ios(15.0))
 {
     UIButtonConfiguration *config = [UIButtonConfiguration tintedButtonConfiguration];
     [config setTitleTextAttributesTransformer:^NSDictionary <NSAttributedStringKey, id> * _Nonnull(NSDictionary <NSAttributedStringKey, id> * _Nonnull textAttributes) {
