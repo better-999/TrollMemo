@@ -4,7 +4,7 @@
 
 [![Build IPA (Manual)](https://github.com/better-999/TrollMemo/actions/workflows/build-manual.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-manual.yml)
 ![Latest Release](https://img.shields.io/github/v/release/better-999/TrollMemo)
-![MIT License](https://img.shields.io/github/license/better-999/TrollMemo)
+![AGPL-3.0 License](https://img.shields.io/github/license/better-999/TrollMemo)
 
 ---
 
@@ -108,7 +108,7 @@ TrollStore 主 App  →  以 root 拉起 HUD 进程  →  全局窗口显示文�
 - 浮窗宽度随文字内容自适应，不再整条横栏
 - 浮窗默认触摸穿透，移除「触摸穿透」「锁定位置」开关
 - 编辑页选项改为单行两按钮布局
-- 新增「重置」按钮；键盘工具栏提供「粘贴」按钮
+- 新增「重置」按钮；编辑框提供「粘贴」按钮
 - 竖屏 / 横屏 Y 轴偏移优化，负值可继续上移，偏移可超出屏幕
 
 ---
@@ -119,38 +119,15 @@ TrollStore 主 App  →  以 root 拉起 HUD 进程  →  全局窗口显示文�
 
 ---
 
-## 许可证与开源声明
-
-TrollMemo 在 [TrollSpeed](https://github.com/Lessica/TrollSpeed) 基础上改造，**沿用 GNU Affero General Public License v3（AGPL-3.0）**。这是 fork 开源项目的法定义务，**LICENSE 文件和许可证说明需要保留**，不能去掉。
-
-建议保留的内容：
-
-| 内容 | 是否保留 | 说明 |
-|------|----------|------|
-| `LICENSE`（AGPL-3.0） | **必须** | 法律要求，分发时须附带 |
-| 致谢（Lessica、TrollSpeed 等） | **建议保留** | 尊重原作者，也是社区惯例 |
-| App 内一行说明 | **可保留** | 当前为 `Made by @better-999, Base on Lessica and jmpews` |
-| TrollSpeed 原文 README 措辞 | **可删改** | 已按 TrollMemo 实际情况重写 |
-
-**结论：** 不是去掉开源声明，而是把说明改成你自己的项目描述；**许可证章节和致谢要留着**，只删不再适用的旧表述即可。
-
----
-
 ## 致谢
 
-本项目基于 [TrollSpeed](https://github.com/Lessica/TrollSpeed)（[@Lessica](https://github.com/Lessica)）改造，并参考了以下开源组件：
-
-- [TrollStore](https://github.com/opa334/TrollStore) · [UIDaemon](https://github.com/limneos/UIDaemon)
-- [SPLarkController](https://github.com/ivanvorobei/SPLarkController) · [SnapshotSafeView](https://github.com/Stampoo/SnapshotSafeView)
-- [KIF](https://github.com/kif-framework/KIF)
+基于 [TrollSpeed](https://github.com/Lessica/TrollSpeed)（[@Lessica](https://github.com/Lessica)）改造，并参考了 [TrollStore](https://github.com/opa334/TrollStore)、[UIDaemon](https://github.com/limneos/UIDaemon)、[SPLarkController](https://github.com/ivanvorobei/SPLarkController)、[SnapshotSafeView](https://github.com/Stampoo/SnapshotSafeView)、[KIF](https://github.com/kif-framework/KIF) 等开源项目。
 
 维护：[@better-999](https://github.com/better-999)
 
----
-
 ## 许可证
 
-TrollMemo 采用 [GNU Affero General Public License v3](LICENSE) 发布（继承自 TrollSpeed fork）。
+本项目采用 [GNU Affero General Public License v3](LICENSE)（继承自 TrollSpeed）。
 
 ## 本地化
 

@@ -6,7 +6,7 @@
 [![Analyse Commands](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml)
 [![Build Release](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml)
 ![Latest Release](https://img.shields.io/github/v/release/better-999/TrollMemo)
-![MIT License](https://img.shields.io/github/license/better-999/TrollMemo)
+![AGPL-3.0 License](https://img.shields.io/github/license/better-999/TrollMemo)
 
 [now-on-havoc]: https://havoc.app/package/TrollMemo 
 
@@ -58,7 +58,7 @@ Tested and expected to work on all iOS versions supported by opa334's TrollStore
 
 ## License
 
-TrollMemo is a fork of [TrollSpeed](https://github.com/Lessica/TrollSpeed) and remains licensed under the [GNU Affero General Public License v3](LICENSE). The LICENSE file and attribution must be kept when distributing.
+Fork of [TrollSpeed](https://github.com/Lessica/TrollSpeed), licensed under the [GNU Affero General Public License v3](LICENSE).
 
 ### Localization
 
