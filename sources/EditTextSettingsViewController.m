@@ -127,11 +127,10 @@ static NSString *PasteboardPlainTextFromController(void) {
 
 @interface EditTextSettingsViewController () <UITextViewDelegate>
 
-@property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIView *contentView;
-@property (nonatomic, strong) UIView *bottomBar;
-@property (nonatomic, strong) UIButton *pasteButton;
 @property (nonatomic, strong) UITextView *textViewPreview;
+@property (nonatomic, strong) UIView *bottomBar;
+@property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIColorWell *textColorWell;
 @property (nonatomic, strong) UIStepper *textSizeStepper;
 @property (nonatomic, strong) UISegmentedControl *textAlignmentSegmentedControl;
@@ -181,23 +180,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     return color ?: fallback;
 }
 
-- (void)pasteIntoEditor {
-    UITextView *textView = _textViewPreview;
-    if (![textView isFirstResponder]) {
-        [textView becomeFirstResponder];
-    }
-
-    NSString *pastedText = PasteboardPlainTextFromController();
-    if (pastedText.length > 0) {
-        [(PasteEnabledTextView *)textView applyPastedText:pastedText];
-        return;
-    }
-
-    if ([textView canPerformAction:@selector(paste:) withSender:nil]) {
-        [textView paste:nil];
-    }
-}
-
 - (void)loadView {
     self.view = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
     self.view.backgroundColor = [UIColor systemBackgroundColor];
@@ -214,12 +196,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     [_scrollView addSubview:_contentView];
 
     NSMutableDictionary *savedSettings = LoadHUDSettingsPlist();
-
-    _pasteButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    _pasteButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [_pasteButton setTitle:NSLocalizedString(@"Paste", nil) forState:UIControlStateNormal];
-    [_pasteButton addTarget:self action:@selector(pasteIntoEditor) forControlEvents:UIControlEventTouchUpInside];
-    [_contentView addSubview:_pasteButton];
 
     _textViewPreview = [[PasteEnabledTextView alloc] init];
     _textViewPreview.translatesAutoresizingMaskIntoConstraints = NO;
@@ -449,10 +425,7 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
         [_contentView.bottomAnchor constraintEqualToAnchor:_scrollView.contentLayoutGuide.bottomAnchor],
         [_contentView.widthAnchor constraintEqualToAnchor:_scrollView.frameLayoutGuide.widthAnchor],
 
-        [_pasteButton.topAnchor constraintEqualToAnchor:_contentView.topAnchor constant:12],
-        [_pasteButton.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
-
-        [_textViewPreview.topAnchor constraintEqualToAnchor:_pasteButton.bottomAnchor constant:8],
+        [_textViewPreview.topAnchor constraintEqualToAnchor:_contentView.topAnchor constant:12],
         [_textViewPreview.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_textViewPreview.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
         [_textViewPreview.heightAnchor constraintGreaterThanOrEqualToConstant:100],
