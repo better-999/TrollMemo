@@ -565,7 +565,8 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
     self.hudTextView.scrollEnabled = NO; // 禁止滚动
     self.hudTextView.backgroundColor = [UIColor clearColor]; // 背景透明
     self.hudTextView.textContainerInset = HUDTextContainerInsets();
-    self.hudTextView.textContainer.lineFragmentPadding = 0; // 移除行片段填充
+    self.hudTextView.textContainer.lineFragmentPadding = 0;
+    self.hudTextView.textContainer.widthTracksTextView = NO;
     self.hudTextView.layer.cornerRadius = HUD_MAX_CORNER_RADIUS; // 设置圆角
     self.hudTextView.layer.masksToBounds = YES; // 裁剪子视图到圆角
     [_blurView.contentView addSubview:self.hudTextView];
@@ -930,19 +931,32 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
 
 - (CGSize)measuredHUDTextContentSizeForText:(NSString *)text font:(UIFont *)font textAlignment:(NSTextAlignment)alignment
 {
-    self.hudTextView.font = font ?: [UIFont systemFontOfSize:10.0];
-    self.hudTextView.text = text.length ? text : @" ";
-    self.hudTextView.textAlignment = alignment;
-    self.hudTextView.textContainerInset = HUDTextContainerInsets();
-    self.hudTextView.textContainer.lineFragmentPadding = 0;
+    (void)alignment;
+    NSString *measureText = text.length ? text : @" ";
+    UIFont *measureFont = font ?: [UIFont systemFontOfSize:10.0];
+    NSDictionary *attributes = @{NSFontAttributeName: measureFont};
 
-    NSLayoutManager *layoutManager = self.hudTextView.layoutManager;
-    NSTextContainer *textContainer = self.hudTextView.textContainer;
-    [layoutManager ensureLayoutForTextContainer:textContainer];
-    CGRect usedRect = [layoutManager usedRectForTextContainer:textContainer];
+    CGFloat maxLineWidth = 0.0;
+    NSArray<NSString *> *lines = [measureText componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    for (NSString *line in lines) {
+        NSString *lineText = line.length ? line : @" ";
+        CGRect lineRect = [lineText boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)
+                                                 options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                              attributes:attributes
+                                                 context:nil];
+        maxLineWidth = MAX(maxLineWidth, ceil(CGRectGetWidth(lineRect)));
+    }
+    if (maxLineWidth < 1.0) {
+        maxLineWidth = 1.0;
+    }
 
-    return CGSizeMake(MAX(ceil(CGRectGetWidth(usedRect)) + kHUDTextHorizontalPadding, 1.0),
-                      MAX(ceil(CGRectGetHeight(usedRect)) + kHUDTextVerticalPadding, 1.0));
+    CGRect fullRect = [measureText boundingRectWithSize:CGSizeMake(maxLineWidth, CGFLOAT_MAX)
+                                                options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                             attributes:attributes
+                                                context:nil];
+
+    return CGSizeMake(MAX(maxLineWidth + kHUDTextHorizontalPadding, 1.0),
+                      MAX(ceil(CGRectGetHeight(fullRect)) + kHUDTextVerticalPadding, 1.0));
 }
 
 // 读取 EditTextSettingsViewController 保存的配置，渲染到桌面文字视图
@@ -1015,6 +1029,8 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
                                                        textAlignment:self.hudTextView.textAlignment];
     _hudTextWidthConstraint.constant = textContentSize.width;
     _hudTextHeightConstraint.constant = textContentSize.height;
+    CGFloat contentWidth = MAX(textContentSize.width - kHUDTextHorizontalPadding, 1.0);
+    self.hudTextView.textContainer.size = CGSizeMake(contentWidth, CGFLOAT_MAX);
 
     [self.view setNeedsUpdateConstraints];
     [self.view updateConstraintsIfNeeded];
