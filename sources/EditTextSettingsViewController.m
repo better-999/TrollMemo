@@ -19,17 +19,24 @@ static NSString *PasteboardPlainTextFromController(void) {
     if (text.length > 0) {
         return text;
     }
-    text = [pasteboard stringForPasteboardType:@"public.utf8-plain-text"];
-    if (text.length > 0) {
-        return text;
-    }
-    text = [pasteboard stringForPasteboardType:@"public.text"];
-    if (text.length > 0) {
-        return text;
-    }
-    NSData *data = [pasteboard dataForPasteboardType:@"public.utf8-plain-text"];
-    if (data.length > 0) {
-        return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] ?: @"";
+    NSArray<NSString *> *types = @[
+        @"public.utf8-plain-text",
+        @"public.text",
+        @"public.plain-text",
+        UIPasteboardTypeString,
+    ];
+    for (NSString *type in types) {
+        id value = [pasteboard valueForPasteboardType:type];
+        if ([value isKindOfClass:[NSString class]]) {
+            text = (NSString *)value;
+        } else if ([value isKindOfClass:[NSData class]]) {
+            text = [[NSString alloc] initWithData:(NSData *)value encoding:NSUTF8StringEncoding];
+        } else {
+            text = nil;
+        }
+        if (text.length > 0) {
+            return text;
+        }
     }
     return @"";
 }
