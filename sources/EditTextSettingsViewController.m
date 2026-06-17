@@ -37,10 +37,26 @@ static NSString *PasteboardPlainTextFromController(void) {
             return text;
         }
     }
+    for (NSDictionary *item in pasteboard.items) {
+        for (NSString *type in item) {
+            id value = item[type];
+            if ([value isKindOfClass:[NSString class]]) {
+                text = (NSString *)value;
+            } else if ([value isKindOfClass:[NSData class]]) {
+                text = [[NSString alloc] initWithData:(NSData *)value encoding:NSUTF8StringEncoding];
+            } else {
+                text = nil;
+            }
+            if (text.length > 0) {
+                return text;
+            }
+        }
+    }
     return @"";
 }
 
 @interface PasteEnabledTextView : UITextView
+- (void)applyPastedText:(NSString *)string;
 @end
 
 @implementation PasteEnabledTextView
@@ -61,7 +77,7 @@ static NSString *PasteboardPlainTextFromController(void) {
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
     if (action == @selector(paste:)) {
-        return self.isEditable && PasteboardPlainTextFromController().length > 0;
+        return self.isEditable;
     }
     if (action == @selector(copy:) || action == @selector(cut:)) {
         return self.isEditable && self.selectedRange.length > 0;
@@ -72,15 +88,39 @@ static NSString *PasteboardPlainTextFromController(void) {
     return [super canPerformAction:action withSender:sender];
 }
 
-- (void)paste:(id)sender {
-    NSString *string = PasteboardPlainTextFromController();
+- (void)applyPastedText:(NSString *)string {
     if (string.length == 0) {
         return;
     }
-    if (self.selectedRange.location == NSNotFound) {
-        self.selectedRange = NSMakeRange(self.text.length, 0);
+
+    NSRange range = self.selectedRange;
+    if (range.location == NSNotFound) {
+        range = NSMakeRange(self.text.length, 0);
     }
-    [self insertText:string];
+    if (NSMaxRange(range) > self.text.length) {
+        range = NSMakeRange(self.text.length, 0);
+    }
+
+    NSMutableString *updated = [NSMutableString stringWithString:self.text ?: @""];
+    [updated replaceCharactersInRange:range withString:string];
+    self.text = updated;
+    self.selectedRange = NSMakeRange(range.location + string.length, 0);
+
+    if ([self.delegate respondsToSelector:@selector(textViewDidChange:)]) {
+        [(id<UITextViewDelegate>)self.delegate textViewDidChange:self];
+    }
+}
+
+- (void)paste:(id)sender {
+    NSString *string = PasteboardPlainTextFromController();
+    if (string.length > 0) {
+        [self applyPastedText:string];
+        return;
+    }
+    [super paste:sender];
+    if ([self.delegate respondsToSelector:@selector(textViewDidChange:)]) {
+        [(id<UITextViewDelegate>)self.delegate textViewDidChange:self];
+    }
 }
 
 @end
@@ -142,19 +182,20 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 }
 
 - (void)pasteIntoEditor {
-    NSString *pastedText = PasteboardPlainTextFromController();
-    if (pastedText.length == 0) {
-        return;
-    }
-
     UITextView *textView = _textViewPreview;
     if (![textView isFirstResponder]) {
         [textView becomeFirstResponder];
     }
-    if (textView.selectedRange.location == NSNotFound) {
-        textView.selectedRange = NSMakeRange(textView.text.length, 0);
+
+    NSString *pastedText = PasteboardPlainTextFromController();
+    if (pastedText.length > 0) {
+        [(PasteEnabledTextView *)textView applyPastedText:pastedText];
+        return;
     }
-    [textView insertText:pastedText];
+
+    if ([textView canPerformAction:@selector(paste:) withSender:nil]) {
+        [textView paste:nil];
+    }
 }
 
 - (void)loadView {

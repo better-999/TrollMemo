@@ -48,14 +48,7 @@ TrollMemo 会在**主屏幕 / 桌面**上常驻一条文字浮窗（HUD），类
 
 ## 安装
 
-### 方式一：GitHub Actions 打包（推荐）
-
-1. 打开仓库 **Actions** → 选择 **Build IPA (Manual)** → **Run workflow**
-2. Scheme 选 `default`（一般设备用这个即可）
-3. 构建完成后在 Artifacts 下载 `.tipa`
-4. 用 TrollStore 安装
-
-### 方式二：本地 Theos 编译
+### 方式一：本地 Theos 编译
 
 ```bash
 FINALPACKAGE=1 make package
@@ -63,7 +56,7 @@ FINALPACKAGE=1 make package
 
 产物在 `packages/` 目录下的 `.tipa` 文件。
 
-### 方式三：Xcode
+### 方式二：Xcode
 
 ```bash
 ./build.sh <版本号>

@@ -114,6 +114,8 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 
 static const CGFloat kHUDTextHorizontalPadding = 8.0;
 static const CGFloat kHUDTextVerticalPadding = 8.0;
+// boundingRect 宽度传 CGFLOAT_MAX 在大字号时会溢出，测出来只剩单字宽
+static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
 
 @implementation HUDRootViewController {
     NSMutableDictionary *_userDefaults;       // 从 USER_DEFAULTS_PATH plist 加载的配置
@@ -555,7 +557,7 @@ static const CGFloat kHUDTextVerticalPadding = 8.0;
     self.hudTextLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     self.hudTextLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.hudTextLabel.numberOfLines = 0;
-    self.hudTextLabel.lineBreakMode = NSLineBreakByCharWrapping;
+    self.hudTextLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.hudTextLabel.backgroundColor = [UIColor clearColor];
     self.hudTextLabel.layer.cornerRadius = HUD_MAX_CORNER_RADIUS;
     self.hudTextLabel.layer.masksToBounds = YES;
@@ -926,23 +928,33 @@ static const CGFloat kHUDTextVerticalPadding = 8.0;
 
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.alignment = alignment;
-    paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
+    paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
 
     NSDictionary *attributes = @{
         NSFontAttributeName: measureFont,
         NSParagraphStyleAttributeName: paragraphStyle,
     };
 
-    CGRect textRect = [measureText boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)
+    CGRect textRect = [measureText boundingRectWithSize:CGSizeMake(kHUDTextMeasureMaxWidth, CGFLOAT_MAX)
                                                 options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
                                              attributes:attributes
                                                 context:nil];
 
-    return CGSizeMake(MAX(ceil(CGRectGetWidth(textRect)) + kHUDTextHorizontalPadding, 1.0),
-                      MAX(ceil(CGRectGetHeight(textRect)) + kHUDTextVerticalPadding, 1.0));
-}
+    // 与 boundingRect 交叉校验，避免约束被设成单字宽
+    UILabel *measureLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    measureLabel.numberOfLines = 0;
+    measureLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    measureLabel.font = measureFont;
+    measureLabel.textAlignment = alignment;
+    measureLabel.text = measureText;
+    measureLabel.preferredMaxLayoutWidth = kHUDTextMeasureMaxWidth;
+    CGSize labelSize = [measureLabel sizeThatFits:CGSizeMake(kHUDTextMeasureMaxWidth, CGFLOAT_MAX)];
 
-// 读取 EditTextSettingsViewController 保存的配置，渲染到桌面文字视图
+    CGFloat measuredWidth = MAX(ceil(CGRectGetWidth(textRect)), ceil(labelSize.width));
+    CGFloat measuredHeight = MAX(ceil(CGRectGetHeight(textRect)), ceil(labelSize.height));
+    return CGSizeMake(MAX(measuredWidth + kHUDTextHorizontalPadding, 1.0),
+                      MAX(measuredHeight + kHUDTextVerticalPadding, 1.0));
+}
 - (void)applyTextSettings {
     [self loadUserDefaults:NO];
 
@@ -1008,6 +1020,8 @@ static const CGFloat kHUDTextVerticalPadding = 8.0;
 
     self.hudTextLabel.font = font;
     self.hudTextLabel.textAlignment = textAlignment;
+    self.hudTextLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    self.hudTextLabel.preferredMaxLayoutWidth = MAX(textContentSize.width - kHUDTextHorizontalPadding, 1.0);
     self.hudTextLabel.text = textContent;
 
     [self.view setNeedsUpdateConstraints];
