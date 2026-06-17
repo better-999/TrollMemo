@@ -132,6 +132,10 @@ static NSString *PasteboardPlainTextFromController(void) {
 @property (nonatomic, strong) UIView *bottomBar;
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIColorWell *textColorWell;
+@property (nonatomic, strong) UIStackView *textStyleStackView;
+@property (nonatomic, strong) UIButton *textStyleBoldButton;
+@property (nonatomic, strong) UIButton *textStyleItalicButton;
+@property (nonatomic, strong) UIButton *textStyleUnderlineButton;
 @property (nonatomic, strong) UIStepper *textSizeStepper;
 @property (nonatomic, strong) UISegmentedControl *textAlignmentSegmentedControl;
 @property (nonatomic, strong) UISegmentedControl *textVerticalSegmentedControl;
@@ -180,6 +184,71 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     return color ?: fallback;
 }
 
+- (UIButton *)createTextStyleToggleButtonWithTitle:(NSString *)title font:(UIFont *)font underline:(BOOL)underline tag:(NSInteger)tag
+{
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.translatesAutoresizingMaskIntoConstraints = NO;
+    button.tag = tag;
+    button.layer.cornerRadius = 8.0;
+    button.layer.masksToBounds = YES;
+    button.titleLabel.font = font;
+    if (underline) {
+        NSDictionary *attributes = @{
+            NSFontAttributeName: font,
+            NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle),
+        };
+        [button setAttributedTitle:[[NSAttributedString alloc] initWithString:title attributes:attributes] forState:UIControlStateNormal];
+    } else {
+        [button setTitle:title forState:UIControlStateNormal];
+    }
+    [button addTarget:self action:@selector(textStyleButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    return button;
+}
+
+- (void)updateTextStyleButton:(UIButton *)button selected:(BOOL)selected
+{
+    button.selected = selected;
+    UIColor *foregroundColor = selected ? [UIColor whiteColor] : [UIColor labelColor];
+    button.backgroundColor = selected ? [UIColor systemBlueColor] : [UIColor tertiarySystemFillColor];
+
+    if (button == _textStyleUnderlineButton) {
+        NSDictionary *attributes = @{
+            NSFontAttributeName: [UIFont systemFontOfSize:17.0],
+            NSForegroundColorAttributeName: foregroundColor,
+            NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle),
+        };
+        [button setAttributedTitle:[[NSAttributedString alloc] initWithString:@"U" attributes:attributes] forState:UIControlStateNormal];
+    } else {
+        [button setTitleColor:foregroundColor forState:UIControlStateNormal];
+    }
+}
+
+- (void)syncTextStyleButtonsFromSettings
+{
+    [self updateTextStyleButton:_textStyleBoldButton selected:[_currentSettings[HUDUserDefaultsKeyTextBold] boolValue]];
+    [self updateTextStyleButton:_textStyleItalicButton selected:[_currentSettings[HUDUserDefaultsKeyTextItalic] boolValue]];
+    [self updateTextStyleButton:_textStyleUnderlineButton selected:[_currentSettings[HUDUserDefaultsKeyTextUnderline] boolValue]];
+}
+
+- (void)textStyleButtonTapped:(UIButton *)sender
+{
+    BOOL newValue = !sender.selected;
+    [self updateTextStyleButton:sender selected:newValue];
+
+    HUDUserDefaultsKey key = nil;
+    if (sender == _textStyleBoldButton) {
+        key = HUDUserDefaultsKeyTextBold;
+    } else if (sender == _textStyleItalicButton) {
+        key = HUDUserDefaultsKeyTextItalic;
+    } else if (sender == _textStyleUnderlineButton) {
+        key = HUDUserDefaultsKeyTextUnderline;
+    }
+    if (key) {
+        [_currentSettings setObject:@(newValue) forKey:key];
+        [self pushPreviewToHUD];
+    }
+}
+
 - (void)loadView {
     self.view = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
     self.view.backgroundColor = [UIColor systemBackgroundColor];
@@ -220,6 +289,34 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _textColorWell.selectedColor = [UIColor redColor];
     [_textColorWell addTarget:self action:@selector(colorWellDidChange:) forControlEvents:UIControlEventValueChanged];
     [_contentView addSubview:_textColorWell];
+
+    UILabel *textStyleLabel = [[UILabel alloc] init];
+    textStyleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    textStyleLabel.text = NSLocalizedString(@"文字样式", nil);
+    [_contentView addSubview:textStyleLabel];
+
+    _textStyleBoldButton = [self createTextStyleToggleButtonWithTitle:@"B"
+                                                                 font:[UIFont boldSystemFontOfSize:17.0]
+                                                            underline:NO
+                                                                  tag:0];
+    _textStyleItalicButton = [self createTextStyleToggleButtonWithTitle:@"I"
+                                                                   font:[UIFont italicSystemFontOfSize:17.0]
+                                                              underline:NO
+                                                                    tag:1];
+    _textStyleUnderlineButton = [self createTextStyleToggleButtonWithTitle:@"U"
+                                                                      font:[UIFont systemFontOfSize:17.0]
+                                                                 underline:YES
+                                                                       tag:2];
+    _textStyleStackView = [[UIStackView alloc] initWithArrangedSubviews:@[
+        _textStyleBoldButton,
+        _textStyleItalicButton,
+        _textStyleUnderlineButton,
+    ]];
+    _textStyleStackView.translatesAutoresizingMaskIntoConstraints = NO;
+    _textStyleStackView.axis = UILayoutConstraintAxisHorizontal;
+    _textStyleStackView.distribution = UIStackViewDistributionFillEqually;
+    _textStyleStackView.spacing = 8.0;
+    [_contentView addSubview:_textStyleStackView];
 
     UILabel *textSizeLabel = [[UILabel alloc] init];
     textSizeLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -437,7 +534,15 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
         [_textColorWell.widthAnchor constraintEqualToConstant:44],
         [_textColorWell.heightAnchor constraintEqualToConstant:44],
 
-        [textSizeLabel.topAnchor constraintEqualToAnchor:textColorLabel.bottomAnchor constant:20],
+        [textStyleLabel.topAnchor constraintEqualToAnchor:textColorLabel.bottomAnchor constant:20],
+        [textStyleLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
+        [_textStyleStackView.centerYAnchor constraintEqualToAnchor:textStyleLabel.centerYAnchor],
+        [_textStyleStackView.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
+        [_textStyleStackView.leadingAnchor constraintGreaterThanOrEqualToAnchor:textStyleLabel.trailingAnchor constant:10],
+        [_textStyleStackView.heightAnchor constraintEqualToConstant:32],
+        [_textStyleStackView.widthAnchor constraintEqualToConstant:132],
+
+        [textSizeLabel.topAnchor constraintEqualToAnchor:textStyleLabel.bottomAnchor constant:20],
         [textSizeLabel.leadingAnchor constraintEqualToAnchor:_contentView.leadingAnchor constant:20],
         [_textSizeStepper.centerYAnchor constraintEqualToAnchor:textSizeLabel.centerYAnchor],
         [_textSizeStepper.trailingAnchor constraintEqualToAnchor:_contentView.trailingAnchor constant:-20],
@@ -625,6 +730,9 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     [_currentSettings setObject:@(0.0f) forKey:HUDUserDefaultsKeyLandscapeOffsetY];
     [_currentSettings setObject:@(1.0f) forKey:HUDUserDefaultsKeyTextAlpha];
     [_currentSettings setObject:@(0.0f) forKey:HUDUserDefaultsKeyBackgroundAlpha];
+    [_currentSettings setObject:@NO forKey:HUDUserDefaultsKeyTextBold];
+    [_currentSettings setObject:@NO forKey:HUDUserDefaultsKeyTextItalic];
+    [_currentSettings setObject:@NO forKey:HUDUserDefaultsKeyTextUnderline];
     [_currentSettings setObject:textContent forKey:HUDUserDefaultsKeyTextContent];
 
     [self syncControlsFromCurrentSettings];
@@ -649,6 +757,9 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     settings[HUDUserDefaultsKeyTextContent] = _textViewPreview.text;
     settings[HUDUserDefaultsKeyTextSize] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextSize];
     settings[HUDUserDefaultsKeyTextAlignment] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlignment];
+    settings[HUDUserDefaultsKeyTextBold] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextBold] ?: @NO;
+    settings[HUDUserDefaultsKeyTextItalic] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextItalic] ?: @NO;
+    settings[HUDUserDefaultsKeyTextUnderline] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextUnderline] ?: @NO;
     settings[HUDUserDefaultsKeyTextAlpha] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextAlpha];
     settings[HUDUserDefaultsKeyBackgroundAlpha] = [_currentSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha];
     settings[HUDUserDefaultsKeyTextVerticalPosition] = [_currentSettings objectForKey:HUDUserDefaultsKeyTextVerticalPosition];
@@ -696,6 +807,9 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _currentSettings[HUDUserDefaultsKeyTextColor] = [self colorFromSettingsData:[savedSettings objectForKey:HUDUserDefaultsKeyTextColor] fallback:[UIColor redColor]];
     _currentSettings[HUDUserDefaultsKeyTextSize] = [savedSettings objectForKey:HUDUserDefaultsKeyTextSize] ?: @(10.0f);
     _currentSettings[HUDUserDefaultsKeyTextAlignment] = [savedSettings objectForKey:HUDUserDefaultsKeyTextAlignment] ?: @(NSTextAlignmentCenter);
+    _currentSettings[HUDUserDefaultsKeyTextBold] = [savedSettings objectForKey:HUDUserDefaultsKeyTextBold] ?: @NO;
+    _currentSettings[HUDUserDefaultsKeyTextItalic] = [savedSettings objectForKey:HUDUserDefaultsKeyTextItalic] ?: @NO;
+    _currentSettings[HUDUserDefaultsKeyTextUnderline] = [savedSettings objectForKey:HUDUserDefaultsKeyTextUnderline] ?: @NO;
     _currentSettings[HUDUserDefaultsKeyTextAlpha] = [savedSettings objectForKey:HUDUserDefaultsKeyTextAlpha] ?: @(1.0f);
     _currentSettings[HUDUserDefaultsKeyBackgroundColor] = [self colorFromSettingsData:[savedSettings objectForKey:HUDUserDefaultsKeyBackgroundColor] fallback:[UIColor blackColor]];
     _currentSettings[HUDUserDefaultsKeyBackgroundAlpha] = [savedSettings objectForKey:HUDUserDefaultsKeyBackgroundAlpha] ?: @(0.0f);
@@ -713,6 +827,7 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _textColorWell.selectedColor = _currentSettings[HUDUserDefaultsKeyTextColor];
     _textSizeStepper.value = [_currentSettings[HUDUserDefaultsKeyTextSize] doubleValue];
     _textAlignmentSegmentedControl.selectedSegmentIndex = [_currentSettings[HUDUserDefaultsKeyTextAlignment] integerValue];
+    [self syncTextStyleButtonsFromSettings];
     _textVerticalSegmentedControl.selectedSegmentIndex = [_currentSettings[HUDUserDefaultsKeyTextVerticalPosition] integerValue];
     _textAlphaSlider.value = [_currentSettings[HUDUserDefaultsKeyTextAlpha] floatValue];
     _backgroundColorWell.selectedColor = _currentSettings[HUDUserDefaultsKeyBackgroundColor];

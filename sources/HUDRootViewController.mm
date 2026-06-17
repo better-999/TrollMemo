@@ -921,32 +921,73 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
 
 #pragma mark - 文字样式（从 plist 读取并应用到 hudTextLabel）
 
-- (CGSize)measuredHUDTextContentSizeForText:(NSString *)text font:(UIFont *)font textAlignment:(NSTextAlignment)alignment
+- (UIFont *)hudFontWithSize:(CGFloat)fontSize bold:(BOOL)bold italic:(BOOL)italic
 {
-    NSString *measureText = text.length ? text : @" ";
-    UIFont *measureFont = font ?: [UIFont systemFontOfSize:10.0];
+    UIFont *font = [UIFont systemFontOfSize:fontSize];
+    UIFontDescriptorSymbolicTraits traits = 0;
+    if (bold) {
+        traits |= UIFontDescriptorTraitBold;
+    }
+    if (italic) {
+        traits |= UIFontDescriptorTraitItalic;
+    }
+    if (traits != 0) {
+        UIFontDescriptor *descriptor = [[font fontDescriptor] fontDescriptorWithSymbolicTraits:([[font fontDescriptor] symbolicTraits] | traits)];
+        UIFont *styledFont = [UIFont fontWithDescriptor:descriptor size:fontSize];
+        if (styledFont) {
+            font = styledFont;
+        }
+    }
+    return font;
+}
 
+- (NSDictionary *)hudTextAttributesForText:(NSString *)text
+                                      font:(UIFont *)font
+                                 textColor:(UIColor *)textColor
+                             textAlignment:(NSTextAlignment)alignment
+                                 underline:(BOOL)underline
+{
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.alignment = alignment;
     paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
 
-    NSDictionary *attributes = @{
-        NSFontAttributeName: measureFont,
+    NSMutableDictionary *attributes = [@{
+        NSFontAttributeName: font,
+        NSForegroundColorAttributeName: textColor,
         NSParagraphStyleAttributeName: paragraphStyle,
-    };
+    } mutableCopy];
+    if (underline) {
+        attributes[NSUnderlineStyleAttributeName] = @(NSUnderlineStyleSingle);
+    }
+    (void)text;
+    return attributes;
+}
 
-    CGRect textRect = [measureText boundingRectWithSize:CGSizeMake(kHUDTextMeasureMaxWidth, CGFLOAT_MAX)
-                                                options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
-                                             attributes:attributes
-                                                context:nil];
+- (CGSize)measuredHUDTextContentSizeForText:(NSString *)text
+                                       font:(UIFont *)font
+                              textAlignment:(NSTextAlignment)alignment
+                                  underline:(BOOL)underline
+                                  textColor:(UIColor *)textColor
+{
+    NSString *measureText = text.length ? text : @" ";
+    UIFont *measureFont = font ?: [UIFont systemFontOfSize:10.0];
+    UIColor *measureColor = textColor ?: [UIColor whiteColor];
+    NSDictionary *attributes = [self hudTextAttributesForText:measureText
+                                                         font:measureFont
+                                                    textColor:measureColor
+                                                textAlignment:alignment
+                                                    underline:underline];
+    NSAttributedString *attributedText = [[NSAttributedString alloc] initWithString:measureText attributes:attributes];
 
-    // 与 boundingRect 交叉校验，避免约束被设成单字宽
+    CGRect textRect = [attributedText boundingRectWithSize:CGSizeMake(kHUDTextMeasureMaxWidth, CGFLOAT_MAX)
+                                                   options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
+                                                   context:nil];
+
     UILabel *measureLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     measureLabel.numberOfLines = 0;
     measureLabel.lineBreakMode = NSLineBreakByWordWrapping;
-    measureLabel.font = measureFont;
     measureLabel.textAlignment = alignment;
-    measureLabel.text = measureText;
+    measureLabel.attributedText = attributedText;
     measureLabel.preferredMaxLayoutWidth = kHUDTextMeasureMaxWidth;
     CGSize labelSize = [measureLabel sizeThatFits:CGSizeMake(kHUDTextMeasureMaxWidth, CGFLOAT_MAX)];
 
@@ -964,11 +1005,9 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
     }
 
     NSData *textColorData = [_userDefaults objectForKey:HUDUserDefaultsKeyTextColor];
+    UIColor *textColor = [UIColor whiteColor];
     if (textColorData) {
-        UIColor *textColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:textColorData error:nil];
-        self.hudTextLabel.textColor = textColor ?: [UIColor whiteColor];
-    } else {
-        self.hudTextLabel.textColor = [UIColor whiteColor];
+        textColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:textColorData error:nil] ?: [UIColor whiteColor];
     }
 
     NSNumber *textSizeNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextSize];
@@ -976,7 +1015,11 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
     if (fontSize < 5.0 || fontSize > 50.0) {
         fontSize = 10.0;
     }
-    UIFont *font = [UIFont systemFontOfSize:fontSize];
+
+    BOOL textBold = [[_userDefaults objectForKey:HUDUserDefaultsKeyTextBold] boolValue];
+    BOOL textItalic = [[_userDefaults objectForKey:HUDUserDefaultsKeyTextItalic] boolValue];
+    BOOL textUnderline = [[_userDefaults objectForKey:HUDUserDefaultsKeyTextUnderline] boolValue];
+    UIFont *font = [self hudFontWithSize:fontSize bold:textBold italic:textItalic];
 
     NSNumber *textAlignmentNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextAlignment];
     NSTextAlignment textAlignment = textAlignmentNumber ? (NSTextAlignment)[textAlignmentNumber integerValue] : NSTextAlignmentCenter;
@@ -1014,15 +1057,24 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
         self.hudTextLabel.backgroundColor = [UIColor clearColor];
     }
 
-    CGSize textContentSize = [self measuredHUDTextContentSizeForText:textContent font:font textAlignment:textAlignment];
+    CGSize textContentSize = [self measuredHUDTextContentSizeForText:textContent
+                                                                 font:font
+                                                        textAlignment:textAlignment
+                                                            underline:textUnderline
+                                                            textColor:textColor];
     _hudTextWidthConstraint.constant = textContentSize.width;
     _hudTextHeightConstraint.constant = textContentSize.height;
 
-    self.hudTextLabel.font = font;
+    NSDictionary *textAttributes = [self hudTextAttributesForText:textContent
+                                                             font:font
+                                                        textColor:textColor
+                                                    textAlignment:textAlignment
+                                                        underline:textUnderline];
+    NSAttributedString *attributedText = [[NSAttributedString alloc] initWithString:textContent attributes:textAttributes];
     self.hudTextLabel.textAlignment = textAlignment;
     self.hudTextLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.hudTextLabel.preferredMaxLayoutWidth = MAX(textContentSize.width - kHUDTextHorizontalPadding, 1.0);
-    self.hudTextLabel.text = textContent;
+    self.hudTextLabel.attributedText = attributedText;
 
     [self.view setNeedsUpdateConstraints];
     [self.view updateConstraintsIfNeeded];

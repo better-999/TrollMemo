@@ -113,6 +113,7 @@
 "Open HUD" = "Open HUD";
 
 /* Edit screen */
+"文字样式" = "Text Style";
 "Text Vertical" = "Text Vertical";
 "Top" = "Top";
 "Middle" = "Middle";
