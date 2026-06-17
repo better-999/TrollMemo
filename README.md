@@ -48,6 +48,11 @@ Tested and expected to work on all iOS versions supported by opa334's TrollStore
 ![preview](screenshots/preview.jpeg)
 
 ## Special Thanks
+
+This project is a fork of [TrollSpeed](https://github.com/Lessica/TrollSpeed) by [@Lessica](https://github.com/Lessica), and references [TrollStore](https://github.com/opa334/TrollStore), [UIDaemon](https://github.com/limneos/UIDaemon), [SPLarkController](https://github.com/ivanvorobei/SPLarkController), [SnapshotSafeView](https://github.com/Stampoo/SnapshotSafeView), [KIF](https://github.com/kif-framework/KIF), and other open source projects.
+
+Maintained by [@better-999](https://github.com/better-999).
+
 - [TrollSpeed](https://github.com/Lessica/TrollSpeed) by [@Lessica](https://github.com/Lessica)
 - [KIF](https://github.com/kif-framework/KIF)
 - [SPLarkController](https://github.com/ivanvorobei/SPLarkController) by [@ivanvorobei_](https://twitter.com/ivanvorobei_)
