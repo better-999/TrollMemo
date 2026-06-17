@@ -36,7 +36,43 @@
     if (action == @selector(paste:)) {
         return self.isEditable && [UIPasteboard generalPasteboard].hasStrings;
     }
+    if (action == @selector(copy:) || action == @selector(cut:)) {
+        return self.isEditable && self.selectedRange.length > 0;
+    }
+    if (action == @selector(selectAll:)) {
+        return self.isEditable && self.text.length > 0;
+    }
     return [super canPerformAction:action withSender:sender];
+}
+
+- (void)paste:(id)sender {
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    NSString *string = pasteboard.string;
+    if (string.length == 0) {
+        return;
+    }
+
+    NSRange range = self.selectedRange;
+    if (range.location == NSNotFound) {
+        range = NSMakeRange(self.text.length, 0);
+    }
+    if (range.location > self.text.length) {
+        range = NSMakeRange(self.text.length, 0);
+    }
+
+    NSMutableString *updatedText = [NSMutableString stringWithString:self.text ?: @""];
+    if (NSMaxRange(range) <= updatedText.length) {
+        [updatedText replaceCharactersInRange:range withString:string];
+    } else {
+        [updatedText appendString:string];
+    }
+
+    self.text = updatedText;
+    self.selectedRange = NSMakeRange(range.location + string.length, 0);
+
+    if ([self.delegate respondsToSelector:@selector(textViewDidChange:)]) {
+        [self.delegate textViewDidChange:self];
+    }
 }
 
 @end
@@ -96,6 +132,26 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     return color ?: fallback;
 }
 
+- (UIToolbar *)textEditorAccessoryToolbar {
+    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 44)];
+    UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    UIBarButtonItem *pasteButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Paste", nil)
+                                                                    style:UIBarButtonItemStylePlain
+                                                                   target:self
+                                                                   action:@selector(pasteIntoEditor)];
+    toolbar.items = @[flexibleSpace, pasteButton];
+    return toolbar;
+}
+
+- (void)pasteIntoEditor {
+    if (![_textViewPreview isFirstResponder]) {
+        [_textViewPreview becomeFirstResponder];
+    }
+    if ([_textViewPreview respondsToSelector:@selector(paste:)]) {
+        [_textViewPreview paste:nil];
+    }
+}
+
 - (void)loadView {
     self.view = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
     self.view.backgroundColor = [UIColor systemBackgroundColor];
@@ -103,6 +159,8 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _scrollView = [[UIScrollView alloc] init];
     _scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     _scrollView.alwaysBounceVertical = YES;
+    _scrollView.delaysContentTouches = NO;
+    _scrollView.keyboardDismissMode = UIScrollViewKeyboardDismissModeInteractive;
     [self.view addSubview:_scrollView];
 
     _contentView = [[UIView alloc] init];
@@ -122,6 +180,7 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _textViewPreview.textAlignment = NSTextAlignmentNatural;
     _textViewPreview.delegate = self;
     _textViewPreview.text = [savedSettings objectForKey:HUDUserDefaultsKeyTextContent] ?: NSLocalizedString(@"Hello World!", nil);
+    _textViewPreview.inputAccessoryView = [self textEditorAccessoryToolbar];
     [_contentView addSubview:_textViewPreview];
 
     UILabel *textColorLabel = [[UILabel alloc] init];

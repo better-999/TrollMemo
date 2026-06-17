@@ -95,10 +95,10 @@ jobs:
           }
           echo "======================="
           
-          GIT_TAG=$(git describe --tags --always --abbrev=0 2>/dev/null || git rev-parse --short HEAD)
-          echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
+          APP_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Resources/Info.plist)
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
-          ./gen-control.sh "$GIT_TAG"
+          ./gen-control.sh "$APP_VERSION"
 
           SCHEME="${{ github.event.inputs.scheme }}"
           echo "Building with scheme: $SCHEME"
@@ -133,6 +133,6 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: TrollMemo${{ env.GIT_TAG }}_${{ github.event.inputs.scheme }}
+          name: TrollMemo_${{ env.APP_VERSION }}_${{ github.event.inputs.scheme }}
           path: project/packages/*.tipa
           if-no-files-found: error

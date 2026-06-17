@@ -1,5 +1,7 @@
 # TrollMemo
 
+**[简体中文说明 → README.zh-CN.md](README.zh-CN.md)**
+
 [![Xcode - Build and Analyze](https://github.com/better-999/TrollMemo/actions/workflows/build-analyse.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-analyse.yml)
 [![Analyse Commands](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/analyse-commands.yml)
 [![Build Release](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml/badge.svg)](https://github.com/better-999/TrollMemo/actions/workflows/build-release.yml)
@@ -56,7 +58,7 @@ Tested and expected to work on all iOS versions supported by opa334's TrollStore
 
 ## License
 
-TrollMemo is [Free Software](https://www.gnu.org/philosophy/free-sw.html) licensed under the [GNU Affero General Public License](LICENSE).
+TrollMemo is a fork of [TrollSpeed](https://github.com/Lessica/TrollSpeed) and remains licensed under the [GNU Affero General Public License v3](LICENSE). The LICENSE file and attribution must be kept when distributing.
 
 ### Localization
 
