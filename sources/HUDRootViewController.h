@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface HUDRootViewController: UIViewController
 
-@property (nonatomic, strong) UITextView *hudTextView; // 用于显示自定义文本的UITextView
+@property (nonatomic, strong) UILabel *hudTextLabel;
 
 + (BOOL)passthroughMode;
 - (void)resetLoopTimer;

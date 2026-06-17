@@ -115,13 +115,6 @@ static const CACornerMask kCornerMaskAll = kCALayerMinXMinYCorner | kCALayerMaxX
 static const CGFloat kHUDTextHorizontalPadding = 8.0;
 static const CGFloat kHUDTextVerticalPadding = 8.0;
 
-static UIEdgeInsets HUDTextContainerInsets(void) {
-    return UIEdgeInsetsMake(kHUDTextVerticalPadding / 2.0,
-                            kHUDTextHorizontalPadding / 2.0,
-                            kHUDTextVerticalPadding / 2.0,
-                            kHUDTextHorizontalPadding / 2.0);
-}
-
 @implementation HUDRootViewController {
     NSMutableDictionary *_userDefaults;       // 从 USER_DEFAULTS_PATH plist 加载的配置
     NSMutableArray <NSLayoutConstraint *> *_constraints;
@@ -151,7 +144,7 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
     BOOL _usesInvertedColor;
     BOOL _keepInPlace;
     BOOL _hideAtSnapshot;
-    UITextView *_hudTextView;                  // 桌面显示文字的视图
+    UILabel *_hudTextLabel;                    // 桌面显示文字的视图
     NSLayoutConstraint *_hudTextWidthConstraint;  // 随文字内容动态更新
     NSLayoutConstraint *_hudTextHeightConstraint;
     CGPoint _centerOffset;
@@ -558,29 +551,26 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
         hudContainerHost = _blurView;
     }
 
-    // 初始化 hudTextView
-    self.hudTextView = [[UITextView alloc] initWithFrame:CGRectZero];
-    self.hudTextView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.hudTextView.editable = NO; // 禁止编辑
-    self.hudTextView.scrollEnabled = NO; // 禁止滚动
-    self.hudTextView.backgroundColor = [UIColor clearColor]; // 背景透明
-    self.hudTextView.textContainerInset = HUDTextContainerInsets();
-    self.hudTextView.textContainer.lineFragmentPadding = 0;
-    self.hudTextView.textContainer.widthTracksTextView = NO;
-    self.hudTextView.layer.cornerRadius = HUD_MAX_CORNER_RADIUS; // 设置圆角
-    self.hudTextView.layer.masksToBounds = YES; // 裁剪子视图到圆角
-    [_blurView.contentView addSubview:self.hudTextView];
+    // 初始化 hudTextLabel（UILabel 尺寸稳定，避免 UITextView 在窄宽度下竖排）
+    self.hudTextLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    self.hudTextLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.hudTextLabel.numberOfLines = 0;
+    self.hudTextLabel.lineBreakMode = NSLineBreakByCharWrapping;
+    self.hudTextLabel.backgroundColor = [UIColor clearColor];
+    self.hudTextLabel.layer.cornerRadius = HUD_MAX_CORNER_RADIUS;
+    self.hudTextLabel.layer.masksToBounds = YES;
+    [_blurView.contentView addSubview:self.hudTextLabel];
 
     // 文字居中；宽高约束在 applyTextSettings 里按内容动态调整
-    _hudTextWidthConstraint = [_hudTextView.widthAnchor constraintEqualToConstant:100];
-    _hudTextHeightConstraint = [_hudTextView.heightAnchor constraintEqualToConstant:44];
+    _hudTextWidthConstraint = [self.hudTextLabel.widthAnchor constraintEqualToConstant:100];
+    _hudTextHeightConstraint = [self.hudTextLabel.heightAnchor constraintEqualToConstant:44];
     [NSLayoutConstraint activateConstraints:@[
-        [_hudTextView.centerXAnchor constraintEqualToAnchor:_blurView.contentView.centerXAnchor],
-        [_hudTextView.centerYAnchor constraintEqualToAnchor:_blurView.contentView.centerYAnchor],
+        [self.hudTextLabel.centerXAnchor constraintEqualToAnchor:_blurView.contentView.centerXAnchor],
+        [self.hudTextLabel.centerYAnchor constraintEqualToAnchor:_blurView.contentView.centerYAnchor],
         _hudTextWidthConstraint,
         _hudTextHeightConstraint,
-        [_blurView.widthAnchor constraintEqualToAnchor:_hudTextView.widthAnchor],
-        [_blurView.heightAnchor constraintEqualToAnchor:_hudTextView.heightAnchor],
+        [_blurView.widthAnchor constraintEqualToAnchor:self.hudTextLabel.widthAnchor],
+        [_blurView.heightAnchor constraintEqualToAnchor:self.hudTextLabel.heightAnchor],
         [hudContainerHost.centerXAnchor constraintEqualToAnchor:_contentView.centerXAnchor],
         [hudContainerHost.centerYAnchor constraintEqualToAnchor:_contentView.centerYAnchor],
         [hudContainerHost.widthAnchor constraintEqualToAnchor:_blurView.widthAnchor],
@@ -845,7 +835,7 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
     animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     [_lockedView.layer addAnimation:animation forKey:@"opacity"];
 
-    [_hudTextView.layer removeAllAnimations];
+    [_hudTextLabel.layer removeAllAnimations];
     CABasicAnimation *animationReverse = [CABasicAnimation animationWithKeyPath:@"opacity"];
     animationReverse.fromValue = [NSNumber numberWithFloat:1.0];
     animationReverse.toValue = [NSNumber numberWithFloat:0.0];
@@ -855,7 +845,7 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
     animationReverse.removedOnCompletion = YES;
     animationReverse.fillMode = kCAFillModeForwards;
     animationReverse.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    [_hudTextView.layer addAnimation:animationReverse forKey:@"opacity"];
+    [_hudTextLabel.layer addAnimation:animationReverse forKey:@"opacity"];
 }
 
 // 拖拽改变 HUD 垂直位置；若开启「固定位置」则震动并闪锁图标
@@ -927,56 +917,46 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
     }
 }
 
-#pragma mark - 文字样式（从 plist 读取并应用到 hudTextView）
+#pragma mark - 文字样式（从 plist 读取并应用到 hudTextLabel）
 
 - (CGSize)measuredHUDTextContentSizeForText:(NSString *)text font:(UIFont *)font textAlignment:(NSTextAlignment)alignment
 {
-    (void)alignment;
     NSString *measureText = text.length ? text : @" ";
     UIFont *measureFont = font ?: [UIFont systemFontOfSize:10.0];
-    NSDictionary *attributes = @{NSFontAttributeName: measureFont};
 
-    CGFloat maxLineWidth = 0.0;
-    NSArray<NSString *> *lines = [measureText componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-    for (NSString *line in lines) {
-        NSString *lineText = line.length ? line : @" ";
-        CGRect lineRect = [lineText boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)
-                                                 options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
-                                              attributes:attributes
-                                                 context:nil];
-        maxLineWidth = MAX(maxLineWidth, ceil(CGRectGetWidth(lineRect)));
-    }
-    if (maxLineWidth < 1.0) {
-        maxLineWidth = 1.0;
-    }
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+    paragraphStyle.alignment = alignment;
+    paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
 
-    CGRect fullRect = [measureText boundingRectWithSize:CGSizeMake(maxLineWidth, CGFLOAT_MAX)
+    NSDictionary *attributes = @{
+        NSFontAttributeName: measureFont,
+        NSParagraphStyleAttributeName: paragraphStyle,
+    };
+
+    CGRect textRect = [measureText boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)
                                                 options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading
                                              attributes:attributes
                                                 context:nil];
 
-    return CGSizeMake(MAX(maxLineWidth + kHUDTextHorizontalPadding, 1.0),
-                      MAX(ceil(CGRectGetHeight(fullRect)) + kHUDTextVerticalPadding, 1.0));
+    return CGSizeMake(MAX(ceil(CGRectGetWidth(textRect)) + kHUDTextHorizontalPadding, 1.0),
+                      MAX(ceil(CGRectGetHeight(textRect)) + kHUDTextVerticalPadding, 1.0));
 }
 
 // 读取 EditTextSettingsViewController 保存的配置，渲染到桌面文字视图
 - (void)applyTextSettings {
     [self loadUserDefaults:NO];
 
-    // --- 文字内容 ---
     NSString *textContent = [_userDefaults objectForKey:HUDUserDefaultsKeyTextContent];
     if (!textContent) {
         textContent = NSLocalizedString(@"Hello World!", nil);
     }
-    self.hudTextView.text = textContent;
 
-    // --- 文字颜色（plist 里存的是 NSKeyedArchiver 序列化的 NSData）---
     NSData *textColorData = [_userDefaults objectForKey:HUDUserDefaultsKeyTextColor];
     if (textColorData) {
         UIColor *textColor = [NSKeyedUnarchiver unarchivedObjectOfClass:[UIColor class] fromData:textColorData error:nil];
-        self.hudTextView.textColor = textColor ?: [UIColor whiteColor];
+        self.hudTextLabel.textColor = textColor ?: [UIColor whiteColor];
     } else {
-        self.hudTextView.textColor = [UIColor whiteColor];
+        self.hudTextLabel.textColor = [UIColor whiteColor];
     }
 
     NSNumber *textSizeNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextSize];
@@ -984,19 +964,18 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
     if (fontSize < 5.0 || fontSize > 50.0) {
         fontSize = 10.0;
     }
-    self.hudTextView.font = [UIFont systemFontOfSize:fontSize];
+    UIFont *font = [UIFont systemFontOfSize:fontSize];
 
     NSNumber *textAlignmentNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextAlignment];
-    self.hudTextView.textAlignment = textAlignmentNumber ? (NSTextAlignment)[textAlignmentNumber integerValue] : NSTextAlignmentCenter;
+    NSTextAlignment textAlignment = textAlignmentNumber ? (NSTextAlignment)[textAlignmentNumber integerValue] : NSTextAlignmentCenter;
 
     NSNumber *textAlphaNumber = [_userDefaults objectForKey:HUDUserDefaultsKeyTextAlpha];
     CGFloat textAlpha = textAlphaNumber ? [textAlphaNumber floatValue] : 1.0;
     if (textAlpha < 0.0 || textAlpha > 1.0) {
         textAlpha = 1.0;
     }
-    self.hudTextView.alpha = textAlpha;
+    self.hudTextLabel.alpha = textAlpha;
 
-    // --- 背景色与背景透明度（与文字透明度分开控制）---
     NSData *bgColorData = [_userDefaults objectForKey:HUDUserDefaultsKeyBackgroundColor];
     UIColor *bgColor = [UIColor blackColor];
     if (bgColorData) {
@@ -1013,24 +992,23 @@ static UIEdgeInsets HUDTextContainerInsets(void) {
     }
 
     if (backgroundAlpha <= 0.001f) {
-        self.hudTextView.backgroundColor = [UIColor clearColor];
+        self.hudTextLabel.backgroundColor = [UIColor clearColor];
         [_blurView setEffect:nil];
         _blurView.backgroundColor = [UIColor clearColor];
     } else {
         [_blurView setEffect:nil];
         UIColor *filledBackground = [bgColor colorWithAlphaComponent:backgroundAlpha];
         _blurView.backgroundColor = filledBackground;
-        self.hudTextView.backgroundColor = [UIColor clearColor];
+        self.hudTextLabel.backgroundColor = [UIColor clearColor];
     }
 
-    // 按文字实际尺寸更新容器大小，避免每次新建约束
-    CGSize textContentSize = [self measuredHUDTextContentSizeForText:textContent
-                                                                font:self.hudTextView.font
-                                                       textAlignment:self.hudTextView.textAlignment];
+    CGSize textContentSize = [self measuredHUDTextContentSizeForText:textContent font:font textAlignment:textAlignment];
     _hudTextWidthConstraint.constant = textContentSize.width;
     _hudTextHeightConstraint.constant = textContentSize.height;
-    CGFloat contentWidth = MAX(textContentSize.width - kHUDTextHorizontalPadding, 1.0);
-    self.hudTextView.textContainer.size = CGSizeMake(contentWidth, CGFLOAT_MAX);
+
+    self.hudTextLabel.font = font;
+    self.hudTextLabel.textAlignment = textAlignment;
+    self.hudTextLabel.text = textContent;
 
     [self.view setNeedsUpdateConstraints];
     [self.view updateConstraintsIfNeeded];

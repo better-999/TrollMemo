@@ -13,6 +13,27 @@
 #import "TrollMemo-Swift.h"
 #import "../supports/hudapp-bridging-header.h"
 
+static NSString *PasteboardPlainTextFromController(void) {
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    NSString *text = pasteboard.string;
+    if (text.length > 0) {
+        return text;
+    }
+    text = [pasteboard stringForPasteboardType:@"public.utf8-plain-text"];
+    if (text.length > 0) {
+        return text;
+    }
+    text = [pasteboard stringForPasteboardType:@"public.text"];
+    if (text.length > 0) {
+        return text;
+    }
+    NSData *data = [pasteboard dataForPasteboardType:@"public.utf8-plain-text"];
+    if (data.length > 0) {
+        return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] ?: @"";
+    }
+    return @"";
+}
+
 @interface PasteEnabledTextView : UITextView
 @end
 
@@ -34,7 +55,7 @@
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
     if (action == @selector(paste:)) {
-        return self.isEditable && [UIPasteboard generalPasteboard].hasStrings;
+        return self.isEditable && PasteboardPlainTextFromController().length > 0;
     }
     if (action == @selector(copy:) || action == @selector(cut:)) {
         return self.isEditable && self.selectedRange.length > 0;
@@ -46,33 +67,14 @@
 }
 
 - (void)paste:(id)sender {
-    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-    NSString *string = pasteboard.string;
+    NSString *string = PasteboardPlainTextFromController();
     if (string.length == 0) {
         return;
     }
-
-    NSRange range = self.selectedRange;
-    if (range.location == NSNotFound) {
-        range = NSMakeRange(self.text.length, 0);
+    if (self.selectedRange.location == NSNotFound) {
+        self.selectedRange = NSMakeRange(self.text.length, 0);
     }
-    if (range.location > self.text.length) {
-        range = NSMakeRange(self.text.length, 0);
-    }
-
-    NSMutableString *updatedText = [NSMutableString stringWithString:self.text ?: @""];
-    if (NSMaxRange(range) <= updatedText.length) {
-        [updatedText replaceCharactersInRange:range withString:string];
-    } else {
-        [updatedText appendString:string];
-    }
-
-    self.text = updatedText;
-    self.selectedRange = NSMakeRange(range.location + string.length, 0);
-
-    if ([self.delegate respondsToSelector:@selector(textViewDidChange:)]) {
-        [self.delegate textViewDidChange:self];
-    }
+    [self insertText:string];
 }
 
 @end
@@ -133,40 +135,20 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     return color ?: fallback;
 }
 
-- (UIToolbar *)textEditorAccessoryToolbar {
-    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, 44)];
-    UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    UIBarButtonItem *pasteButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Paste", nil)
-                                                                    style:UIBarButtonItemStylePlain
-                                                                   target:self
-                                                                   action:@selector(pasteIntoEditor)];
-    toolbar.items = @[flexibleSpace, pasteButton];
-    return toolbar;
-}
-
 - (void)pasteIntoEditor {
-    NSString *pastedText = [UIPasteboard generalPasteboard].string;
+    NSString *pastedText = PasteboardPlainTextFromController();
     if (pastedText.length == 0) {
         return;
     }
 
-    PasteEnabledTextView *textView = (PasteEnabledTextView *)_textViewPreview;
-    NSRange range = textView.selectedRange;
-    if (range.location == NSNotFound || range.location > textView.text.length) {
-        range = NSMakeRange(textView.text.length, 0);
+    UITextView *textView = _textViewPreview;
+    if (![textView isFirstResponder]) {
+        [textView becomeFirstResponder];
     }
-
-    NSMutableString *updatedText = [NSMutableString stringWithString:textView.text ?: @""];
-    if (NSMaxRange(range) <= updatedText.length) {
-        [updatedText replaceCharactersInRange:range withString:pastedText];
-    } else {
-        [updatedText appendString:pastedText];
+    if (textView.selectedRange.location == NSNotFound) {
+        textView.selectedRange = NSMakeRange(textView.text.length, 0);
     }
-
-    textView.text = updatedText;
-    textView.selectedRange = NSMakeRange(range.location + pastedText.length, 0);
-    [_currentSettings setObject:textView.text forKey:HUDUserDefaultsKeyTextContent];
-    [self pushPreviewToHUD];
+    [textView insertText:pastedText];
 }
 
 - (void)loadView {
@@ -203,7 +185,6 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
     _textViewPreview.textAlignment = NSTextAlignmentNatural;
     _textViewPreview.delegate = self;
     _textViewPreview.text = [savedSettings objectForKey:HUDUserDefaultsKeyTextContent] ?: NSLocalizedString(@"Hello World!", nil);
-    _textViewPreview.inputAccessoryView = [self textEditorAccessoryToolbar];
     [_contentView addSubview:_textViewPreview];
 
     UILabel *textColorLabel = [[UILabel alloc] init];
@@ -732,6 +713,10 @@ static NSArray<NSString *> *EditBehaviorSettingKeys(void)
 }
 
 #pragma mark - UITextViewDelegate
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    return YES;
+}
 
 - (void)textViewDidChange:(UITextView *)textView {
     [_currentSettings setObject:textView.text forKey:HUDUserDefaultsKeyTextContent];
