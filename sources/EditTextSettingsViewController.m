@@ -23,7 +23,6 @@ static NSString *PasteboardPlainTextFromController(void) {
         @"public.utf8-plain-text",
         @"public.text",
         @"public.plain-text",
-        UIPasteboardTypeString,
     ];
     for (NSString *type in types) {
         id value = [pasteboard valueForPasteboardType:type];
