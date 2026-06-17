@@ -923,28 +923,29 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
 
 - (UIFont *)hudFontWithSize:(CGFloat)fontSize bold:(BOOL)bold italic:(BOOL)italic
 {
-    UIFont *font = [UIFont systemFontOfSize:fontSize];
-    UIFontDescriptorSymbolicTraits traits = 0;
+    if (bold && italic) {
+        UIFontDescriptor *descriptor = [[UIFont systemFontOfSize:fontSize].fontDescriptor
+            fontDescriptorWithSymbolicTraits:UIFontDescriptorTraitBold | UIFontDescriptorTraitItalic];
+        UIFont *combinedFont = [UIFont fontWithDescriptor:descriptor size:fontSize];
+        if (combinedFont) {
+            return combinedFont;
+        }
+        return [UIFont boldSystemFontOfSize:fontSize];
+    }
     if (bold) {
-        traits |= UIFontDescriptorTraitBold;
+        return [UIFont boldSystemFontOfSize:fontSize];
     }
     if (italic) {
-        traits |= UIFontDescriptorTraitItalic;
+        return [UIFont italicSystemFontOfSize:fontSize];
     }
-    if (traits != 0) {
-        UIFontDescriptor *descriptor = [[font fontDescriptor] fontDescriptorWithSymbolicTraits:([[font fontDescriptor] symbolicTraits] | traits)];
-        UIFont *styledFont = [UIFont fontWithDescriptor:descriptor size:fontSize];
-        if (styledFont) {
-            font = styledFont;
-        }
-    }
-    return font;
+    return [UIFont systemFontOfSize:fontSize];
 }
 
 - (NSDictionary *)hudTextAttributesForText:(NSString *)text
                                       font:(UIFont *)font
                                  textColor:(UIColor *)textColor
                              textAlignment:(NSTextAlignment)alignment
+                                    italic:(BOOL)italic
                                  underline:(BOOL)underline
 {
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
@@ -956,6 +957,10 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
         NSForegroundColorAttributeName: textColor,
         NSParagraphStyleAttributeName: paragraphStyle,
     } mutableCopy];
+    if (italic) {
+        // 系统中文字体通常没有真斜体，用 obliqueness 做合成斜体。
+        attributes[NSObliquenessAttributeName] = @(0.25);
+    }
     if (underline) {
         attributes[NSUnderlineStyleAttributeName] = @(NSUnderlineStyleSingle);
     }
@@ -966,6 +971,7 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
 - (CGSize)measuredHUDTextContentSizeForText:(NSString *)text
                                        font:(UIFont *)font
                               textAlignment:(NSTextAlignment)alignment
+                                     italic:(BOOL)italic
                                   underline:(BOOL)underline
                                   textColor:(UIColor *)textColor
 {
@@ -976,6 +982,7 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
                                                          font:measureFont
                                                     textColor:measureColor
                                                 textAlignment:alignment
+                                                       italic:italic
                                                     underline:underline];
     NSAttributedString *attributedText = [[NSAttributedString alloc] initWithString:measureText attributes:attributes];
 
@@ -1060,6 +1067,7 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
     CGSize textContentSize = [self measuredHUDTextContentSizeForText:textContent
                                                                  font:font
                                                         textAlignment:textAlignment
+                                                               italic:textItalic
                                                             underline:textUnderline
                                                             textColor:textColor];
     _hudTextWidthConstraint.constant = textContentSize.width;
@@ -1069,6 +1077,7 @@ static const CGFloat kHUDTextMeasureMaxWidth = 4096.0;
                                                              font:font
                                                         textColor:textColor
                                                     textAlignment:textAlignment
+                                                           italic:textItalic
                                                         underline:textUnderline];
     NSAttributedString *attributedText = [[NSAttributedString alloc] initWithString:textContent attributes:textAttributes];
     self.hudTextLabel.textAlignment = textAlignment;
